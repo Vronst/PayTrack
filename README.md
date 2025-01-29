@@ -12,9 +12,11 @@ Rachunki is a Python application for managing user taxes and payments. It allows
 
 ## Installation
 
+This project uses PostgreSQL, be sure you have it installed.
+
 1. Clone the repository:
     ```sh
-    git clone https://github.com/yourusername/rachunki.git
+    git clone https://github.com/Vronst/Did_I_pay_my_taxes.git
     cd rachunki
     ```
 
@@ -29,7 +31,7 @@ Rachunki is a Python application for managing user taxes and payments. It allows
     pip install -r requirements.txt
     ```
 
-4. Set up the environment variables in the [.env](http://_vscodecontentref_/15) file:
+4. Set up the environment variables in the [.env](http://_vscodecontentref_/3) file:
     ```env
     POSTGRES_USER='your_postgres_user'
     POSTGRES_PASSWORD='your_postgres_password'
@@ -53,11 +55,11 @@ Rachunki is a Python application for managing user taxes and payments. It allows
 
 ## Logging
 
-Logs are stored in the [logs](http://_vscodecontentref_/16) directory:
-- [db.log](http://_vscodecontentref_/17): Logs related to database operations
-- [logs.txt](http://_vscodecontentref_/18): General logs
-- [taxes.log](http://_vscodecontentref_/19): Logs related to tax payments
-- [user.log](http://_vscodecontentref_/20): Logs related to user activities
+Logs are stored in the [logs](http://_vscodecontentref_/4) directory:
+- [db.log](http://_vscodecontentref_/5): Logs related to database operations
+- [logs.txt](http://_vscodecontentref_/6): General logs
+- [taxes.log](http://_vscodecontentref_/7): Logs related to tax payments
+- [user.log](http://_vscodecontentref_/8): Logs related to user activities
 
 ## Contributing
 
