@@ -1,4 +1,5 @@
 #!/home/vronst/Programming/Rachunki/.venv/bin/python
+from getpass import getpass
 from sqlalchemy.orm import scoped_session
 from app.database.models import User
 from app.utils import simple_logs, taxes, update
@@ -42,17 +43,17 @@ def taxes_app() -> None:
             choice: str = input(login_messege)
             if choice == '1':
                 name = input('Enter user name: ')
-                password = input('Enter user password: ')
+                password = getpass('Enter user password: ')
                 user = create_user(name, password)
             elif choice == '2':
                 user = select_user(input('Enter user name: '))
-                password = input('Enter user password: ')
+                password = getpass('Enter user password: ')
                 if user and user.password == password:
                     simple_logs(f'User {user.name} logged in', log_file=['user.log'])
                 else:
                     user = None
                     simple_logs('Invalid password or name', log_file=['user.log'])
-            elif choice == 'q':
+            elif choice == 'q' or choice == 'exit':
                 break
             else:
                 print('Invalid choice')
@@ -64,7 +65,7 @@ def taxes_app() -> None:
             elif choice == '2':
                 tax: str = input('Enter tax name: ')
                 pay_taxes(user, tax)
-            elif choice == 'q':
+            elif choice == 'q' or choice == 'exit':
                 user = None
             else:
                 print('Invalid choice')
@@ -116,4 +117,8 @@ def pay_tax(user: User, tax: str) -> None:
                 continue
 
 if __name__ == '__main__':
-    taxes_app()
+    import sys
+    if '-N' in sys.argv:
+        ...
+    else:
+        taxes_app()

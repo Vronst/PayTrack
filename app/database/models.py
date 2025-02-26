@@ -1,4 +1,3 @@
-from typing import Union
 from sqlalchemy import Integer, String, ForeignKey, Boolean, Float
 from sqlalchemy.orm import (
     relationship, 
@@ -6,21 +5,20 @@ from sqlalchemy.orm import (
     MappedColumn,
     mapped_column,
 )
-from ..utils import simple_logs, taxes
 
 
 class Base(DeclarativeBase):
     pass
 
 
-def default_taxes(user: 'User') -> None:
-    from . import session
-    for tax in taxes:
-        tx: Tax = Tax(taxname=tax, user_id=user.id)
-        session.add(tx)
-        # user.taxes.append(tx)
-        session.commit()
-    return
+#def default_taxes(user: 'User') -> None:
+    #from . import session
+    #for tax in taxes:
+        #tx: Tax = Tax(taxname=tax, user_id=user.id)
+        #session.add(tx)
+        ## user.taxes.append(tx)
+        #session.commit()
+    #return
 
 
 class Tax(Base):

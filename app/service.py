@@ -1,26 +1,26 @@
+from sqlalchemy.orm import scoped_session
 from .database.models import User, Payment, Tax
 from .utils import simple_logs, taxes, update
-from .database import session
 
 
-def select_user(name: str) -> User | None:
+def select_user(name: str, session: scoped_session) -> User | None:
     return session.query(User).filter_by(name=name).first()
 
 
-def create_user(name: str, password: str) -> User | None:
-    if session.query(User).filter_by(name=name).first():
-        simple_logs('User already exists', log_file=['user.log'])
-        print('User already exists')
-        return None
-    user = User(name=name, password=password)
-    session.add(user)
-    session.commit()
-    for tax in taxes:
-        tx: Tax = Tax(taxname=tax, user_id=user.id)
-        user.taxes.append(tx)
-    session.commit()
-    simple_logs(f'User {name} created', log_file=['user.log'])
-    return user
+#def create_user(name: str, password: str, session: scoped_session) -> User | None:
+#    if session.query(User).filter_by(name=name).first():
+#        simple_logs('User already exists', log_file=['user.log'])
+#        print('User already exists')
+#        return None
+#    user = User(name=name, password=password)
+#    session.add(user)
+#    session.commit()
+#    for tax in taxes:
+#        tx: Tax = Tax(taxname=tax, user_id=user.id)
+#        user.taxes.append(tx)
+#    session.commit()
+#    simple_logs(f'User {name} created', log_file=['user.log'])
+#    return user
 
 
 def check_taxes(user: User) -> None:
@@ -31,7 +31,7 @@ def check_taxes(user: User) -> None:
         print('-' * 24)
 
 
-def pay_taxes(user: User, tax: str) -> None:
+def pay_taxes(user: User, tax: str, session: scoped_session) -> None:
     import datetime
     price: float= float(input('Enter price: '))
     date: str = datetime.date.today().strftime('%d-%m-%Y')
@@ -55,7 +55,7 @@ def pay_taxes(user: User, tax: str) -> None:
     return
 
     
-def view_payments(user: User, tax: str) -> None:
+def view_payments(user: User, tax: str, session: scoped_session) -> None:
     selected_tax: Tax | None = session.query(Tax).filter_by(taxname=tax, user_id=user.id).first()
     if not selected_tax:
         print(f'{tax} not found')
@@ -70,7 +70,7 @@ def view_payments(user: User, tax: str) -> None:
     return
 
 
-def edit_payment(user: User) -> None:
+def edit_payment(user: User, session: scoped_session) -> None:
     while True:
         try:
             py_id: int = int(input('Enter payment id (q to quit): '))
