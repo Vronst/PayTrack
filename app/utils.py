@@ -37,7 +37,7 @@ def list_of_taxes(path_to_file: str = '/home/vronst/Programming/Rachunki/app/') 
     return taxes_list
 
 
-taxes: list[str] = list_of_taxes() 
+# taxes: list[str] = list_of_taxes() 
 
 
 def simple_logs(message: str, error: str | None = None, log_file: list[str] = ['default']) -> None:
@@ -71,11 +71,9 @@ def update() -> None:
     """
     import datetime
     from datetime import date
-    from .database import session
     from .database.models import Tax 
     
     today: date = datetime.date.today()
-    day: int
     month: int
     year: int
     

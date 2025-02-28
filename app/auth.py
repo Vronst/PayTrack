@@ -1,7 +1,5 @@
 from werkzeug.security import generate_password_hash, check_password_hash
-from sqlalchemy.orm import scoped_session
-from .database import User
-from .service import select_user
+from .database import User, MyEngine
 
 
 class Authorization:
@@ -9,20 +7,23 @@ class Authorization:
     guest: list[int]  # so you can share you taxes
     guest_list: list[int]
     
-    def __init__(self, session: scoped_session, action: str | None = None, test: bool = False):
+    def __init__(self, *, engine: MyEngine, action: str | None = None, test: bool = False, **kwargs):
         self.user = None
         self.guest = [] 
         self.guest_list = []
         self.test = test
-        self.session = session
+        self.engine= engine
         if action:
             try:
-                eval(f'self.{action}()')
-            except TypeError:
-                print('Authorization: chosen action could not be called')
+                if not eval(f'self.{action}("{kwargs.get("username")}", "{kwargs.get("password")}")'):
+                    raise TypeError("Action returned False")
+            except TypeError as e:
+                print(f'Authorization: chosen action could not be called {e}')
 
     def login(self, username: str, password: str) -> bool:
-        selected_user: User | None = select_user(username, session=self.session)
+        if self.user:
+            return False
+        selected_user: User | None = self.engine.get_user(username=username)
         if not isinstance(selected_user, User):
             return False
         if check_password_hash(selected_user.password, password):
@@ -32,13 +33,18 @@ class Authorization:
             return False
 
     def logout(self) -> bool:
+        if self.user == None:
+            return False
         self.user = None
         self.guest = []
         self.guest_list = []
         return True
 
     def register(self, username: str, password: str) -> bool:
-        if select_user(username, self.session):
+        if self.user != None:
+            print("Logout first")
+            return False
+        if self.engine.get_user(username):
             print('Error: Username is already taken')
             return False
         if len(password) < 8:
@@ -47,12 +53,19 @@ class Authorization:
         if not any([x in password for x in "!@#$%^&*()?{}[]"]):
             print('Password requires at least one special sign')
             return False
+        if not any([char.isupper() for char in password]):
+            print('Password must have at least one capital letter')
+            return False
+        if not any([char.islower() for char in password]):
+            print('Password must have at least one lower letter')
+            return False
         hashed_passwd: str = generate_password_hash(password, salt_length=24)
         user: User = User(
             name=username,
             password=hashed_passwd
         )
-        self.session.add(user)
-        self.session.commit()
-
+        self.engine.session.add(user)
+        self.engine.session.commit()
+        self.user = user
         return True
+

@@ -11,21 +11,11 @@ class Base(DeclarativeBase):
     pass
 
 
-#def default_taxes(user: 'User') -> None:
-    #from . import session
-    #for tax in taxes:
-        #tx: Tax = Tax(taxname=tax, user_id=user.id)
-        #session.add(tx)
-        ## user.taxes.append(tx)
-        #session.commit()
-    #return
-
-
 class Tax(Base):
     __tablename__ = 'taxes'
     
     id: MappedColumn[int] = mapped_column(Integer, primary_key=True)
-    taxname: MappedColumn[str] = mapped_column(String, unique=True)
+    taxname: MappedColumn[str] = mapped_column(String, unique=False)
     payment_status: MappedColumn[bool] = mapped_column(Boolean, default=False, nullable=False)
     user_id: MappedColumn[int] = mapped_column(Integer, ForeignKey('users.id'))
     

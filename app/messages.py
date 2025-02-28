@@ -4,5 +4,10 @@ start_app: str = '''
     q. Quit
 '''
 
-tax_list: str = '''
-
+inner_loop: str = """
+    1. Check taxes
+    2. Pay/Add tax
+    q. Quit
+    
+    exit - close app 
+    """
