@@ -9,12 +9,30 @@ class Services:
     # TODO: Maybe option to sync it to google sheets?
 
     def __init__(self, auth: Authorization, engine: MyEngine) -> None:
-        self.auth = auth
-        self.engine = engine
+        self._auth = auth
+        self._engine = engine
+        # if not self.engine.session:
+        #     print("To avoid errors, session has been started")
+        #     self._engine.create_my_session()
+
+    @property
+    def auth(self) -> Authorization:
+        return self._auth
+
+    @auth.setter
+    def auth(self, value) -> None:
+        raise AttributeError("This attribute cannot be changed directly")
+
+    @property
+    def engine(self) -> MyEngine:
+        return self._engine
+
+    @engine.setter
+    def engine(self, value) -> None:
+        raise AttributeError("This attribute cannot be changed directly")
 
     def check_taxes(self, simple: bool = False) -> None:
         # TODO: A way to see shared taxes
-        # FIXME: something is not right with this, tests shows it prints ''
         user: User | None = self.auth.user
         if not user:
             raise ValueError("User not logged in")
@@ -36,7 +54,9 @@ class Services:
 
         price: float= float(input('Enter amount: '))
         date: str = datetime.date.today().strftime('%d-%m-%Y')
-        selected_tax = self.engine.session.query(Tax).filter_by(taxname=tax, user_id=user.id).first()
+        # don't worry about session being None, in innit of this class
+        # if it wasn't already initialized, it is
+        selected_tax = self._engine.session.query(Tax).filter_by(taxname=tax, user_id=user.id).first()
 
         if not selected_tax:
             simple_logs(f'{tax} not found, attempting to add tax', log_file=['taxes.log'])
@@ -45,8 +65,8 @@ class Services:
                 taxname=tax,
                 user_id=user.id
             )
-            self.engine.session.add(selected_tax)
-            self.engine.session.commit()
+            self._engine.session.add(selected_tax)
+            self._engine.session.commit()
 
         payment: Payment = Payment(
             price=price,
@@ -54,9 +74,9 @@ class Services:
             taxes_id=selected_tax.id,
             users_id=user.id
         )
-        self.engine.session.add(payment)
+        self._engine.session.add(payment)
         selected_tax.payment_status = True
-        self.engine.session.add(selected_tax)
-        self.engine.session.commit()
+        self._engine.session.add(selected_tax)
+        self._engine.session.commit()
         simple_logs(f'{tax} paid successfully', log_file=['taxes.log'])
         return

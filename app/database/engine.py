@@ -45,13 +45,24 @@ class MyEngine:
             self.POSTGRES_PORT]):
             raise ValueError('One or more environment variables are not set')
 
-    def is_session_running(self) -> bool:
-        if not self._session:
-            warn("Warning: First initialize session", UserWarning)
-            return False
+    # def is_session_running(self) -> bool:
+    #     if not self._session:
+    #         warn("Warning: First initialize session", UserWarning)
+    #         return False
+    #     return True
+
+    def default_taxes(self, user: User) -> bool:
+        taxes: list[str] = list_of_taxes()
+        for tax in taxes:
+            new_tax: Tax = Tax(
+                    taxname=tax,
+                    user_id=user.id
+            )
+            user.taxes.append(new_tax)
+        self.session.commit()
         return True
 
-    def create_user(self, username: str, password: str, hashpass: bool = True) -> bool:
+    def create_user(self, username: str, password: str, hashpass: bool = True, with_taxes: bool = True) -> User | None:
         """
         Allows for creation of user with any password, and even duplicated username
         Arguments:
@@ -60,10 +71,8 @@ class MyEngine:
             - hashpass: bool -> defualt True, hashes password and stores that hash instead
                 of plain passowrd
         """
-        if not self.is_session_running():
-            return False
-
-        # TODO: each created user should have list of taxes to pay
+        # if not self.is_session_running():
+        #     return
 
         if hashpass:
             from werkzeug.security import generate_password_hash
@@ -71,18 +80,12 @@ class MyEngine:
         user: User = User(
                 name=username,
                 password=password)
-        self._session.add(user)
-        self._session.commit()
+        self.session.add(user)
+        self.session.commit()
 
-        taxes: list[str] = list_of_taxes()
-        for tax in taxes:
-            new_tax: Tax = Tax(
-                    taxname=tax,
-                    user_id=user.id
-            )
-            user.taxes.append(new_tax)
-        self._session.commit()
-        return True
+        if with_taxes:
+            self.default_taxes(user)
+        return user
 
     def get_user(self, username: str | None = None, user_id: int | None = None) -> User | None:
         """
@@ -94,14 +97,14 @@ class MyEngine:
         Returns:
             User
         """
-        if not self.is_session_running:
-            return None
+        # if not self.is_session_running:
+        #     return None
         
         user: None | User
         if username:
-            user = self._session.query(User).filter_by(name=username).first()
+            user = self.session.query(User).filter_by(name=username).first()
         else:
-            user = self._session.query(User).get(user_id)
+            user = self.session.query(User).get(user_id)
 
         return user
 
@@ -133,18 +136,24 @@ class MyEngine:
         return self._session
 
     @property
-    def session(self) -> scoped_session | None:
-        return self._session
+    def session(self) -> scoped_session:
+        if self._session == None:
+            self.create_my_session()
+            print("Session was created due to it's being called")
+        if self._session:
+            return self._session  
+        else:
+            raise RuntimeError("Session could not be created")
     
     def close_session(self) -> None:
         """
             Closes session and dispose of engine
         """
-        if not self.is_session_running():
-            return
+        # if not self.is_session_running():
+        #     return
 
-        self._session.rollback()
-        self._session.remove()
+        self.session.rollback()
+        self.session.remove()
         if self.test:
             with self.engine.begin() as conn:
                 Base.metadata.drop_all(bind=conn)
@@ -158,7 +167,8 @@ class MyEngine:
         So the payments from last months won't count
         this month's taxes as paid.
         """
-        self.is_session_running()
+        # if not self.is_session_running():
+        #     return None
 
         today: date = datetime.date.today()
         day: int
@@ -167,11 +177,11 @@ class MyEngine:
         
         def change_status(tax: Tax) -> None:
             tax.payment_status = False
-            self._session.add(tax)
-            self._session.commit()
+            self.session.add(tax)
+            self.session.commit()
             simple_logs(f'{tax.taxname} payment status changed ({today.month, today.year})', log_file=['taxes.log'])
         
-        taxes: list[Tax] = self._session.query(Tax).filter_by(payment_status=True).all()
+        taxes: list[Tax] = self.session.query(Tax).filter_by(payment_status=True).all()
         for tax in taxes:
             if not tax.payments:
                 change_status(tax)

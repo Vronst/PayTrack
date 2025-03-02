@@ -14,15 +14,15 @@ class TextApp:
 
     def start_app(self) -> None:
         self.is_running = True
-        self.engine = MyEngine()
-        self.engine.create_my_session()
-        self.auth = Authorization(engine=self.engine)
+        self._engine = MyEngine()
+        self._engine.create_my_session()
+        self.auth = Authorization(engine=self._engine)
 
         self.main_loop()
 
     def close_app(self) -> None:
         self.is_running = False
-        self.engine.close_session()
+        self._engine.close_session()
         
     def main_loop(self) -> None:
         choice: str
@@ -61,7 +61,7 @@ class TextApp:
 
         while self.is_running:
             choice: str = input(inner_loop)
-            self.services = Services(auth=self.auth, engine=self.engine)
+            self.services = Services(auth=self.auth, engine=self._engine)
 
             match choice:
                 case '1':
@@ -70,6 +70,10 @@ class TextApp:
                 case '2':   
                     # TODO: Pay/Add taxes
                     self.services.check_taxes(simple=True)
+                    tax: str = input("Tax name to pay: ")
+                    if tax in ('q', 'exit'):
+                        break
+                    self.services.pay_taxes(tax)
                 case 'q':
                     self.auth.logout()
                     break

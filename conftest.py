@@ -13,3 +13,10 @@ def my_session() -> Generator[MyEngine, None, None]:
 
     meng.close_session()
 
+
+@pytest.fixture(scope='function')
+def no_session() -> Generator[MyEngine, None, None]:
+    meng: MyEngine = MyEngine(test=True, test_db='testtaxes')
+
+    yield meng
+
