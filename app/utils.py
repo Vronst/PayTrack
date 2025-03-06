@@ -94,3 +94,14 @@ def update() -> None:
                 change_status(tax)
                 continue
 
+
+class NameTaken(Exception):
+    pass
+
+
+class PasswordNotSafe(Exception):
+    pass
+
+
+class LoginError(Exception):
+    pass

@@ -1,10 +1,13 @@
 from getpass import getpass
 from .auth import Authorization
-from .database.engine import MyEngine
+from .database.engine import MyEngine, Tax
 from .services import Services
 from .messages import (
         start_app as sam,
+        check_taxes as ctl,
+        inner_loop,
 )
+from .utils import LoginError, NameTaken, PasswordNotSafe
 
 
 class TextApp:
@@ -37,15 +40,26 @@ class TextApp:
                 case '1':
                     username = input("Username: ")
                     password = getpass("Password: ") 
-                    if self.auth.login(username, password):
+                    try:
+                        self.auth.login(username, password)
+                    except LoginError as e:
+                        print(e)
+                    else:
                         self.after_login()
                 case '2':
                     username = input("Username: ")
                     while True:
                         password = getpass("Password: ")
                         re_password = getpass("Repeat password: ")
-                        if password == re_password and self.auth.register(username, password):
-                            break
+                        if password == re_password:
+                            try:
+                                self.auth.register(username, password)
+                            except NameTaken as e:
+                                print(e)
+                            except PasswordNotSafe as e:
+                                print(e)
+                            else:
+                                break
                         else:
                             print("Password does not match")
                     self.after_login()
@@ -57,28 +71,63 @@ class TextApp:
                     print('Unknown option')
 
     def after_login(self) -> None:
-        from .messages import inner_loop
+        self.services = Services(auth=self.auth, engine=self._engine)
 
         while self.is_running:
             choice: str = input(inner_loop)
-            self.services = Services(auth=self.auth, engine=self._engine)
-
             match choice:
                 case '1':
-                    # TODO: Check taxes
-                    self.services.check_taxes()       
+                    self.check_taxes_loop()
                 case '2':   
-                    # TODO: Pay/Add taxes
-                    self.services.check_taxes(simple=True)
-                    tax: str = input("Tax name to pay: ")
-                    if tax in ('q', 'exit'):
-                        break
-                    self.services.pay_taxes(tax)
+                    self.pay_taxes_loop()
                 case 'q':
                     self.auth.logout()
-                    break
+                    return 
                 case "exit":
-                    self.is_running = False
+                    self.close_app()
                 case _:
                     print("Unknown option")
 
+    def check_taxes_loop(self) -> None:
+        """
+            Allows to see payments associated with selected tax
+        """
+        while self.is_running:
+            tax_list: dict[int, Tax] = self.services.check_taxes()
+            choice: str = input(ctl)
+            
+            match choice:
+
+                case value if any(tax.taxname.startswith(value) for tax in tax_list.values()):
+                    full_name: str = next(tax.taxname for tax in tax_list.values() if tax.taxname.startswith(value))
+                    self.services.view_payments(full_name)
+                case 'q':
+                    return None
+                case 'exit':
+                    self.close_app()
+                case _:
+                    print('Unknown option')
+
+    def pay_taxes_loop(self) -> None:
+        tax_list: dict[int, Tax] | None = None
+        while self.is_running:
+            ims: str = "Tax name to pay (or command): "
+            tax: str | int = input(ims)
+            if tax == 'help':
+                print('Possible comands: help, q, exit')
+                tax_list = self.services.check_taxes(simple=True)
+                tax = input(ims)
+            try:
+                tax = int(tax)
+            except ValueError:
+                pass
+            else:
+                if tax_list and tax in tax_list.keys():
+                    self.services.pay_taxes(tax_list[tax].taxname)
+            if tax == 'q':
+                return
+            elif tax == 'exit':
+                self.close_app()
+            else:
+                if isinstance(tax, str):
+                    self.services.pay_taxes(tax)

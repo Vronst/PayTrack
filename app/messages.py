@@ -10,4 +10,10 @@ inner_loop: str = """
     q. Quit
     
     exit - close app 
+
     """
+
+check_taxes: str = """
+    Type name of tax to go into details of payment
+    Type q or exit to leave
+"""
