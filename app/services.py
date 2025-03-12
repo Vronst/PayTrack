@@ -3,6 +3,7 @@ from .database import MyEngine
 from .database import User, Tax, Payment
 from .auth import Authorization
 from .utils import simple_logs
+from .messages import payment_edit, edit_msg
 
 
 class Services:
@@ -14,9 +15,6 @@ class Services:
         if not self._auth.user:
             raise ValueError("User must be logged in")
         self.user: User = self._auth.user
-        # if not self.engine.session:
-        #     print("To avoid errors, session has been started")
-        #     self._engine.create_my_session()
 
     @property
     def auth(self) -> Authorization:
@@ -110,12 +108,82 @@ class Services:
         else:
             try:
                 self.edit_payment(int(choice))
-            except TypeError:
+            except ValueError:
                 print("Uknown choice")
             finally:
                 return
 
     def edit_payment(self, payment_id: int) -> None:
-        # TODO: option to edit payments
-        ...
+        selected_payment: Payment | None = self._engine.session.query(Payment).get(payment_id)
+        if not selected_payment:
+            raise ValueError("Selected payment is not found")
+        choice: str
+        while True:
+            print('ID  |  Price  |  Date')
+            print(f"{selected_payment.id})", selected_payment.price, selected_payment.date, sep='\t')
+            choice = input(payment_edit)
+            match choice.lower():
+                case '1':
+                    try:
+                        self.edit_details(selected_payment)
+                    except ValueError as e:
+                        print(e)
+                case '2':
+                    if input("Are you sure you want to delete this payment? (Y/n)\t") != 'Y':
+                        print("Canceled")
+                        break
+                    self._engine.session.remove(selected_payment)
+                    self._engine.session.commit()
+                    print("Removed successfully")
+                    return
+                case value if value in ('q', 'quit'):
+                    return
+                case _:
+                    print("Invalid option")
+    
+    def edit_details(self, chosen_payment: Payment) -> None:
+        selected_payment: Payment | None = self._engine.session.query(Payment).filter_by(
+            user_id=self.user.id, payment_id=chosen_payment).first()
+        if not selected_payment:
+            raise ValueError("Payment not found")
+        # TODO:option to change price, date or tax it is bounded to
+        while True:
+            choice: str = input(edit_msg)
+            match choice.lower():
+                case '1':
+                    day: str = input("Day: ")
+                    month: str = input("Month: ")
+                    year: str = input("Year: ")
+                    date: str = day + "-" + month + "-" + year
+                    selected_payment.date = date
+                case '2':
+                    new_price: int = int("New price")
+                    selected_payment.price = new_price
+                case '3':
+                    list_of_ids: list = self.user.taxes
+                    print('ID\t|Tax')
+                    for taxes in list_of_ids:
+                        print(taxes.id, taxes.taxname, sep='\t')
+                    try:
+                        selection: int = int(input("Select tax id: "))
+                    except ValueError as e:
+                        print(f'Error occured:\n{e}')
+                    else:
+                        selected_payment.taxex_id = selection
+                case '4':
+                    if input("Are you sure you want to delete that payment? (Y/n)") == 'Y':
+                        self._engine.session.remove(selected_payment)
+                        return
+                    else:
+                        print("Canceled\n")
+                case value if value in ('q', 'quit'):
+                    self._engine.session.add(selected_payment)
+                    self._engine.session.commit()
+                    return
+                case 'a':
+                    self._engine.session.rollback()
+                    return
+                case _:
+                    print("Invalid choice")
+
 

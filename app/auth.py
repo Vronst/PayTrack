@@ -4,6 +4,7 @@ from .utils import NameTaken, PasswordNotSafe, LoginError
 
 
 class Authorization:
+    # TODO: Maybe create abstract class and move some futures there?
     _user: User | None
     _guest: list[int]  # so you can share you taxes
     _guest_list: list[int]
@@ -51,6 +52,8 @@ class Authorization:
         raise AttributeError("This attribute cannot be changed directly")
 
     def login(self, username: str, password: str) -> None:
+        if username == '' or password == '':
+            raise LoginError("Username and password cannot be empty")
         if self._user:
             raise LoginError("Already logged in")
         selected_user: User | None = self._engine.get_user(username=username)
@@ -71,6 +74,10 @@ class Authorization:
         return True
 
     def register(self, username: str, password: str) -> bool:
+
+        if username == '' or any(x in username for x in '!@#$%^&*()+_}{":?><~`,./;\'[]-='):
+            # print('Illegal username')
+            raise ValueError('Username cannot contain special signs')
         if self._user != None:
             print("Logout first")
             return False
