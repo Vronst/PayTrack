@@ -64,7 +64,7 @@ class MyEngine:
 
     def create_user(self, username: str, password: str, hashpass: bool = True, with_taxes: bool = True) -> User | None:
         """
-        Allows for creation of user with any password, and even duplicated username
+        Allows for creation of user with any password
         Arguments:
             - username: str -> username
             - password: str -> password
@@ -74,6 +74,10 @@ class MyEngine:
         # if not self.is_session_running():
         #     return
 
+        # won't create duplicated username
+        if self.session.query(User).filter_by(name=username).first():
+            print('Username taken')
+            return 
         if hashpass:
             from werkzeug.security import generate_password_hash
             password = generate_password_hash(password, salt_length=24)
@@ -160,35 +164,4 @@ class MyEngine:
                 simple_logs('Tables dropped successfully', log_file=['logs.txt', 'db.log'])
         self.engine.dispose()
         simple_logs('Session removed successfully', log_file=['logs.txt', 'db.log'])
-
-    def update(self) -> None:
-        """
-        Updates the database with the current date.
-        So the payments from last months won't count
-        this month's taxes as paid.
-        """
-        # if not self.is_session_running():
-        #     return None
-
-        today: date = datetime.date.today()
-        day: int
-        month: int
-        year: int
-        
-        def change_status(tax: Tax) -> None:
-            tax.payment_status = False
-            self.session.add(tax)
-            self.session.commit()
-            simple_logs(f'{tax.taxname} payment status changed ({today.month, today.year})', log_file=['taxes.log'])
-        
-        taxes: list[Tax] = self.session.query(Tax).filter_by(payment_status=True).all()
-        for tax in taxes:
-            if not tax.payments:
-                change_status(tax)
-                continue
-            for payment in tax.payments:
-                day, month, year = list(map(int, payment.date.split('-')))
-                if (month < today.month and year <= today.year) or year < today.year:
-                    change_status(tax)
-                    continue
 

@@ -30,5 +30,5 @@ edit_msg: str = """
     3. Edit tax
     4. Delete payment 
     a. Abandon changes
-    q. Quit
+    q. Quit and save
 """

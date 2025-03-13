@@ -17,7 +17,7 @@ class Tax(Base):
     id: MappedColumn[int] = mapped_column(Integer, primary_key=True)
     taxname: MappedColumn[str] = mapped_column(String, unique=False)
     payment_status: MappedColumn[bool] = mapped_column(Boolean, default=False, nullable=False)
-    user_id: MappedColumn[int] = mapped_column(Integer, ForeignKey('users.id'))
+    user_id: MappedColumn[int] = mapped_column(Integer, ForeignKey('users.id', ondelete='CASCADE'))
     
     users = relationship("User", back_populates="taxes")
     payments = relationship("Payment", back_populates="tax")
@@ -39,8 +39,8 @@ class Payment(Base):
     id: MappedColumn[int] = mapped_column(Integer, primary_key=True)
     price: MappedColumn[float] = mapped_column(Float)
     date: MappedColumn[str] = mapped_column(String)
-    taxes_id: MappedColumn[int] = mapped_column(Integer, ForeignKey('taxes.id'))
-    users_id: MappedColumn[int] = mapped_column(Integer, ForeignKey('users.id'))
+    taxes_id: MappedColumn[int] = mapped_column(Integer, ForeignKey('taxes.id', ondelete='CASCADE'))
+    users_id: MappedColumn[int] = mapped_column(Integer, ForeignKey('users.id', ondelete='CASCADE'))
     
     tax = relationship("Tax", back_populates="payments")
     user = relationship("User", back_populates="payments")

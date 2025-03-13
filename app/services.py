@@ -1,4 +1,5 @@
 import datetime
+from datetime import date
 from .database import MyEngine
 from .database import User, Tax, Payment
 from .auth import Authorization
@@ -45,7 +46,7 @@ class Services:
             print('Tax{:<12}| Is paid?{:<10}'.format('', ''))
             print('-' * 24)
             for number, tax in result.items():
-                print(f'{tax.taxname:<15}| {str(tax.payment_status):<10}')
+                print(f'{number}) {tax.taxname:<15}| {str(tax.payment_status):<10}')
                 print('-' * 24)
 
         return result
@@ -64,7 +65,7 @@ class Services:
 
         if not selected_tax:
             simple_logs(f'{tax} not found, attempting to add tax', log_file=['taxes.log'])
-            print(f'{tax} not found, adding new tax')
+            # print(f'{tax} not found, adding new tax')
             selected_tax = Tax(
                 taxname=tax,
                 user_id=self.user.id
@@ -98,9 +99,9 @@ class Services:
             return None
         payments: list[Payment] = self._engine.session.query(Payment).filter_by(users_id=self.user.id, taxes_id=selected_tax.id).all()
         print('')
-        print('ID  |  Price  |  Date')
+        print('ID  |  Price  |  Date  |  Tax-name')
         for payment in payments:
-            print(f'{payment.id})\t{payment.price}\t{payment.date}')
+            print(f'{payment.id})\t{payment.price}\t{payment.date}\t{payment.tax.taxname}')
         print('')
         choice: str = input("Press enter to continue or type id of payment you want to edit\n")
         if choice == '':
@@ -119,8 +120,8 @@ class Services:
             raise ValueError("Selected payment is not found")
         choice: str
         while True:
-            print('ID  |  Price  |  Date')
-            print(f"{selected_payment.id})", selected_payment.price, selected_payment.date, sep='\t')
+            print('ID  |  Price  |  Date  |  Tax-name')
+            print(f"{selected_payment.id})", selected_payment.price, selected_payment.date, selected_payment.tax.taxname, sep='\t')
             choice = input(payment_edit)
             match choice.lower():
                 case '1':
@@ -132,7 +133,7 @@ class Services:
                     if input("Are you sure you want to delete this payment? (Y/n)\t") != 'Y':
                         print("Canceled")
                         break
-                    self._engine.session.remove(selected_payment)
+                    self._engine.session.delete(selected_payment)
                     self._engine.session.commit()
                     print("Removed successfully")
                     return
@@ -142,23 +143,47 @@ class Services:
                     print("Invalid option")
     
     def edit_details(self, chosen_payment: Payment) -> None:
-        selected_payment: Payment | None = self._engine.session.query(Payment).filter_by(
-            user_id=self.user.id, payment_id=chosen_payment).first()
-        if not selected_payment:
-            raise ValueError("Payment not found")
-        # TODO:option to change price, date or tax it is bounded to
+        # selected_payment: Payment | None = self._engine.session.query(Payment).filter_by(
+        #     user_id=self.user.id, payment_id=chosen_payment).first()
+        # if not isinstance(chosen_payment, Payment):
+        #     raise ValueError("Payment not found")
         while True:
+            print('ID  |  Price  |  Date  |  Tax-name')
+            print(f"{chosen_payment.id})", chosen_payment.price, chosen_payment.date, chosen_payment.tax.taxname, sep='\t')
             choice: str = input(edit_msg)
-            match choice.lower():
+            match choice:
                 case '1':
                     day: str = input("Day: ")
-                    month: str = input("Month: ")
-                    year: str = input("Year: ")
-                    date: str = day + "-" + month + "-" + year
-                    selected_payment.date = date
+                    month: str | int = input("Month: ")
+                    year: str = input("Full year (e.g. 2025: ")
+                    try:
+                        month = int(month)
+                    except ValueError:
+                        month_dict: dict = {
+                            "January": 1,
+                            "February": 2,
+                            "March": 3,
+                            "April": 4,
+                            "May": 5,
+                            "June": 6,
+                            "July": 7,
+                            "August": 8,
+                            "September": 9,
+                            "October": 10,
+                            "November": 11,
+                            "December": 12
+                            }
+                        month = month_dict[month.capitalize()]
+                        
+                    date: str = f'{int(day):02d}-{month:02d}-{year}'
+                    chosen_payment.date = date
                 case '2':
-                    new_price: int = int("New price")
-                    selected_payment.price = new_price
+                    try:
+                        new_price: int = int(input("New price: "))
+                    except ValueError as e:
+                        print(e)
+                        break
+                    chosen_payment.price = new_price
                 case '3':
                     list_of_ids: list = self.user.taxes
                     print('ID\t|Tax')
@@ -169,15 +194,15 @@ class Services:
                     except ValueError as e:
                         print(f'Error occured:\n{e}')
                     else:
-                        selected_payment.taxex_id = selection
+                        chosen_payment.taxes_id = selection
                 case '4':
                     if input("Are you sure you want to delete that payment? (Y/n)") == 'Y':
-                        self._engine.session.remove(selected_payment)
+                        self._engine.session.delete(chosen_payment)
                         return
                     else:
                         print("Canceled\n")
                 case value if value in ('q', 'quit'):
-                    self._engine.session.add(selected_payment)
+                    self._engine.session.add(chosen_payment)
                     self._engine.session.commit()
                     return
                 case 'a':
@@ -187,3 +212,33 @@ class Services:
                     print("Invalid choice")
 
 
+    # TODO: Use update in important parts so db will be updated
+    def update(self) -> None:
+        """
+        Updates the database with the current date.
+
+        This function updates the database with the current date. So the payments from last months won't count
+        this month's taxes as paid.
+        """
+        
+        today: date = datetime.date.today()
+        day: int
+        month: int
+        year: int
+        
+        def change_status(tax: Tax) -> None:
+            tax.payment_status = False
+            self._engine.session.add(tax)
+            self._engine.session.commit()
+            simple_logs(f'{tax.taxname} payment status changed ({today.month, today.year})', log_file=['taxes.log'])
+        
+        taxes: list[Tax] = self._engine.session.query(Tax).filter_by(payment_status=True).all()
+        for tax in taxes:
+            if not tax.payments:
+                change_status(tax)
+                continue
+            for payment in tax.payments:
+                day, month, year = list(map(int, payment.date.split('-')))
+                if (month < today.month and year <= today.year) or year < today.year:
+                    change_status(tax)
+                    continue

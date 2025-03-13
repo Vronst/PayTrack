@@ -6,7 +6,13 @@ from app.core import TextApp
 if __name__ == '__main__':
     if '-t' in sys.argv:
         app: TextApp = TextApp()
-        app.start_app()
+        if '-d' in sys.argv:
+            try:
+                app.start_app(debug=True)
+            except ValueError as e:
+                print(e)
+        else:
+            app.start_app()
     elif '-p' in sys.argv:
         # TODO: change password without limitation to minimum of...
         ...

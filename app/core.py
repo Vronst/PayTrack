@@ -1,6 +1,6 @@
 from getpass import getpass
 from .auth import Authorization
-from .database.engine import MyEngine, Tax
+from .database.engine import MyEngine, Tax, User
 from .services import Services
 from .messages import (
         start_app as sam,
@@ -14,18 +14,34 @@ class TextApp:
     is_running: bool = False
     engine: MyEngine
     auth: Authorization
+    debug: bool = False
 
-    def start_app(self) -> None:
+    def start_app(self, debug: bool = False) -> None:
         self.is_running = True
         self._engine = MyEngine()
         self._engine.create_my_session()
         self.auth = Authorization(engine=self._engine)
 
+        if debug:
+            self.debug =True
+            self.activate_debug_account()
+
         self.main_loop()
+
+    def activate_debug_account(self):
+        if not self._engine.create_user(username='test', password='test'):
+            raise ValueError("Name already taken")
+        print("Test account created")
 
     def close_app(self) -> None:
         self.is_running = False
+        if self.debug:
+            user: User | None = self._engine.session.query(User).filter_by(name='test').first()
+            self._engine.session.delete(user)
+            self._engine.session.commit()
+            print("Test account deleted")
         self._engine.close_session()
+
         
     def main_loop(self) -> None:
         choice: str
@@ -56,13 +72,15 @@ class TextApp:
                                 self.auth.register(username, password)
                             except NameTaken as e:
                                 print(e)
+                                break
                             except PasswordNotSafe as e:
                                 print(e)
                             else:
                                 break
                         else:
                             print("Password does not match")
-                    self.after_login()
+                    if self.auth.user:
+                        self.after_login()
                 case 'q':
                     self.close_app()
                 case 'exit':
@@ -101,6 +119,8 @@ class TextApp:
                 case value if any(tax.taxname.startswith(value) for tax in tax_list.values()):
                     full_name: str = next(tax.taxname for tax in tax_list.values() if tax.taxname.startswith(value))
                     self.services.view_payments(full_name)
+                case value if (value in str(tax_list)):
+                    self.services.view_payments(tax_list[int(value)].taxname)
                 case 'q':
                     return None
                 case 'exit':

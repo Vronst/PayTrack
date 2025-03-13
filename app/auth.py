@@ -20,8 +20,7 @@ class Authorization:
         #     print("To avoid errors, session has been started")
         #     self._engine.create_my_session()
         if action:
-            if not eval(f'self.{action}("{kwargs.get("username")}", "{kwargs.get("password")}")'):
-                raise TypeError("Action returned False")
+            eval(f'self.{action}("{kwargs.get("username")}", "{kwargs.get("password")}")')
     
     @property
     def engine(self) -> MyEngine:
@@ -75,8 +74,7 @@ class Authorization:
 
     def register(self, username: str, password: str) -> bool:
 
-        if username == '' or any(x in username for x in '!@#$%^&*()+_}{":?><~`,./;\'[]-='):
-            # print('Illegal username')
+        if username in ('', 'test', 'admin', None, ' ') or any(x in username for x in '!@# $%^&*()+_}{":?><~`,./;\'[]-='):
             raise ValueError('Username cannot contain special signs')
         if self._user != None:
             print("Logout first")
