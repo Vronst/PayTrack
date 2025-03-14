@@ -86,6 +86,7 @@ class Services:
         simple_logs(f'{tax} paid successfully', log_file=['taxes.log'])
         return
 
+    # TODO: test this
     def view_payments(self, tax_name: str) -> None:
         """
             Prints out payments associated with user and tax passed as variable
@@ -114,6 +115,7 @@ class Services:
             finally:
                 return
 
+    # TODO: test this
     def edit_payment(self, payment_id: int) -> None:
         selected_payment: Payment | None = self._engine.session.query(Payment).get(payment_id)
         if not selected_payment:
@@ -142,6 +144,7 @@ class Services:
                 case _:
                     print("Invalid option")
     
+    # TODO: test this
     def edit_details(self, chosen_payment: Payment) -> None:
         # selected_payment: Payment | None = self._engine.session.query(Payment).filter_by(
         #     user_id=self.user.id, payment_id=chosen_payment).first()
@@ -213,6 +216,7 @@ class Services:
 
 
     # TODO: Use update in important parts so db will be updated
+    # TODO: test this
     def update(self) -> None:
         """
         Updates the database with the current date.

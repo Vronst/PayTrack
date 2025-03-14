@@ -26,6 +26,7 @@ class User(Base):
     __tablename__ = 'users'
     
     id: MappedColumn[int] = mapped_column(Integer, primary_key=True)
+    admin: MappedColumn[bool] = mapped_column(Boolean, default=False)
     name: MappedColumn[str] = mapped_column(String, unique=True)
     password: MappedColumn[str] = mapped_column(String)
     

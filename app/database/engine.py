@@ -62,7 +62,8 @@ class MyEngine:
         self.session.commit()
         return True
 
-    def create_user(self, username: str, password: str, hashpass: bool = True, with_taxes: bool = True) -> User | None:
+    # TODO: Test creation of admin
+    def create_user(self, username: str, password: str, hashpass: bool = True, admin: bool = False, with_taxes: bool = True) -> User | None:
         """
         Allows for creation of user with any password
         Arguments:
@@ -83,7 +84,9 @@ class MyEngine:
             password = generate_password_hash(password, salt_length=24)
         user: User = User(
                 name=username,
-                password=password)
+                password=password,
+                admin=admin
+        )
         self.session.add(user)
         self.session.commit()
 

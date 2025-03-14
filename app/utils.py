@@ -37,9 +37,6 @@ def list_of_taxes(path_to_file: str = '/home/vronst/Programming/Rachunki/app/') 
     return taxes_list
 
 
-# taxes: list[str] = list_of_taxes() 
-
-
 def simple_logs(message: str, error: str | None = None, log_file: list[str] = ['default']) -> None:
     """
     Logs a message to specified log files.
@@ -60,39 +57,6 @@ def simple_logs(message: str, error: str | None = None, log_file: list[str] = ['
     for file in log_file:
         with open(path + file, 'a+') as log:
             log.write(f'{message} {error}\n\n' if error else f'{message}\n\n')
-
-
-def update() -> None:
-    """
-    Updates the database with the current date.
-
-    This function imports the necessary modules and updates the database with the current date. So the payments from last months won't count
-    this month's taxes as paid.
-    """
-    import datetime
-    from datetime import date
-    from .database.models import Tax 
-    
-    today: date = datetime.date.today()
-    month: int
-    year: int
-    
-    def change_status(tax: Tax) -> None:
-        tax.payment_status = False
-        session.add(tax)
-        session.commit()
-        simple_logs(f'{tax.taxname} payment status changed ({today.month, today.year})', log_file=['taxes.log'])
-    
-    taxes: list[Tax] = session.query(Tax).filter_by(payment_status=True).all()
-    for tax in taxes:
-        if not tax.payments:
-            change_status(tax)
-            continue
-        for payment in tax.payments:
-            day, month, year = list(map(int, payment.date.split('-')))
-            if (month < today.month and year <= today.year) or year < today.year:
-                change_status(tax)
-                continue
 
 
 class NameTaken(Exception):
