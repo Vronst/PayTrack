@@ -92,6 +92,7 @@ class TextApp:
         self.services = Services(auth=self.auth, engine=self._engine)
 
         while self.is_running:
+            self.services.update()
             choice: str = input(inner_loop)
             match choice:
                 case '1':
@@ -111,6 +112,7 @@ class TextApp:
             Allows to see payments associated with selected tax
         """
         while self.is_running:
+            self.services.update()
             tax_list: dict[int, Tax] = self.services.check_taxes()
             choice: str = input(ctl)
             
@@ -151,3 +153,4 @@ class TextApp:
             else:
                 if isinstance(tax, str):
                     self.services.pay_taxes(tax)
+        self.services.update()

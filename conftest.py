@@ -31,21 +31,30 @@ def dict_of(my_session, monkeypatch) -> Generator[dict[str, Any], None, None]:
     password: str = 'StrongPass!'
     admin_name: str = 'admin'
     admin: User = my_session.create_user(username=admin_name, password=admin_name, admin=True)
+    no_taxes: User = my_session.create_user(username=username+'1', password=password+'1', with_taxes=False)
     # if not my_session.session.query(User).filter_by(name=username).first():
     auth: Authorization = Authorization(engine=my_session, action='register', username=username, password=password)
     # else:
         # auth = Authorization(engine=my_session, action='login', username=username, password=password)
     services: Services = Services(auth=auth, engine=my_session)
 
-    yield {'engine': my_session, 'auth': auth, 'services': services, 'user': {'username': username, 'password': password}}
+    yield {
+        'engine': my_session,
+        'auth': auth,
+        'services': services,
+        'user': {'username': username, 'password': password},
+        'user_no_taxes': {'username': username+'1', 'password': password+'1'},
+        'admin': {'username': admin_name, 'password': admin_name},
+    }
 
-    inputs: Iterable = iter(['Y', 'Y', 'Y'])
+    inputs: Iterable = iter(['Y'] * 4)
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
 
     del services
     auth.logout()
     auth.login(username=admin_name, password=admin_name)
     auth.delete_user(username)
+    auth.delete_user(username+'1')
     auth.delete_user(admin_name)
     del auth
 
