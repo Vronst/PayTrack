@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def list_of_taxes(path_to_file: str = '/home/vronst/Programming/Rachunki/app/') -> list[str]:
+def list_of_taxes(path_to_file: str | None = None) -> list[str]:
     """
     Reads a list of taxes from a file or returns a default list if the file is not found.
 
@@ -15,12 +15,13 @@ def list_of_taxes(path_to_file: str = '/home/vronst/Programming/Rachunki/app/') 
         list[str]: A list of tax names.
     """
     taxes_list: list[str] = []
-    try:
-        with open(path_to_file + 'taxes.txt', 'r') as file:
-            for line in file:
-                taxes_list.append(line.strip())
-    except FileNotFoundError:
-        print('File with list of taxes not found\nDefault taxes applied')
+    if path_to_file:
+        try:
+            with open(path_to_file, 'r') as file:
+                for line in file:
+                    taxes_list.append(line.strip())
+        except FileNotFoundError:
+            print('File with list of taxes not found\nDefault taxes applied')
     if not taxes_list:
         return [
             'water',
@@ -68,4 +69,8 @@ class PasswordNotSafe(Exception):
 
 
 class LoginError(Exception):
+    pass
+
+
+class UserCreationError(Exception):
     pass

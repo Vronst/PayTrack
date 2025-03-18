@@ -1,4 +1,5 @@
 import pytest
+from typing import Iterable
 from ...utils import LoginError, NameTaken, PasswordNotSafe
 from ...auth import Authorization
 from ...database import User, MyEngine
@@ -17,6 +18,7 @@ class TestAuthorizationPositive:
         auth: Authorization = Authorization(engine=my_session, action='register', username='registertestinit', password='Testpass!')
 
         assert auth.is_logged == True
+        assert auth.user is not None
         assert auth.guest == []
         assert auth.guest_list == []
         assert auth.user.taxes != []
@@ -28,6 +30,7 @@ class TestAuthorizationPositive:
         auth: Authorization = Authorization(engine=my_session, action='login', username=username, password=password)
         
         assert auth.is_logged == True, 'user logged in?'
+        assert auth.user is not None
         assert auth.user.name == username, 'checking username'
         assert auth.guest == [], 'checking guests'
         assert auth.guest_list == [], 'checking guests list'
@@ -39,6 +42,7 @@ class TestAuthorizationPositive:
         auth: Authorization = Authorization(engine=my_session, action='login', username=username, password=password)
         
         assert auth.is_logged == True
+        assert auth.user is not None
         assert auth.user.name == username
         auth.logout()
         assert auth.is_logged == False
@@ -50,6 +54,7 @@ class TestAuthorizationPositive:
 
         assert auth.register(username, password) != None
         assert auth.is_logged == True
+        assert auth.user is not None
         assert auth.user.name == username
 
     def test_login(self, my_session) -> None:
@@ -61,8 +66,27 @@ class TestAuthorizationPositive:
         auth.login(username, password)
 
         assert auth.is_logged == True
+        assert auth.user is not None
         assert auth.user.name == username
 
+    def test_delete_user(self, dict_of, capsys, monkeypatch) -> None:
+        inputs: Iterable = iter(['Y'])
+        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+        user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
+        admin: User | None = dict_of['engine'].get_user(username=dict_of['admin']['username'])
+        assert user is not None
+        assert admin is not None
+        username: str = user.name
+        dict_of['auth'].logout()
+        dict_of['auth'].login(username=admin.name, password=admin.name)
+        dict_of['auth'].delete_user(username=username)
+        captured_output: str = capsys.readouterr().out.strip()
+        assert 'You must be logged as administrator to delete someones account!' not in captured_output
+        assert 'User not found' not in captured_output
+        assert 'Abandoned action' not in captured_output
+        assert 'Account of ' in captured_output
+        assert dict_of['engine'].get_user(username=username) is None
+        
 
 class TestAuthorizationNegative:
     
@@ -112,6 +136,7 @@ class TestAuthorizationNegative:
         auth.login(username, password)
 
         assert auth.is_logged == True
+        assert auth.user is not None
         assert auth.user.name == username
         with pytest.raises(LoginError):
             auth.login(username, password)
@@ -122,6 +147,20 @@ class TestAuthorizationNegative:
         assert my_session.create_user(username, password) != None
         auth: Authorization = Authorization(engine=my_session, action='login', username=username, password=password)
         assert auth.is_logged == True
+        assert auth.user is not None
         assert auth.user.name == username
         assert auth.register(username='someotheruserhere', password=password) == False
          
+    def test_delete_not_existing_user(self, dict_of, monkeypatch) -> None:
+        inputs: Iterable = iter(['Y'])
+        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+        username: str = 'ThatUserDoesNotExists'
+        admin: User | None = dict_of['engine'].get_user(username=dict_of['admin']['username'])
+        assert admin is not None
+        assert dict_of['engine'].get_user(username=username) is None
+        dict_of['auth'].logout()
+        dict_of['auth'].login(username=admin.name, password=admin.name)
+        with pytest.raises(ValueError, match='User not found'):
+            dict_of['auth'].delete_user(username=username)
+        assert dict_of['engine'].get_user(username=username) is None
+

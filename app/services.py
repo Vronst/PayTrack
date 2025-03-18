@@ -249,8 +249,6 @@ class Services:
                     print(f"Invalid choice {choice}")
 
 
-    # TODO: Use update in important parts so db will be updated
-    # TODO: test this
     def update(self) -> None:
         """
         Updates the database with the current date.

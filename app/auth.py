@@ -93,12 +93,11 @@ class Authorization:
         self._user = user
         return True
     
-    # TODO: test this
     def delete_user(self, username: str) -> None:
         if self.user and self.user.admin != True:
             raise LoginError('You must be logged as administrator to delete someones account!')
 
-        user: User | None = self._engine.session.query(User).filter_by(name=username).first()
+        user: User | None = self._engine.get_user(username=username)
         if not user:
             raise ValueError('User not found')
 
@@ -110,7 +109,7 @@ class Authorization:
             return
         if self.user and self.user.name == username:
             if input(f'Are you sure you want to delete your own account? (Y,n): ') != 'Y':
-                print('Abadoned action')
+                print('Deleting your own account was cancelled')
                 return
             else:
                 self.logout()

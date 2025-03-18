@@ -7,7 +7,6 @@ from ...database import MyEngine
 from ...database import Payment, Tax, User
 
 
-# TODO: more tests - details github project
 class TestServicesPositive:
 
     def test_check_taxes(self, capsys, my_session):

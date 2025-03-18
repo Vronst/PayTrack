@@ -6,7 +6,7 @@ from warnings import warn
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import sessionmaker, scoped_session
-from ..utils import simple_logs, list_of_taxes
+from ..utils import simple_logs, list_of_taxes, UserCreationError
 from .models import Base, User
 
 
@@ -45,14 +45,8 @@ class MyEngine:
             self.POSTGRES_PORT]):
             raise ValueError('One or more environment variables are not set')
 
-    # def is_session_running(self) -> bool:
-    #     if not self._session:
-    #         warn("Warning: First initialize session", UserWarning)
-    #         return False
-    #     return True
-
-    def default_taxes(self, user: User) -> bool:
-        taxes: list[str] = list_of_taxes()
+    def default_taxes(self, user: User, *, path_to_file: str | None = None) -> list[str]:
+        taxes: list[str] = list_of_taxes(path_to_file=path_to_file)
         for tax in taxes:
             new_tax: Tax = Tax(
                     taxname=tax,
@@ -60,10 +54,9 @@ class MyEngine:
             )
             user.taxes.append(new_tax)
         self.session.commit()
-        return True
+        return taxes
 
-    # TODO: Test creation of admin
-    def create_user(self, username: str, password: str, hashpass: bool = True, admin: bool = False, with_taxes: bool = True) -> User | None:
+    def create_user(self, username: str, password: str, *, hashpass: bool = True, admin: bool = False, with_taxes: bool = True) -> User | None:
         """
         Allows for creation of user with any password
         Arguments:
@@ -76,9 +69,8 @@ class MyEngine:
         #     return
 
         # won't create duplicated username
-        if self.session.query(User).filter_by(name=username).first():
-            print('Username taken')
-            return 
+        if self.get_user(username):
+            raise UserCreationError('Username is taken')
         if hashpass:
             from werkzeug.security import generate_password_hash
             password = generate_password_hash(password, salt_length=24)
@@ -114,6 +106,23 @@ class MyEngine:
             user = self.session.query(User).get(user_id)
 
         return user
+
+    def delete_user(self, *, username: str | None = None, id_: int | None = None) -> None:
+        warn('If possible you should be using Auth.delete_user instead of engine.delete_user')
+
+        user: User | None
+        if not id_:
+            user = self.get_user(username=username)
+        else:
+            user = self.get_user(user_id=id_)
+        if not user:
+            raise ValueError('User not found')
+                    
+        self.session.delete(user)
+        self.session.commit()
+        print(f'User {username} has been deleted')
+
+        return
 
     def create_my_session(self) -> scoped_session:
         """

@@ -7,7 +7,7 @@ from .app.database import MyEngine
 from .app.database import User
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="function")
 def my_session() -> Generator[MyEngine, None, None]:
 
     meng: MyEngine = MyEngine(test=True, test_db='testtaxes')
@@ -53,8 +53,11 @@ def dict_of(my_session, monkeypatch) -> Generator[dict[str, Any], None, None]:
     del services
     auth.logout()
     auth.login(username=admin_name, password=admin_name)
-    auth.delete_user(username)
-    auth.delete_user(username+'1')
-    auth.delete_user(admin_name)
+    try:
+        auth.delete_user(username)
+        auth.delete_user(username+'1')
+        auth.delete_user(admin_name)
+    except ValueError:
+        pass
     del auth
 
