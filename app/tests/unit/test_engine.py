@@ -1,9 +1,26 @@
 import pytest
 from ...database import User
 from ...utils import UserCreationError
+from ...auth import Authorization 
 
 
 class TestEnginePositive:
+    def test_change_password(self, dict_of, capsys) -> None:
+        user: User | None = dict_of['engine'].session.query(User).filter_by(
+            name=dict_of['user']['username']
+        ).first()
+        assert user is not None
+        new_password: str = 'new'
+        dict_of['engine'].change_password(user_id=user.id, new_password=new_password)
+        cap_output: str = capsys.readouterr().out.strip()
+        assert 'Password changed successfully' in cap_output
+        auth: Authorization = dict_of['auth']
+        auth.logout()
+        assert auth.user is None
+        auth.login(username=user.name, password=new_password)
+        assert auth.user is not None
+        assert auth.user.name == user.name
+
     def test_create_session(self, no_session, capsys) -> None:
         assert no_session.session is not None
         captured_output: str = capsys.readouterr().out.strip()
@@ -146,7 +163,7 @@ class TestEngineNegative:
         ]
 
     def test_delete_not_existing_user_by_id(self, dict_of) -> None:
-        user_id: int = 0
+        user_id: int = 0  # may cause errors in future
         admin: User | None = dict_of['engine'].get_user(username=dict_of['admin']['username'])
         assert admin is not None
         assert dict_of['engine'].get_user(user_id=user_id) is None

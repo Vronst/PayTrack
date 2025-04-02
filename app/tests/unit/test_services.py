@@ -357,6 +357,101 @@ class TestServicesPositive:
         services.update()
         assert selected_tax.payment_status == True, 'Paid to one year later, should be true'
 
+    def test_delete_tax(self, dict_of, monkeypatch, capsys) -> None:
+        services: Services = dict_of['services']
+        user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
+        inputs: Iterable = iter(['Y'])
+        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+        assert user is not None
+        taxname: str = user.taxes[0].taxname
+        services.delete_tax(taxname=taxname)
+        captured_output: str = capsys.readouterr().out.strip()
+        assert 'Deleted successfully' in captured_output
+        assert not any(tax for tax in user.taxes if tax.taxname == taxname)
+
+    def test_delete_tax_canceled(self, dict_of, monkeypatch, capsys) -> None:
+        services: Services = dict_of['services']
+        user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
+        inputs: Iterable = iter(['n'])
+        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+        assert user is not None
+        taxname: str = user.taxes[0].taxname
+        services.delete_tax(taxname=taxname)
+        captured_output: str = capsys.readouterr().out.strip()
+        assert 'Canceled' in captured_output
+        assert any(tax for tax in user.taxes if tax.taxname == taxname)
+
+    def test_delete_tax_by_id(self, dict_of, monkeypatch, capsys) -> None:
+        services: Services = dict_of['services']
+        user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
+        inputs: Iterable = iter(['Y'])
+        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+        assert user is not None
+        tax_id: int = user.taxes[0].id
+        services.delete_tax(tax_id=tax_id)
+        captured_output: str = capsys.readouterr().out.strip()
+        assert 'Deleted successfully' in captured_output
+        assert not any(tax for tax in user.taxes if tax.id == tax_id)
+
+    def test_add_tax(self, dict_of, monkeypatch, capsys) -> None:
+        services: Services = dict_of['services']
+        user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
+        assert user is not None
+        taxname: str = 'testtax'
+        inputs: Iterable = iter(['y'])
+        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+        services.add_tax(taxname=taxname)
+        captured_output: str = capsys.readouterr().out.strip()
+        user_taxes: list[Tax] = user.taxes
+
+        assert 'added successfully' in captured_output
+        assert any(tax for tax in user_taxes if tax.taxname == taxname)
+
+    def test_add_tax_and_cancel(self, dict_of, monkeypatch, capsys) -> None:
+        services: Services = dict_of['services']
+        user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
+        assert user is not None
+        taxname: str = 'testtax'
+        inputs: Iterable = iter(['n'])
+        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+        services.add_tax(taxname=taxname)
+        captured_output: str = capsys.readouterr().out.strip()
+        user_taxes: list[Tax] = user.taxes
+
+        assert 'Canceled' in captured_output
+        assert not any(tax for tax in user_taxes if tax.taxname == taxname)
+
+    def test_edit_tax(self, dict_of, monkeypatch, capsys) -> None:
+        services: Services = dict_of['services']
+        user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
+        assert user is not None
+        taxname: str = user.taxes[0].taxname
+        inputs: Iterable = iter(['new_name', 'y'])
+        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+        services.edit_tax(taxname=taxname)
+        captured_output: str = capsys.readouterr().out.strip()
+        user_taxes: list[Tax] = dict_of['engine'].get_user(dict_of['user']['username']).taxes
+
+        assert 'edited successfully' in captured_output
+        assert not any(tax for tax in user_taxes if tax.taxname == taxname)
+        assert any(tax for tax in user_taxes if tax.taxname == 'new_name')
+
+    def test_edit_tax_by_id(self, dict_of, monkeypatch, capsys) -> None:
+        services: Services = dict_of['services']
+        user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
+        assert user is not None
+        tax_id: int = user.taxes[0].id
+        taxname: str = 'testtax'
+        inputs: Iterable = iter([taxname, 'y'])
+        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+        services.edit_tax(tax_id=tax_id)
+        captured_output: str = capsys.readouterr().out.strip()
+        user_taxes: list[Tax] = dict_of['engine'].get_user(dict_of['user']['username']).taxes
+
+        assert 'edited successfully' in captured_output
+        assert any(tax for tax in user_taxes if tax.taxname == taxname)
+
+
 class TestServicesNegative:
     def test_changing_unchangable_attributes_auth(self, dict_of) -> None:
         services: Services = dict_of['services']
@@ -571,7 +666,6 @@ class TestServicesNegative:
 
     def test_payment_edit_details_third_option_value_error(self, dict_of, capsys, monkeypatch) -> None:
         services: Services = dict_of.get('services')
-        school_tax_id: int = next(tax for tax in services.user.taxes if tax.taxname == 'school').id
         inputs: Iterable = iter([
             'y', '100', '1', '3'] + ['lol']+ ['3', '11p'] + ['3', '1111111111111111'] +
             ['q', 'q'
@@ -599,4 +693,46 @@ class TestServicesNegative:
         assert our_payment.date == datetime.date.today().strftime('%d-%m-%Y')
         assert our_payment.tax.taxname == 'water'
 
+    def test_delete_not_exisitng_tax(self, dict_of, monkeypatch) -> None:
+        services: Services = dict_of['services']
+        user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
+        inputs: Iterable = iter(['Y'])
+        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+        assert user is not None
+        taxname: str = 'this is not valid name'
+        with pytest.raises(KeyError, match='Tax doesn\'t exist'):
+            services.delete_tax(taxname=taxname)
+        assert not any(tax for tax in user.taxes if tax.taxname == taxname)
 
+    def test_delete_not_existing_tax_by_id(self, dict_of, monkeypatch) -> None:
+        services: Services = dict_of['services']
+        user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
+        inputs: Iterable = iter(['Y'])
+        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+        assert user is not None
+        tax_id: int = -1
+        with pytest.raises(KeyError, match="Tax doesn't exist"):
+            services.delete_tax(tax_id=tax_id)
+        assert not any(tax for tax in user.taxes if tax.id == tax_id)
+
+    def test_edit_not_existent_tax(self, dict_of) -> None:
+        services: Services = dict_of['services']
+        user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
+        assert user is not None
+        taxname: str = 'this is not valid tax name'
+        with pytest.raises(KeyError, match="Tax doesn't exist"):
+            services.edit_tax(taxname=taxname)
+
+        assert not any(tax for tax in user.taxes if tax.taxname == taxname)
+
+    def test_edit_non_existent_tax_by_id(self, dict_of, capsys) -> None:
+        services: Services = dict_of['services']
+        user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
+        assert user is not None
+        tax_id: int = -1
+        with pytest.raises(KeyError, match="Tax doesn't exist"):
+            services.edit_tax(tax_id=tax_id)
+        captured_output: str = capsys.readouterr().out.strip()
+        dict_of['engine'].get_user(dict_of['user']['username']).taxes
+
+        assert 'edited successfully' not in captured_output

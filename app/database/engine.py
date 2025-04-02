@@ -1,7 +1,6 @@
 import os
-import datetime
-from datetime import date
 from . import Tax 
+from werkzeug.security import generate_password_hash
 from warnings import warn
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, Engine
@@ -45,6 +44,16 @@ class MyEngine:
             self.POSTGRES_PORT]):
             raise ValueError('One or more environment variables are not set')
 
+    def change_password(self, user_id: int, new_password: str) -> None:
+        user: User | None = self.session.get(User, user_id)
+        if not user:
+            raise KeyError("User does not exist")
+        user.password = generate_password_hash(new_password, salt_length=24)
+        self.session.add(user)
+        self.session.commit()
+        print("Password changed successfully")
+        return
+
     def default_taxes(self, user: User, *, path_to_file: str | None = None) -> list[str]:
         taxes: list[str] = list_of_taxes(path_to_file=path_to_file)
         for tax in taxes:
@@ -65,10 +74,6 @@ class MyEngine:
             - hashpass: bool -> defualt True, hashes password and stores that hash instead
                 of plain passowrd
         """
-        # if not self.is_session_running():
-        #     return
-
-        # won't create duplicated username
         if self.get_user(username):
             raise UserCreationError('Username is taken')
         if hashpass:
@@ -96,14 +101,12 @@ class MyEngine:
         Returns:
             User
         """
-        # if not self.is_session_running:
-        #     return None
         
         user: None | User
         if username:
             user = self.session.query(User).filter_by(name=username).first()
         else:
-            user = self.session.query(User).get(user_id)
+            user = self.session.get(User, user_id)
 
         return user
 
@@ -165,8 +168,6 @@ class MyEngine:
         """
             Closes session and dispose of engine
         """
-        # if not self.is_session_running():
-        #     return
 
         self.session.rollback()
         self.session.remove()

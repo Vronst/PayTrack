@@ -248,6 +248,53 @@ class Services:
                 case _:
                     print(f"Invalid choice {choice}")
 
+    def edit_tax(self, taxname: str | None = None, tax_id: int | None = None) -> None:
+        tax: Tax | None 
+        if tax_id:
+            tax = self._engine.session.get(Tax, tax_id)
+        else:
+            tax = self._engine.session.query(Tax).filter_by(taxname=taxname, user_id=self.user.id).first()
+        if not tax:
+            raise KeyError("Tax doesn't exist")
+        new_name: str = input("New tax name: ")
+        if not input(f"Are you sure, you want to change {tax.taxname} to {new_name} (y/n)"):
+            print("Canceled")
+            return
+        tax.taxname, new_name = new_name, tax.taxname
+        self._engine.session.add(tax)
+        self._engine.session.commit()
+        print(f"{new_name} -> {tax.taxname} edited successfully")
+        return
+
+    def delete_tax(self, taxname: str | None = None, tax_id: int | None = None) -> None:
+        tax: Tax | None
+        if tax_id:
+            tax = self._engine.session.get(Tax, tax_id)
+        else:
+            tax = self._engine.session.query(Tax).filter_by(taxname=taxname, user_id=self.user.id).first()
+        if not tax:
+            raise KeyError("Tax doesn't exist")
+        if input(f"Are you sure, you wan't to delete {tax.taxname}? (y/n)").lower() != 'y':
+            print("Canceled")
+            return
+            
+        self._engine.session.delete(tax)
+        self._engine.session.commit()
+        print("Deleted successfully")
+        return
+
+    def add_tax(self, taxname: str) -> None:
+        if input(
+            f"Are you sure, you want to create new tax: {taxname} (y/n)"
+        ).lower() != 'y':
+            print("Canceled")
+            return
+        
+        new_tax: Tax = Tax(taxname=taxname, user_id=self.user.id)
+        self._engine.session.add(new_tax)
+        self._engine.session.commit()
+        print("Tax added successfully")
+        return
 
     def update(self) -> None:
         """
