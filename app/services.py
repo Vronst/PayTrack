@@ -1,19 +1,23 @@
+from typing import Callable, TYPE_CHECKING
 import datetime
 from datetime import date
 from functools import wraps
-from .database import MyEngine
-from .database import User, Tax, Payment
-from .auth import Authorization
+from . import User, Tax, Payment
 from .utils import LoginError, simple_logs
 from .messages import payment_edit, edit_msg
+
+
+if TYPE_CHECKING:
+    from . import MyEngine
+    from .auth import Authorization
 
 
 class Services:
     # TODO: Maybe option to sync it to google sheets?
 
-    def __init__(self, auth: Authorization, engine: MyEngine) -> None:
-        self._auth: Authorization = auth
-        self._engine: MyEngine = engine
+    def __init__(self, auth: "Authorization", engine: "MyEngine") -> None:
+        self._auth: "Authorization" = auth
+        self._engine: "MyEngine" = engine
 
     @staticmethod
     def requires_login(func):
@@ -21,8 +25,12 @@ class Services:
         def wrapper(self, *args, **kwargs):
             while (self._auth.user is None):
                 print('You must log in to use services!')
-                username: str = input('Username: ')
-                password: str = input('Password: ')
+                try:
+                    username: str = input_method('Username: ')
+                    password: str = input_method('Password: ')
+                except NameError:
+                    username = input("Username: ")
+                    password = input("Password: ")
                 try:
                     self._auth.login(username, password)
                 except LoginError as e:
@@ -39,7 +47,7 @@ class Services:
         return self._auth.user
 
     @property
-    def auth(self) -> Authorization:
+    def auth(self) -> "Authorization":
         return self._auth
 
     @auth.setter
@@ -47,7 +55,7 @@ class Services:
         raise AttributeError("This attribute cannot be changed directly")
 
     @property
-    def engine(self) -> MyEngine:
+    def engine(self) -> "MyEngine":
         return self._engine
 
     @engine.setter
@@ -70,14 +78,14 @@ class Services:
 
         return result
 
-    def pay_taxes(self, tax: str) -> None:
+    def pay_taxes(self, tax: str, *, input_method=input) -> None:
         selected_tax: Tax | None
 
-        if input(f'Is {tax} - correct (y/N)') != 'y':
+        if input_method(f'Is {tax} - correct (y/N)') != 'y':
             print('Aborted')
             return None
 
-        price: float= float(input('Enter amount: '))
+        price: float= float(input_method('Enter amount: '))
         date: str = datetime.date.today().strftime('%d-%m-%Y')
         selected_tax = self._engine.session.query(Tax).filter_by(taxname=tax, user_id=self.user.id).first()
 
@@ -103,7 +111,7 @@ class Services:
         simple_logs(f'{tax} paid successfully', log_file=['taxes.log'])
         return
 
-    def view_payments(self, tax_name: str) -> None:
+    def view_payments(self, tax_name: str, *, input_method: Callable =input) -> None:
         """
             Prints out payments associated with user and tax passed as variable
         """
@@ -120,7 +128,7 @@ class Services:
         for payment in payments:
             print(f'{payment.id})\t{payment.price}\t{payment.date}\t{payment.tax.taxname}')
         print('')
-        choice: str = input("Press enter to continue or type id of payment you want to edit\n")
+        choice: str = input_method("Press enter to continue or type id of payment you want to edit\n")
         if choice == '':
             return
         else:
@@ -131,7 +139,7 @@ class Services:
             finally:
                 return
 
-    def edit_payment(self, payment_id: int) -> None:
+    def edit_payment(self, payment_id: int, *, input_method=input) -> None:
         selected_payment: Payment | None = self._engine.session.query(Payment).filter_by(
             id=payment_id, users_id=self.user.id).first()
         if not selected_payment:
@@ -140,15 +148,15 @@ class Services:
         while True:
             print('ID  |  Price  |  Date  |  Tax-name')
             print(f"{selected_payment.id})", selected_payment.price, selected_payment.date, selected_payment.tax.taxname, sep='\t')
-            choice = input(payment_edit)
+            choice = input_method(payment_edit)
             match choice.lower():
                 case '1':
                     try:
-                        self.edit_details(selected_payment)
+                        self.edit_details(selected_payment, input_method=input_method)
                     except ValueError as e:
                         print(e)
                 case '2':
-                    if input("Are you sure you want to delete this payment? (Y/n)\t") != 'Y':
+                    if input_method("Are you sure you want to delete this payment? (Y/n)\t") != 'Y':
                         print("Canceled")
                         break
                     self._engine.session.delete(selected_payment)
@@ -160,16 +168,16 @@ class Services:
                 case _:
                     print("Invalid option")
     
-    def edit_details(self, chosen_payment: Payment) -> None:
+    def edit_details(self, chosen_payment: Payment, *, input_method=input) -> None:
         while True:
             print('ID  |  Price  |  Date  |  Tax-name')
             print(f"{chosen_payment.id})", chosen_payment.price, chosen_payment.date, chosen_payment.tax.taxname, sep='\t')
-            choice: str = input(edit_msg)
+            choice: str = input_method(edit_msg)
             match choice:
                 case '1':
-                    day: str | int = input("Day: ")
-                    month: str | int = input("Month: ")
-                    year: str = input("Full year (e.g. 2025): ")
+                    day: str | int = input_method("Day: ")
+                    month: str | int = input_method("Month: ")
+                    year: str = input_method("Full year (e.g. 2025): ")
                     try:
                         month = int(month)
                     except ValueError:
@@ -208,7 +216,7 @@ class Services:
                     chosen_payment.date = date
                 case '2':
                     try:
-                        new_price: int = int(input("New price: "))
+                        new_price: int = int(input_method("New price: "))
                     except ValueError as e:
                         print(e)
                         continue
@@ -221,7 +229,7 @@ class Services:
                         print(taxes.id, taxes.taxname, sep='\t')
                         ids_list.append(taxes.id)
                     try:
-                        selection: int = int(input("Select tax id: "))
+                        selection: int = int(input_method("Select tax id: "))
                         if selection not in ids_list:
                             raise ValueError('Id out of range')
                     except ValueError as e:
@@ -230,7 +238,7 @@ class Services:
                     else:
                         chosen_payment.taxes_id = selection
                 case '4':
-                    if input("Are you sure you want to delete that payment? (Y/n)") == 'Y':
+                    if input_method("Are you sure you want to delete that payment? (Y/n)") == 'Y':
                         self._engine.session.delete(chosen_payment)
                         self._engine.session.commit()
                         print('Deleted successfully')
@@ -248,7 +256,7 @@ class Services:
                 case _:
                     print(f"Invalid choice {choice}")
 
-    def edit_tax(self, taxname: str | None = None, tax_id: int | None = None) -> None:
+    def edit_tax(self, taxname: str | None = None, tax_id: int | None = None, *, input_method=input) -> None:
         tax: Tax | None 
         if tax_id:
             tax = self._engine.session.get(Tax, tax_id)
@@ -256,8 +264,8 @@ class Services:
             tax = self._engine.session.query(Tax).filter_by(taxname=taxname, user_id=self.user.id).first()
         if not tax:
             raise KeyError("Tax doesn't exist")
-        new_name: str = input("New tax name: ")
-        if not input(f"Are you sure, you want to change {tax.taxname} to {new_name} (y/n)"):
+        new_name: str = input_method("New tax name: ")
+        if not input_method(f"Are you sure, you want to change {tax.taxname} to {new_name} (y/n)"):
             print("Canceled")
             return
         tax.taxname, new_name = new_name, tax.taxname
@@ -266,7 +274,7 @@ class Services:
         print(f"{new_name} -> {tax.taxname} edited successfully")
         return
 
-    def delete_tax(self, taxname: str | None = None, tax_id: int | None = None) -> None:
+    def delete_tax(self, taxname: str | None = None, tax_id: int | None = None, *, input_method=input) -> None:
         tax: Tax | None
         if tax_id:
             tax = self._engine.session.get(Tax, tax_id)
@@ -274,7 +282,7 @@ class Services:
             tax = self._engine.session.query(Tax).filter_by(taxname=taxname, user_id=self.user.id).first()
         if not tax:
             raise KeyError("Tax doesn't exist")
-        if input(f"Are you sure, you wan't to delete {tax.taxname}? (y/n)").lower() != 'y':
+        if input_method(f"Are you sure, you wan't to delete {tax.taxname}? (y/n)").lower() != 'y':
             print("Canceled")
             return
             
@@ -283,8 +291,8 @@ class Services:
         print("Deleted successfully")
         return
 
-    def add_tax(self, taxname: str) -> None:
-        if input(
+    def add_tax(self, taxname: str, *, input_method=input) -> None:
+        if input_method(
             f"Are you sure, you want to create new tax: {taxname} (y/n)"
         ).lower() != 'y':
             print("Canceled")

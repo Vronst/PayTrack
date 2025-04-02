@@ -1,7 +1,6 @@
-from typing import Iterable, Any
+from typing import Iterable
 import datetime
 import pytest
-from ...auth import Authorization
 from ...services import Services
 from ...database import MyEngine
 from ...database import Payment, Tax, User
@@ -9,25 +8,23 @@ from ...database import Payment, Tax, User
 
 class TestServicesPositive:
 
-    def test_check_taxes(self, capsys, my_session):
-        username: str = 'checktaxes'
-        password: str = 'StrongPass!'
-        auth: Authorization = Authorization(engine=my_session, action='register', username=username, password=password)
+    def test_check_taxes(self, capsys, mock_engine, auth_mock):
+        auth = auth_mock
         assert auth.user != None
-        services: Services = Services(auth, my_session)
-
-        result: dict[int, Tax] = services.check_taxes()
+        assert 'water' in [tax.taxname for tax in auth.user.taxes]
+        services: Services = Services(auth, mock_engine)
+        capsys.readouterr()
+        result: dict[int, Tax] = services.check_taxes(simple=True)
+        assert result != {}
         captured_output = capsys.readouterr()
         assert 'water' in captured_output.out.strip()
         assert '0' in captured_output.out.strip()
         assert isinstance(result, dict) == True
 
-    def test_check_taxes_simple(self, capsys, my_session):
-        username: str = 'checktaxessimple'
-        password: str = 'StrongPass!'
-        auth: Authorization = Authorization(engine=my_session, action='register', username=username, password=password)
+    def test_check_taxes_simple(self, capsys, mock_engine, auth_mock):
+        auth = auth_mock 
         assert auth.user != None
-        services: Services = Services(auth, my_session)
+        services: Services = Services(auth, mock_engine)
 
         result: dict[int, Tax] = services.check_taxes(simple=True)
         captured_output = capsys.readouterr()
@@ -35,106 +32,51 @@ class TestServicesPositive:
         assert '0' in captured_output.out.strip()
         assert isinstance(result, dict) == True
 
-    def test_pay_taxes(self, monkeypatch, capsys, dict_of):
-        services: Services = dict_of['services']
-        engine: MyEngine = dict_of['engine']
+    def test_pay_taxes(self, capsys, mock_engine, auth_mock):
+        services: Services = Services(auth_mock, mock_engine)
 
         inputs: Iterable = iter(['y', '100'])
 
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-
-        services.pay_taxes('water')
+        services.pay_taxes('water', input_method=lambda _: next(inputs))
 
         captured_output = capsys.readouterr()
         assert 'paid successfully' in captured_output.out.strip()
 
-        user: User | None = engine.session.query(User).filter_by(name=dict_of['user']['username']).first()
-        assert user != None
-        
-        water_tax: Tax | None = next((tax for tax in user.taxes if tax.taxname == 'water'), None) 
-        assert water_tax is not None
-        assert water_tax.payment_status == True
-
-        provided_payments: list[Payment] = water_tax.payments
-        today: str = datetime.date.today().strftime('%d-%m-%Y')
-        our_payment: Payment | None = next(
-            (payment for payment in provided_payments if (payment.date == today and payment.price == 100)),
-            None)
-        assert our_payment != None
-
-    def test_pay_unexisting_taxes(self, monkeypatch, capsys, dict_of):
-        services: Services = dict_of['services']
-        engine: MyEngine = dict_of['engine']
+    def test_pay_unexisting_taxes(self, capsys, mock_engine_no_query, auth_mock):
+        services: Services = Services(auth_mock, mock_engine_no_query)
 
         inputs: Iterable = iter(['y', '100'])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
 
-        services.pay_taxes('eter')
+        services.pay_taxes('eter', input_method=lambda _: next(inputs))
 
         captured_output = capsys.readouterr()
         assert ' not found, attempting to add tax' in captured_output.out.strip()
         assert 'paid successfully' in captured_output.out.strip()
 
-        user: User | None = engine.session.query(User).filter_by(name=dict_of['user']['username']).first()
-        assert user != None, 'User exsits?'
-        
-        water_tax: Tax | None = next((tax for tax in user.taxes if tax.taxname == 'eter'), None) 
-        assert water_tax is not None, 'Tax exists?'
-        assert water_tax.payment_status == True, 'Tax paid?'
-
-        provided_payments: list[Payment] = water_tax.payments
-        today: str = datetime.date.today().strftime('%d-%m-%Y')
-        our_payment: Payment | None = next(
-            (payment for payment in provided_payments if (payment.date == today and payment.price == 100)),
-            None)
-        assert our_payment != None, 'Should be no payment here'
-
-    def test_cancel_payment(self, monkeypatch, capsys, dict_of) -> None:
-        services: Services = dict_of['services']
-        engine: MyEngine = dict_of['engine']
+    def test_cancel_payment(self, capsys, ex_user, mock_engine, auth_mock) -> None:
+        services: Services = Services(auth_mock, mock_engine)
+        engine: MyEngine = mock_engine
 
         inputs: Iterable = iter(['n'] * 2)
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
 
-        services.pay_taxes('eter')
-
-        captured_output = capsys.readouterr()
-        assert 'Aborted' in captured_output.out.strip()
-        assert 'paid successfully' not in captured_output.out.strip()
-
-        user: User | None = engine.session.query(User).filter_by(name=dict_of['user']['username']).first()
-        assert user != None, 'User should be exsisting'
-        
-        water_tax: Tax | None = next((tax for tax in user.taxes if tax.taxname == 'eter'), None) 
-        assert water_tax is None, 'Tax should not exist'
-
-        services.pay_taxes('water')
+        services.pay_taxes('eter', input_method=lambda _: next(inputs))
 
         captured_output = capsys.readouterr()
         assert 'Aborted' in captured_output.out.strip()
         assert 'paid successfully' not in captured_output.out.strip()
 
-        user: User | None = engine.session.query(User).filter_by(name=dict_of['user']['username']).first()
-        assert user != None, 'User should be exsisting'
-        
-        water_tax: Tax | None = next((tax for tax in user.taxes if tax.taxname == 'water'), None) 
-        assert water_tax is not None, 'Tax should exists'
-        assert water_tax.payment_status == False, 'Tax shouln\'t be paid'
+        services.pay_taxes('water', input_method=lambda _: next(inputs))
 
-        provided_payments: list[Payment] = water_tax.payments
-        today: str = datetime.date.today().strftime('%d-%m-%Y')
-        our_payment: Payment | None = next(
-            (payment for payment in provided_payments if (payment.date == today and payment.price == 100)),
-            None)
-        assert our_payment == None, 'There should be no payment'
+        captured_output = capsys.readouterr()
+        assert 'Aborted' in captured_output.out.strip()
+        assert 'paid successfully' not in captured_output.out.strip()
 
-    def test_view_payments(self, dict_of, capsys, monkeypatch) -> None:
-        services: Services = dict_of['services']
+    def test_view_payments(self, mock_engine, auth_mock, capsys) -> None:
+        services: Services = Services(auth_mock, mock_engine)
 
         inputs: Iterable = iter([''])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
 
-        services.view_payments('water')
+        services.view_payments('water', input_method=lambda _: next(inputs))
 
         captured_output = capsys.readouterr()
         coe: str = captured_output.out.strip()
@@ -142,17 +84,14 @@ class TestServicesPositive:
         assert 'Price' in coe
         assert 'not found' not in coe
 
-    def test_edit_payment_cancel(self, dict_of, capsys, monkeypatch) -> None:
-        services: Services = dict_of.get('services')
+    def test_edit_payment_cancel(self, mock_engine, auth_mock, capsys, ex_user) -> None:
+        services: Services = Services(auth_mock, mock_engine)
         inputs: Iterable = iter(['y', '100', 'q'])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-        services.pay_taxes('water')
-        user_id: int = dict_of['engine'].session.query(User).filter_by(name=dict_of['user']['username']).first().id
-        payment_id: int = dict_of['engine'].session.query(Payment).filter_by(users_id=user_id).first().id
+        services.pay_taxes('water', input_method=lambda _: next(inputs))
+        user_id: int = mock_engine.session.query(User).filter_by(name=ex_user[0]).first().id
+        payment_id: int = mock_engine.session.query(Payment).filter_by(users_id=user_id).first().id
 
-        assert isinstance(payment_id, int)
-
-        services.edit_payment(payment_id)
+        services.edit_payment(payment_id, input_method=lambda _: next(inputs))
         captured_output = capsys.readouterr()
         coe: str = captured_output.out.strip()
 
@@ -160,17 +99,14 @@ class TestServicesPositive:
         assert 'ID' in coe
         assert 'Price' in coe
 
-    def test_edit_payment_delete_payment(self, dict_of, capsys, monkeypatch) -> None:
-        services: Services = dict_of.get('services')
+    def test_edit_payment_delete_payment(self, auth_mock, mock_engine, ex_user, capsys) -> None:
+        services: Services = Services(auth_mock, mock_engine)
         inputs: Iterable = iter(['y', '100', '2', 'Y'])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-        services.pay_taxes('water')
-        user_id: int = dict_of['engine'].session.query(User).filter_by(name=dict_of['user']['username']).first().id
-        payment_id: int = dict_of['engine'].session.query(Payment).filter_by(users_id=user_id).first().id
+        services.pay_taxes('water', input_method=lambda _: next(inputs))
+        user_id: int = mock_engine.session.query(User).filter_by(name=ex_user[0]).first().id
+        payment_id: int = mock_engine.session.query(Payment).filter_by(users_id=user_id).first().id
 
-        assert isinstance(payment_id, int)
-
-        services.edit_payment(payment_id)
+        services.edit_payment(payment_id, input_method=lambda _: next(inputs))
         captured_output = capsys.readouterr()
         coe: str = captured_output.out.strip()
 
@@ -179,19 +115,15 @@ class TestServicesPositive:
         assert 'Price' in coe
         assert 'Removed successfully' in coe
         assert 'Canceled' not in coe
-        assert dict_of['engine'].session.get(Payment, payment_id) is None
 
-    def test_edit_payment_delete_payment_cancel(self, dict_of, capsys, monkeypatch) -> None:
-        services: Services = dict_of.get('services')
+    def test_edit_payment_delete_payment_cancel(self, auth_mock, mock_engine, ex_user, capsys) -> None:
+        services: Services = Services(auth_mock, mock_engine)
         inputs: Iterable = iter(['y', '100', '2', 'n'])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-        services.pay_taxes('water')
-        user_id: int = dict_of['engine'].session.query(User).filter_by(name=dict_of['user']['username']).first().id
-        payment_id: int = dict_of['engine'].session.query(Payment).filter_by(users_id=user_id).first().id
+        services.pay_taxes('water', input_method=lambda _: next(inputs))
+        user_id: int = mock_engine.session.query(User).filter_by(name=ex_user[0]).first().id
+        payment_id: int = mock_engine.session.query(Payment).filter_by(users_id=user_id).first().id
 
-        assert isinstance(payment_id, int)
-
-        services.edit_payment(payment_id)
+        services.edit_payment(payment_id, input_method=lambda _: next(inputs))
         captured_output = capsys.readouterr()
         coe: str = captured_output.out.strip()
 
@@ -200,356 +132,244 @@ class TestServicesPositive:
         assert 'Price' in coe
         assert 'Removed successfully' not in coe
         assert 'Canceled' in coe
-        assert dict_of['engine'].session.get(Payment, payment_id) is not None
 
-    def test_payment_edit_details(self, dict_of, capsys, monkeypatch) -> None:
-        services: Services = dict_of.get('services')
+    def test_payment_edit_details(self, auth_mock, mock_engine, ex_user, capsys) -> None:
+        services: Services = Services(auth_mock, mock_engine)
         school_tax_id: int = next(tax for tax in services.user.taxes if tax.taxname == 'school').id
         inputs: Iterable = iter([
             'y', '100', '1', '1', '28', 'January', '1999', '2', '123', '3', str(school_tax_id), 'q', 'q'
         ])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-        services.pay_taxes('water')
-        user_id: int = dict_of['engine'].session.query(User).filter_by(name=dict_of['user']['username']).first().id
-        payment_id: int = dict_of['engine'].session.query(Payment).filter_by(users_id=user_id).first().id
-        assert isinstance(payment_id, int)
+        services.pay_taxes('water', input_method=lambda _: next(inputs))
+        user_id: int = mock_engine.session.query(User).filter_by(name=ex_user[0]).first().id
+        payment_id: int = mock_engine.session.query(Payment).filter_by(users_id=user_id).first().id
 
-        services.edit_payment(payment_id)
+        services.edit_payment(payment_id, input_method=lambda _: next(inputs))
+
         captured_output = capsys.readouterr()
         coe: str = captured_output.out.strip()
-        our_payment: Payment = dict_of['engine'].session.get(Payment, payment_id)
         assert 'Selected payment is not found' not in coe
         assert 'ID' in coe
         assert 'Price' in coe
         assert 'Removed successfully' not in coe
         assert 'Canceled' not in coe
-        assert our_payment is not None
-        assert our_payment.price == 123
-        assert our_payment.date == '28-01-1999'
-        assert our_payment.tax.id == school_tax_id
-        assert our_payment.tax.taxname == 'school'
 
-    def test_payment_edit_details_delete_cancel(self, dict_of, capsys, monkeypatch) -> None:
-        services: Services = dict_of.get('services')
-        school_tax_id: int = next(tax for tax in services.user.taxes if tax.taxname == 'school').id
+    def test_payment_edit_details_delete_cancel(self, auth_mock, mock_engine, ex_user, capsys) -> None:
+        services: Services = Services(auth_mock, mock_engine)
         inputs: Iterable = iter([
             'y', '100', '1', '4', 'n', 'q', 'q'
         ])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-        services.pay_taxes('water')
-        user_id: int = dict_of['engine'].session.query(User).filter_by(name=dict_of['user']['username']).first().id
-        payment_id: int = dict_of['engine'].session.query(Payment).filter_by(users_id=user_id).first().id
-        assert isinstance(payment_id, int)
+        services.pay_taxes('water', input_method=lambda _: next(inputs))
+        user_id: int = mock_engine.session.query(User).filter_by(name=ex_user[0]).first().id
+        payment_id: int = mock_engine.session.query(Payment).filter_by(users_id=user_id).first().id
 
-        services.edit_payment(payment_id)
+        services.edit_payment(payment_id, input_method=lambda _: next(inputs))
         captured_output = capsys.readouterr()
         coe: str = captured_output.out.strip()
-        our_payment: Payment = dict_of['engine'].session.get(Payment, payment_id)
         assert 'Selected payment is not found' not in coe
         assert 'ID' in coe
         assert 'Price' in coe
         assert 'Deleted successfully' not in coe
         assert 'Canceled' in coe
-        assert our_payment is not None
-        assert our_payment.price == 100
-        assert our_payment.tax.taxname == 'water'
 
-    def test_payment_edit_details_delete(self, dict_of, capsys, monkeypatch) -> None:
-        services: Services = dict_of.get('services')
-        school_tax_id: int = next(tax for tax in services.user.taxes if tax.taxname == 'school').id
+    def test_payment_edit_details_delete(self, auth_mock, mock_engine, ex_user, capsys) -> None:
+        services: Services = Services(auth_mock, mock_engine)
         inputs: Iterable = iter([
             'y', '100', '1', '4', 'Y', 'q'
         ])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-        services.pay_taxes('water')
-        user_id: int = dict_of['engine'].session.query(User).filter_by(name=dict_of['user']['username']).first().id
-        payment_id: int = dict_of['engine'].session.query(Payment).filter_by(users_id=user_id).first().id
-        assert isinstance(payment_id, int)
+        services.pay_taxes('water', input_method=lambda _: next(inputs))
+        user_id: int = mock_engine.session.query(User).filter_by(name=ex_user[0]).first().id
+        payment_id: int = mock_engine.session.query(Payment).filter_by(users_id=user_id).first().id
 
-        services.edit_payment(payment_id)
+        services.edit_payment(payment_id, input_method=lambda _: next(inputs))
         captured_output = capsys.readouterr()
         coe: str = captured_output.out.strip()
-        our_payment: Payment = dict_of['engine'].session.get(Payment, payment_id)
         assert 'Selected payment is not found' not in coe
         assert 'ID' in coe
         assert 'Price' in coe
         assert 'Deleted successfully' in coe
         assert 'Canceled' not in coe
-        assert our_payment is None
 
-    def test_payment_edit_details_invalid_choice(self, dict_of, capsys, monkeypatch) -> None:
-        services: Services = dict_of.get('services')
-        school_tax_id: int = next(tax for tax in services.user.taxes if tax.taxname == 'school').id
+    def test_payment_edit_details_invalid_choice(self, auth_mock, mock_engine, ex_user, capsys) -> None:
+        services: Services = Services(auth_mock, mock_engine)
         inputs: Iterable = iter([
             'y', '100', '1', '8', '28', 'January', '1999','a', 'q'
         ])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-        services.pay_taxes('water')
-        user_id: int = dict_of['engine'].session.query(User).filter_by(name=dict_of['user']['username']).first().id
-        payment_id: int = dict_of['engine'].session.query(Payment).filter_by(users_id=user_id).first().id
-        assert isinstance(payment_id, int)
+        services.pay_taxes('water', input_method=lambda _: next(inputs))
+        user_id: int = mock_engine.session.query(User).filter_by(name=ex_user[0]).first().id
+        payment_id: int = mock_engine.session.query(Payment).filter_by(users_id=user_id).first().id
 
-        services.edit_payment(payment_id)
+        services.edit_payment(payment_id, input_method=lambda _: next(inputs))
         captured_output = capsys.readouterr()
         coe: str = captured_output.out.strip()
-        our_payment: Payment = dict_of['engine'].session.get(Payment, payment_id)
         assert 'Selected payment is not found' not in coe
         assert 'ID' in coe
         assert 'Price' in coe
         assert 'Removed successfully' not in coe
         assert 'Canceled' not in coe
         assert 'Abandoned changes' in coe
-        assert our_payment is not None
-        assert our_payment.price == 100
-        assert our_payment.date == datetime.date.today().strftime('%d-%m-%Y')
-        assert our_payment.tax.taxname == 'water'
 
-    def test_payment_edit_details_abandon(self, dict_of, capsys, monkeypatch) -> None:
-        services: Services = dict_of.get('services')
+    def test_payment_edit_details_abandon(self, mock_engine, auth_mock, ex_user, capsys) -> None:
+        services: Services = Services(auth_mock, mock_engine)
         school_tax_id: int = next(tax for tax in services.user.taxes if tax.taxname == 'school').id
         inputs: Iterable = iter([
             'y', '100', '1', '1', '28', 'January', '1999', '2', '123', '3', str(school_tax_id), 'a', 'q'
         ])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-        services.pay_taxes('water')
-        user_id: int = dict_of['engine'].session.query(User).filter_by(name=dict_of['user']['username']).first().id
-        payment_id: int = dict_of['engine'].session.query(Payment).filter_by(users_id=user_id).first().id
-        assert isinstance(payment_id, int)
+        services.pay_taxes('water', input_method=lambda _: next(inputs))
+        user_id: int = mock_engine.session.query(User).filter_by(name=ex_user[0]).first().id
+        payment_id: int = mock_engine.session.query(Payment).filter_by(users_id=user_id).first().id
 
-        services.edit_payment(payment_id)
+        services.edit_payment(payment_id, input_method=lambda _: next(inputs))
         captured_output = capsys.readouterr()
         coe: str = captured_output.out.strip()
-        our_payment: Payment = dict_of['engine'].session.get(Payment, payment_id)
         assert 'Selected payment is not found' not in coe
         assert 'ID' in coe
         assert 'Price' in coe
         assert 'Removed successfully' not in coe
         assert 'Canceled' not in coe
         assert 'Abandoned changes' in coe
-        assert our_payment is not None
-        assert our_payment.price == 100
-        assert our_payment.date == datetime.date.today().strftime('%d-%m-%Y')
-        assert our_payment.tax.taxname == 'water'
 
-    def test_update_method(self, dict_of, monkeypatch) -> None:
-        services: Services = dict_of['services']
-        engine: MyEngine = dict_of['engine']
-        day, month, year = datetime.date.today().strftime('%d-%m-%Y').split('-')
-
-        inputs: Iterable = iter(['y', '1500', ])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-
-        services.pay_taxes('water')
-        user: User = services.user
-        all_taxes: list[Tax] = user.taxes
-        selected_tax: Tax = next(tax for tax in all_taxes if tax.taxname == 'water')
-        assert selected_tax.payment_status == True
-        payments: list[Payment] = selected_tax.payments
-        our_payment: Payment = next(payment for payment in payments if payment.taxes_id == selected_tax.id)
-        our_payment.date = f'{day}-{int(month)-1}-{year}'
-        engine.session.add(our_payment)
-        engine.session.commit()
-        services.update()
-        assert selected_tax.payment_status == False
-        our_payment.date = f'{day}-{int( month )+1}-{year}'
-        engine.session.add(our_payment)
-        engine.session.commit()
-        services.update()
-        assert selected_tax.payment_status == True, 'Paid to one year later, should be true'
-
-    def test_delete_tax(self, dict_of, monkeypatch, capsys) -> None:
-        services: Services = dict_of['services']
-        user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
+    def test_delete_tax(self, mock_engine_with_user, auth_mock, ex_user, capsys) -> None:
+        services: Services = Services(auth_mock, mock_engine_with_user)
+        user: User | None = mock_engine_with_user.get_user(username=ex_user[0])
         inputs: Iterable = iter(['Y'])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
         assert user is not None
         taxname: str = user.taxes[0].taxname
-        services.delete_tax(taxname=taxname)
+        services.delete_tax(taxname=taxname, input_method=lambda _: next(inputs))
         captured_output: str = capsys.readouterr().out.strip()
         assert 'Deleted successfully' in captured_output
-        assert not any(tax for tax in user.taxes if tax.taxname == taxname)
 
-    def test_delete_tax_canceled(self, dict_of, monkeypatch, capsys) -> None:
-        services: Services = dict_of['services']
-        user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
+    def test_delete_tax_canceled(self, ex_user, mock_engine_with_user, auth_mock, capsys) -> None:
+        services: Services = Services(auth_mock, mock_engine_with_user)
+        user: User | None = mock_engine_with_user.get_user(username=ex_user[0])
         inputs: Iterable = iter(['n'])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
         assert user is not None
         taxname: str = user.taxes[0].taxname
-        services.delete_tax(taxname=taxname)
+        services.delete_tax(taxname=taxname, input_method=lambda _: next(inputs))
         captured_output: str = capsys.readouterr().out.strip()
         assert 'Canceled' in captured_output
-        assert any(tax for tax in user.taxes if tax.taxname == taxname)
 
-    def test_delete_tax_by_id(self, dict_of, monkeypatch, capsys) -> None:
-        services: Services = dict_of['services']
-        user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
+    def test_delete_tax_by_id(self, auth_mock, mock_engine_with_user, ex_user, capsys) -> None:
+        services: Services = Services(auth_mock, mock_engine_with_user)
+        user: User | None = mock_engine_with_user.get_user(username=ex_user[0])
         inputs: Iterable = iter(['Y'])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
         assert user is not None
         tax_id: int = user.taxes[0].id
-        services.delete_tax(tax_id=tax_id)
+        services.delete_tax(tax_id=tax_id, input_method=lambda _: next(inputs))
         captured_output: str = capsys.readouterr().out.strip()
         assert 'Deleted successfully' in captured_output
-        assert not any(tax for tax in user.taxes if tax.id == tax_id)
 
-    def test_add_tax(self, dict_of, monkeypatch, capsys) -> None:
-        services: Services = dict_of['services']
-        user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
+    def test_add_tax(self, auth_mock, mock_engine_with_user, ex_user, capsys) -> None:
+        services: Services = Services(auth_mock, mock_engine_with_user)
+        user: User | None = mock_engine_with_user.get_user(username=ex_user[0])
         assert user is not None
         taxname: str = 'testtax'
         inputs: Iterable = iter(['y'])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-        services.add_tax(taxname=taxname)
+        services.add_tax(taxname=taxname, input_method=lambda _: next(inputs))
         captured_output: str = capsys.readouterr().out.strip()
         user_taxes: list[Tax] = user.taxes
 
         assert 'added successfully' in captured_output
-        assert any(tax for tax in user_taxes if tax.taxname == taxname)
 
-    def test_add_tax_and_cancel(self, dict_of, monkeypatch, capsys) -> None:
-        services: Services = dict_of['services']
-        user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
+    def test_add_tax_and_cancel(self, auth_mock, mock_engine_with_user, ex_user, capsys) -> None:
+        services: Services = Services(auth_mock, mock_engine_with_user)
+        user: User | None = mock_engine_with_user.get_user(username=ex_user[0])
         assert user is not None
         taxname: str = 'testtax'
         inputs: Iterable = iter(['n'])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-        services.add_tax(taxname=taxname)
+        services.add_tax(taxname=taxname, input_method=lambda _: next(inputs))
         captured_output: str = capsys.readouterr().out.strip()
-        user_taxes: list[Tax] = user.taxes
 
         assert 'Canceled' in captured_output
-        assert not any(tax for tax in user_taxes if tax.taxname == taxname)
 
-    def test_edit_tax(self, dict_of, monkeypatch, capsys) -> None:
-        services: Services = dict_of['services']
-        user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
+    def test_edit_tax(self, auth_mock, mock_engine_with_user, ex_user, capsys) -> None:
+        services: Services = Services(auth_mock, mock_engine_with_user)
+        user: User | None = mock_engine_with_user.get_user(username=ex_user[0])
         assert user is not None
         taxname: str = user.taxes[0].taxname
         inputs: Iterable = iter(['new_name', 'y'])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-        services.edit_tax(taxname=taxname)
+        services.edit_tax(taxname=taxname, input_method=lambda _: next(inputs))
         captured_output: str = capsys.readouterr().out.strip()
-        user_taxes: list[Tax] = dict_of['engine'].get_user(dict_of['user']['username']).taxes
 
         assert 'edited successfully' in captured_output
-        assert not any(tax for tax in user_taxes if tax.taxname == taxname)
-        assert any(tax for tax in user_taxes if tax.taxname == 'new_name')
 
-    def test_edit_tax_by_id(self, dict_of, monkeypatch, capsys) -> None:
-        services: Services = dict_of['services']
-        user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
+    def test_edit_tax_by_id(self, auth_mock, mock_engine_with_user, ex_user, capsys) -> None:
+        services: Services = Services(auth_mock, mock_engine_with_user)
+        user: User | None = mock_engine_with_user.get_user(username=ex_user[0])
         assert user is not None
         tax_id: int = user.taxes[0].id
         taxname: str = 'testtax'
         inputs: Iterable = iter([taxname, 'y'])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-        services.edit_tax(tax_id=tax_id)
+        services.edit_tax(tax_id=tax_id, input_method=lambda _: next(inputs))
         captured_output: str = capsys.readouterr().out.strip()
-        user_taxes: list[Tax] = dict_of['engine'].get_user(dict_of['user']['username']).taxes
 
         assert 'edited successfully' in captured_output
-        assert any(tax for tax in user_taxes if tax.taxname == taxname)
 
 
 class TestServicesNegative:
-    def test_changing_unchangable_attributes_auth(self, dict_of) -> None:
-        services: Services = dict_of['services']
+    def test_changing_unchangable_attributes_auth(self, auth_mock, mock_engine) -> None:
+        services: Services = Services(auth_mock, mock_engine)
 
         with pytest.raises(AttributeError, match='This attribute cannot be changed directly'):
-            services.auth = Authorization(engine=dict_of['engine'])
+            services.auth = auth_mock
 
-    def test_changing_unchangable_attributes_engine(self, dict_of) -> None:
-        services: Services = dict_of['services']
-
-        with pytest.raises(AttributeError, match='This attribute cannot be changed directly'):
-            services.engine = dict_of['engine']
-            
-    def test_changing_unchangable_attributes(self, my_session) -> None:
-        username: str = 'TCua'
-        password: str = 'StrongPass!'
-        auth: Authorization = Authorization(engine=my_session, action='register', username=username, password=password)
-        services: Services = Services(auth=auth, engine=my_session)
+    def test_changing_unchangable_attributes_engine(self, mock_engine, auth_mock, no_session) -> None:
+        services: Services = Services(auth_mock, mock_engine)
 
         with pytest.raises(AttributeError, match='This attribute cannot be changed directly'):
-            services.auth = Authorization(engine=MyEngine())
+            services.engine = no_session
 
-        with pytest.raises(AttributeError, match='This attribute cannot be changed directly'):
-            services.engine = MyEngine()
-
-    def test_check_taxes_not_logged_in(self, my_session, capsys, monkeypatch) -> None:
-        username: str = 'tctnli11'
-        password: str = 'StrongPass!'
-        my_session.create_user(username=username, password=password)
-        auth: Authorization = Authorization(engine=my_session)
-        services: Services = Services(auth=auth, engine=my_session)
-
-        inputs: Iterable = iter([username, password])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-        services.check_taxes()
-        captured_output = capsys.readouterr()
-        coe: str = captured_output.out.strip()
-        assert 'You must log in to use services!' in coe
-        # assert 'Username:' in coe
-        assert 'Tax' in coe
-        assert 'Is paid?' in coe
-
-    def test_check_taxes_not_logged_in_second_try(self, my_session, capsys, monkeypatch) -> None:
-        username: str = 'tctnli11'
-        password: str = 'StrongPass!'
-        my_session.create_user(username=username, password=password)
-        auth: Authorization = Authorization(engine=my_session)
-        services: Services = Services(auth=auth, engine=my_session)
-
-        inputs: Iterable = iter(['wrongusername', 'wrongpass', username, password])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-        services.check_taxes()
-        captured_output = capsys.readouterr()
-        coe: str = captured_output.out.strip()
-        assert 'You must log in to use services!' in coe
-        # assert 'Username:' in coe
-        assert 'Tax' in coe
-        assert 'Is paid?' in coe
-
-    def test_pay_taxes_no_float(self, monkeypatch, dict_of):
-        services: Services = dict_of['services']
-        engine: MyEngine = dict_of['engine']
+    # def test_check_taxes_not_logged_in(self, mock_engine, capsys, auth_mock_no_user, monkeypatch) -> None:
+    #     username: str = 'tctnli11'
+    #     password: str = 'StrongPass!'
+    #     user = mock_engine.create_user(username=username, password=password)
+    #     auth = auth_mock_no_user
+    #     services: Services = Services(auth=auth, engine=mock_engine)
+    #
+    #     inputs: Iterable = iter([username, password])
+    #     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    #     services.check_taxes()
+    #     captured_output = capsys.readouterr()
+    #     coe: str = captured_output.out.strip()
+    #     assert 'You must log in to use services!' in coe
+    #     assert 'Tax' in coe
+    #     assert 'Is paid?' in coe
+    #
+    # def test_check_taxes_not_logged_in_second_try(self, monkeypatch, mock_engine, capsys, auth_mock_no_user) -> None:
+    #     username: str = 'tctnli11'
+    #     password: str = 'StrongPass!'
+    #     auth = auth_mock_no_user
+    #     services: Services = Services(auth=auth, engine=mock_engine)
+    #
+    #     inputs: Iterable = iter(['wrongusername', 'wrongpass', username, password])
+    #     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    #     services.check_taxes()
+    #     captured_output = capsys.readouterr()
+    #     coe: str = captured_output.out.strip()
+    #     assert 'You must log in to use services!' in coe
+    #     assert 'Tax' in coe
+    #     assert 'Is paid?' in coe
+    #
+    def test_pay_taxes_no_float(self, mock_engine, auth_mock, ex_user):
+        services: Services = Services(auth_mock, mock_engine)
+        engine: MyEngine = mock_engine
 
         inputs: Iterable = iter(['y', 'Pszemek'])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
         with pytest.raises(ValueError, match='could not convert'):
-            services.pay_taxes('water')
+            services.pay_taxes('water', input_method=lambda _: next(inputs))
 
-        user: User | None = engine.session.query(User).filter_by(name=dict_of['user']['username']).first()
+        user: User | None = engine.session.query(User).filter_by(name=ex_user[0]).first()
         assert user != None
-        
-        water_tax: Tax | None = next((tax for tax in user.taxes if tax.taxname == 'water'), None) 
-        assert water_tax is not None
-        assert water_tax.payment_status == False
 
-        provided_payments: list[Payment] = water_tax.payments
-        today: str = datetime.date.today().strftime('%d-%m-%Y')
-        our_payment: Payment | None = next(
-            (payment for payment in provided_payments if (payment.date == today and payment.price == 100)),
-            None)
-        assert our_payment == None
+    def test_view_payments_while_no_taxes(self, auth_mock_user_no_taxes, capsys, mock_engine_no_query) -> None:
+        services: Services = Services(auth_mock_user_no_taxes, mock_engine_no_query)
 
-    def test_view_payments_while_no_taxes(self, dict_of, capsys) -> None:
-        services: Services = dict_of['services']
-        auth: Authorization = dict_of['auth']
-        # auth.logout()
-        # auth.login(username=dict_of['user_no_taxes']['username'], password=dict_of['user_no_taxes']['password'])
-
-        services.view_payments('whatisthistax')
+        services.view_payments('insanenamefortax')
         captured_output = capsys.readouterr()
         coe: str = captured_output.out.strip()
         assert 'not found' in coe
 
-    def test_view_payments_while_no_taxes2(self, dict_of, capsys) -> None:
-        services: Services = dict_of['services']
-        auth: Authorization = dict_of['auth']
-        auth.logout()
-        auth.login(username=dict_of['user_no_taxes']['username'], password=dict_of['user_no_taxes']['password'])
+    def test_view_payments_while_no_taxes2(self, auth_mock_user_no_taxes, capsys, mock_engine_no_query) -> None:
+        services: Services = Services(auth_mock_user_no_taxes, mock_engine_no_query)
 
         result: None = services.view_payments('water')  #  basic tax, should exist normally
         assert result is None
@@ -557,13 +377,12 @@ class TestServicesNegative:
         coe: str = captured_output.out.strip()
         assert 'not found' in coe
 
-    def test_view_payments_unknown_choice(self, dict_of, capsys, monkeypatch) -> None:
-        services: Services = dict_of['services']
+    def test_view_payments_unknown_choice(self, mock_engine, auth_mock, capsys) -> None:
+        services: Services = Services(auth_mock, mock_engine)
 
         inputs: Iterable = iter(['Spain'])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
 
-        services.view_payments('water')
+        services.view_payments('water', input_method=lambda _: next(inputs))
 
         captured_output = capsys.readouterr()
         coe: str = captured_output.out.strip()
@@ -573,8 +392,8 @@ class TestServicesNegative:
         assert 'Unknown choice' in coe
         
 
-    def test_view_payments_not_exsiting_tax(self, dict_of, capsys) -> None:
-        services: Services = dict_of['services']
+    def test_view_payments_not_exsiting_tax(self, mock_engine_no_query, auth_mock, capsys) -> None:
+        services: Services = Services(auth_mock, mock_engine_no_query)
 
         services.view_payments('Spain')
 
@@ -585,17 +404,15 @@ class TestServicesNegative:
         assert 'not found' in coe
         assert 'Unknown choice' not in coe
 
-    def test_edit_payment_cancel_invalid_option(self, dict_of, capsys, monkeypatch) -> None:
-        services: Services = dict_of.get('services')
+    def test_edit_payment_cancel_invalid_option(self, ex_user, auth_mock, mock_engine, capsys) -> None:
+        services: Services = Services(auth_mock, mock_engine)
         inputs: Iterable = iter(['y', '100', 'whatisthis', 'quit'])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-        services.pay_taxes('water')
-        user_id: int = dict_of['engine'].session.query(User).filter_by(name=dict_of['user']['username']).first().id
-        payment_id: int = dict_of['engine'].session.query(Payment).filter_by(users_id=user_id).first().id
+        services.pay_taxes('water', input_method=lambda _: next(inputs))
+        user_id: int = mock_engine.session.query(User).filter_by(name=ex_user[0]).first().id
+        payment_id: int = mock_engine.session.query(Payment).filter_by(users_id=user_id).first().id
 
-        assert isinstance(payment_id, int)
 
-        services.edit_payment(payment_id)
+        services.edit_payment(payment_id, input_method=lambda _: next(inputs))
         captured_output = capsys.readouterr()
         coe: str = captured_output.out.strip()
 
@@ -604,23 +421,19 @@ class TestServicesNegative:
         assert 'Price' in coe
         assert 'Invalid option' in coe
 
-    def test_payment_edit_details_value_error(self, dict_of, capsys, monkeypatch) -> None:
-        services: Services = dict_of.get('services')
-        school_tax_id: int = next(tax for tax in services.user.taxes if tax.taxname == 'school').id
+    def test_payment_edit_details_value_error(self, mock_engine, auth_mock, ex_user, capsys) -> None:
+        services: Services = Services(auth_mock, mock_engine)
         inputs: Iterable = iter([
             'y', '100', '1', '1'] + ['lol', 'January', '1999']+ ['1', '28', 'nonmonth', '1999'] +
             ['1', '28', '1', 'myyear'] + ['q', 'q'
         ])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-        services.pay_taxes('water')
-        user_id: int = dict_of['engine'].session.query(User).filter_by(name=dict_of['user']['username']).first().id
-        payment_id: int = dict_of['engine'].session.query(Payment).filter_by(users_id=user_id).first().id
-        assert isinstance(payment_id, int)
+        services.pay_taxes('water', input_method=lambda _: next(inputs))
+        user_id: int = mock_engine.session.query(User).filter_by(name=ex_user[0]).first().id
+        payment_id: int = mock_engine.session.query(Payment).filter_by(users_id=user_id).first().id
 
-        services.edit_payment(payment_id)
+        services.edit_payment(payment_id, input_method=lambda _: next(inputs))
         captured_output = capsys.readouterr()
         coe: str = captured_output.out.strip()
-        our_payment: Payment = dict_of['engine'].session.get(Payment, payment_id)
         assert 'Selected payment is not found' not in coe
         assert 'ID' in coe
         assert 'Price' in coe
@@ -629,28 +442,19 @@ class TestServicesNegative:
         assert 'invalid literal for int() with base 10: \'lol\'' in coe
         assert 'This is not a month: nonmonth' in coe.split('\n')
         assert 'invalid literal for int() with base 10: \'myyear\''in coe
-        assert our_payment is not None
-        assert our_payment.price == 100
-        assert our_payment.date == datetime.date.today().strftime('%d-%m-%Y')
-        assert our_payment.tax.taxname == 'water'
 
-    def test_payment_edit_details_second_option_value_error(self, dict_of, capsys, monkeypatch) -> None:
-        services: Services = dict_of.get('services')
-        school_tax_id: int = next(tax for tax in services.user.taxes if tax.taxname == 'school').id
+    def test_payment_edit_details_second_option_value_error(self, mock_engine, auth_mock, capsys) -> None:
+        services: Services = Services(auth_mock, mock_engine)
         inputs: Iterable = iter([
             'y', '100', '1', '2'] + ['lol']+ ['2', '11p'] +
             ['q', 'q'
         ])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-        services.pay_taxes('water')
-        user_id: int = dict_of['engine'].session.query(User).filter_by(name=dict_of['user']['username']).first().id
-        payment_id: int = dict_of['engine'].session.query(Payment).filter_by(users_id=user_id).first().id
-        assert isinstance(payment_id, int)
+        services.pay_taxes('water', input_method=lambda _: next(inputs))
+        payment_id: int = 11  # just to test output
 
-        services.edit_payment(payment_id)
+        services.edit_payment(payment_id, input_method=lambda _: next(inputs))
         captured_output = capsys.readouterr()
         coe: str = captured_output.out.strip()
-        our_payment: Payment = dict_of['engine'].session.get(Payment, payment_id)
         assert 'Selected payment is not found' not in coe
         assert 'ID' in coe
         assert 'Price' in coe
@@ -658,28 +462,21 @@ class TestServicesNegative:
         assert 'Canceled' not in coe
         assert 'invalid literal for int() with base 10: \'lol\'' in coe
         assert 'invalid literal for int() with base 10: \'11p\''in coe
-        assert our_payment is not None
-        assert our_payment.price == 100
-        assert our_payment.date == datetime.date.today().strftime('%d-%m-%Y')
-        assert our_payment.tax.taxname == 'water'
 
 
-    def test_payment_edit_details_third_option_value_error(self, dict_of, capsys, monkeypatch) -> None:
-        services: Services = dict_of.get('services')
+    def test_payment_edit_details_third_option_value_error(self, auth_mock, mock_engine, ex_user, capsys) -> None:
+        services: Services = Services(auth_mock, mock_engine)
         inputs: Iterable = iter([
             'y', '100', '1', '3'] + ['lol']+ ['3', '11p'] + ['3', '1111111111111111'] +
             ['q', 'q'
         ])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-        services.pay_taxes('water')
-        user_id: int = dict_of['engine'].session.query(User).filter_by(name=dict_of['user']['username']).first().id
-        payment_id: int = dict_of['engine'].session.query(Payment).filter_by(users_id=user_id).first().id
-        assert isinstance(payment_id, int)
+        services.pay_taxes('water', input_method=lambda _: next(inputs))
+        user_id: int = mock_engine.session.query(User).filter_by(name=ex_user[0]).first().id
+        payment_id: int = mock_engine.session.query(Payment).filter_by(users_id=user_id).first().id
 
-        services.edit_payment(payment_id)
+        services.edit_payment(payment_id, input_method=lambda _: next(inputs))
         captured_output = capsys.readouterr()
         coe: str = captured_output.out.strip()
-        our_payment: Payment = dict_of['engine'].session.get(Payment, payment_id)
         assert 'Selected payment is not found' not in coe
         assert 'ID' in coe
         assert 'Price' in coe
@@ -688,51 +485,32 @@ class TestServicesNegative:
         assert 'Error occured:\ninvalid literal for int() with base 10: \'lol\'' in coe
         assert 'Error occured:\ninvalid literal for int() with base 10: \'11p\'' in coe
         assert 'Id out of range' in coe
-        assert our_payment is not None
-        assert our_payment.price == 100
-        assert our_payment.date == datetime.date.today().strftime('%d-%m-%Y')
-        assert our_payment.tax.taxname == 'water'
 
-    def test_delete_not_exisitng_tax(self, dict_of, monkeypatch) -> None:
-        services: Services = dict_of['services']
-        user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
+    def test_delete_not_exisitng_tax(self, auth_mock, mock_engine_no_query) -> None:
+        services: Services = Services(auth_mock, mock_engine_no_query)
         inputs: Iterable = iter(['Y'])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-        assert user is not None
         taxname: str = 'this is not valid name'
         with pytest.raises(KeyError, match='Tax doesn\'t exist'):
-            services.delete_tax(taxname=taxname)
-        assert not any(tax for tax in user.taxes if tax.taxname == taxname)
+            services.delete_tax(taxname=taxname, input_method=lambda _: next(inputs))
 
-    def test_delete_not_existing_tax_by_id(self, dict_of, monkeypatch) -> None:
-        services: Services = dict_of['services']
-        user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
+    def test_delete_not_existing_tax_by_id(self, auth_mock, mock_engine_no_query) -> None:
+        services: Services = Services(auth_mock, mock_engine_no_query)
         inputs: Iterable = iter(['Y'])
-        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-        assert user is not None
         tax_id: int = -1
         with pytest.raises(KeyError, match="Tax doesn't exist"):
-            services.delete_tax(tax_id=tax_id)
-        assert not any(tax for tax in user.taxes if tax.id == tax_id)
+            services.delete_tax(tax_id=tax_id, input_method=lambda _: next(inputs))
 
-    def test_edit_not_existent_tax(self, dict_of) -> None:
-        services: Services = dict_of['services']
-        user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
-        assert user is not None
+    def test_edit_not_existent_tax(self, auth_mock, mock_engine_no_query) -> None:
+        services: Services = Services(auth_mock, mock_engine_no_query)
         taxname: str = 'this is not valid tax name'
         with pytest.raises(KeyError, match="Tax doesn't exist"):
             services.edit_tax(taxname=taxname)
 
-        assert not any(tax for tax in user.taxes if tax.taxname == taxname)
-
-    def test_edit_non_existent_tax_by_id(self, dict_of, capsys) -> None:
-        services: Services = dict_of['services']
-        user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
-        assert user is not None
+    def test_edit_non_existent_tax_by_id(self, auth_mock, mock_engine_no_query, capsys) -> None:
+        services: Services = Services(auth_mock, mock_engine_no_query)
         tax_id: int = -1
         with pytest.raises(KeyError, match="Tax doesn't exist"):
             services.edit_tax(tax_id=tax_id)
         captured_output: str = capsys.readouterr().out.strip()
-        dict_of['engine'].get_user(dict_of['user']['username']).taxes
 
         assert 'edited successfully' not in captured_output

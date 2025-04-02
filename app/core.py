@@ -1,7 +1,6 @@
 from getpass import getpass
 from .auth import Authorization
-from .database.engine import MyEngine, Tax, User
-from .services import Services
+from . import MyEngine, Tax, User
 from .messages import (
         start_app as sam,
         check_taxes as ctl,
@@ -89,10 +88,10 @@ class TextApp:
                     print('Unknown option')
 
     def after_login(self) -> None:
-        self.services = Services(auth=self.auth, engine=self._engine)
+        # self.services = Services(auth=self.auth, engine=self._engine)
 
         while self.is_running:
-            self.services.update()
+            self.auth.services.update()
             choice: str = input(inner_loop)
             match choice:
                 case '1':
@@ -112,17 +111,17 @@ class TextApp:
             Allows to see payments associated with selected tax
         """
         while self.is_running:
-            self.services.update()
-            tax_list: dict[int, Tax] = self.services.check_taxes()
+            self.auth.services.update()
+            tax_list: dict[int, Tax] = self.auth.services.check_taxes()
             choice: str = input(ctl)
             
             match choice:
 
                 case value if any(tax.taxname.startswith(value) for tax in tax_list.values()):
                     full_name: str = next(tax.taxname for tax in tax_list.values() if tax.taxname.startswith(value))
-                    self.services.view_payments(full_name)
+                    self.auth.services.view_payments(full_name)
                 case value if (value in str(tax_list)):
-                    self.services.view_payments(tax_list[int(value)].taxname)
+                    self.auth.services.view_payments(tax_list[int(value)].taxname)
                 case 'q':
                     return None
                 case 'exit':
@@ -137,7 +136,7 @@ class TextApp:
             tax: str | int = input(ims)
             if tax == 'help':
                 print('Possible comands: help, q, exit')
-                tax_list = self.services.check_taxes(simple=True)
+                tax_list = self.auth.services.check_taxes(simple=True)
                 tax = input(ims)
             try:
                 tax = int(tax)
@@ -145,12 +144,12 @@ class TextApp:
                 pass
             else:
                 if tax_list and tax in tax_list.keys():
-                    self.services.pay_taxes(tax_list[tax].taxname)
+                    self.auth.services.pay_taxes(tax_list[tax].taxname)
             if tax == 'q':
                 return
             elif tax == 'exit':
                 self.close_app()
             else:
                 if isinstance(tax, str):
-                    self.services.pay_taxes(tax)
-        self.services.update()
+                    self.auth.services.pay_taxes(tax)
+        self.auth.services.update()

@@ -1,5 +1,7 @@
+from typing import Callable
 from werkzeug.security import check_password_hash
-from .database import User, MyEngine
+from . import User, MyEngine
+from .services import Services
 from .utils import NameTaken, PasswordNotSafe, LoginError
 
 
@@ -8,17 +10,16 @@ class Authorization:
     _user: User | None
     _guest: list[int]  # so you can share you taxes
     _guest_list: list[int]
+    services: None | Services
     
     def __init__(self, *, engine: MyEngine, action: str | None = None, **kwargs):
         self._user = None
         self._guest = [] 
         self._guest_list = []
-        self._engine= engine
-        if not isinstance(self._engine, MyEngine):
+        self._engine = engine
+        self.services = None
+        if not kwargs.get('test', False) and not isinstance(self._engine, MyEngine):
             raise AttributeError("Engine should be of type MyEngine")
-        # if not self._engine.session and not no_init:
-        #     print("To avoid errors, session has been started")
-        #     self._engine.create_my_session()
         if action:
             eval(f'self.{action}("{kwargs.get("username")}", "{kwargs.get("password")}")')
     
@@ -51,7 +52,7 @@ class Authorization:
         raise AttributeError("This attribute cannot be changed directly")
 
     def login(self, username: str, password: str) -> None:
-        if username == '' or password == '':
+        if username == '' or password == '' or username is None or password is None:
             raise LoginError("Username and password cannot be empty")
         if self._user:
             raise LoginError("Already logged in")
@@ -60,6 +61,7 @@ class Authorization:
             raise LoginError("User doesn't exists")
         if check_password_hash(selected_user.password, password):
             self._user = selected_user
+            self.services = Services(auth=self, engine=self._engine)
             return
         else:
             raise LoginError("Incorrect credentials")
@@ -70,6 +72,7 @@ class Authorization:
         self._user = None
         self._guest = []
         self._guest_list = []
+        self.services = None
         return True
 
     def register(self, username: str, password: str) -> bool:
@@ -93,7 +96,7 @@ class Authorization:
         self._user = user
         return True
     
-    def delete_user(self, username: str) -> None:
+    def delete_user(self, username: str, *, input_method: Callable = input) -> None:
         if self.user and self.user.admin != True:
             raise LoginError('You must be logged as administrator to delete someones account!')
 
@@ -102,13 +105,13 @@ class Authorization:
             raise ValueError('User not found')
 
         print()
-        if input(
+        if input_method(
             f'Are you sure you want to delete {user.id=} {user.name=} accont? (Y/n): '
         ) != 'Y':
             print('Abandoned action')
             return
         if self.user and self.user.name == username:
-            if input(f'Are you sure you want to delete your own account? (Y,n): ') != 'Y':
+            if input_method(f'Are you sure you want to delete your own account? (Y,n): ') != 'Y':
                 print('Deleting your own account was cancelled')
                 return
             else:
