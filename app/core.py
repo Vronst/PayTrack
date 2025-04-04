@@ -89,6 +89,13 @@ class TextApp:
 
     def after_login(self) -> None:
         # self.services = Services(auth=self.auth, engine=self._engine)
+        assert self.auth.user is not None
+        assert self.auth.services is not None
+
+        if self.auth.user.admin:
+            while self.is_running:
+                pass
+            return
 
         while self.is_running:
             self.auth.services.update()

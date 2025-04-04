@@ -8,6 +8,11 @@ from .app.services import Services
 from .app.database import MyEngine
 
 
+@pytest.fixture(scope='session')
+def admin_user() -> User:
+    return User(name='admin', password='admin', admin=True)
+
+
 @pytest.fixture(scope='function')
 def mock_engine() -> MagicMock:
     user: User = User(name='examplemock', password='pass')
