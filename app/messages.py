@@ -32,3 +32,28 @@ edit_msg: str = """
     a. Abandon changes
     q. Quit and save
 """
+
+## admin messages
+admin_dict: dict = {
+        'tax': """
+                1. Add tax
+                2. Edit tax
+                3. Delete tax
+                4. Go to users
+                5. Go to payments
+                """,
+        'payment': """
+                1. Add payment
+                2. Edit payment
+                3. Delete payment
+                4. Go to Taxes
+                5. Go to Users
+                """,
+        'user': """
+                1. Add new user
+                2. Edit user
+                3. Delete user
+                4. Go to Taxes
+                5. Go to Payments
+                """
+}

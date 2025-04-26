@@ -61,7 +61,7 @@ class Authorization:
             raise LoginError("User doesn't exists")
         if check_password_hash(selected_user.password, password):
             self._user = selected_user
-            self.services = Services(auth=self, engine=self._engine)
+            self.services = Services(user=self._user, engine=self._engine)
             return
         else:
             raise LoginError("Incorrect credentials")
@@ -94,7 +94,7 @@ class Authorization:
             raise PasswordNotSafe("Password should contain at least one lower letter")
         user: User | None = self._engine.create_user(username, password)
         self._user = user
-        self.services = Services(auth=self, engine=self._engine)
+        self.services = Services(user=self._user, engine=self._engine)
         return True
     
     def delete_user(self, username: str, *, input_method: Callable = input) -> None:

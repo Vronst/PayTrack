@@ -15,43 +15,47 @@ if TYPE_CHECKING:
 class Services:
     # TODO: Maybe option to sync it to google sheets?
 
-    def __init__(self, auth: "Authorization", engine: "MyEngine") -> None:
-        self._auth: "Authorization" = auth
+    def __init__(self, user: User, engine: "MyEngine") -> None:
+        self._user: User = user
         self._engine: "MyEngine" = engine
+
+    # @staticmethod
+    # def requires_login(func):
+    #     @wraps(func)
+    #     def wrapper(self, *args, **kwargs):
+    #         while (self.user is None):
+    #             print('You must log in to use services!')
+    #             try:
+    #                 username: str = input_method('Username: ')
+    #                 password: str = input_method('Password: ')
+    #             except NameError:
+    #                 username = input("Username: ")
+    #                 password = input("Password: ")
+    #             try:
+    #                 self.login(username, password)
+    #             except LoginError as e:
+    #                 print(e)
+    #         return func(self, *args, **kwargs)
+    #     return wrapper
 
     @staticmethod
     def requires_login(func):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
-            while (self._auth.user is None):
-                print('You must log in to use services!')
-                try:
-                    username: str = input_method('Username: ')
-                    password: str = input_method('Password: ')
-                except NameError:
-                    username = input("Username: ")
-                    password = input("Password: ")
-                try:
-                    self._auth.login(username, password)
-                except LoginError as e:
-                    print(e)
+            if not isinstance(self._user, User):
+                raise LoginError("Before accessing services, log in")            
             return func(self, *args, **kwargs)
         return wrapper
-            
 
     @property
     @requires_login
     def user(self) -> User:
-        if self._auth.user is None:
+        if self._user is None:
             raise ValueError('You must be logged in to use Services')
-        return self._auth.user
+        return self._user
 
-    @property
-    def auth(self) -> "Authorization":
-        return self._auth
-
-    @auth.setter
-    def auth(self, value) -> None:
+    @user.setter
+    def user(self, value) -> None:
         raise AttributeError("This attribute cannot be changed directly")
 
     @property

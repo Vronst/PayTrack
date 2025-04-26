@@ -1,7 +1,34 @@
 from dotenv import load_dotenv
+from sqlalchemy import Integer, Boolean, Float
+from sqlalchemy.inspection import inspect
+from datetime import datetime
 
 
 load_dotenv()
+
+
+def get_model_columns(model):
+    return [column.key for column in inspect(model).mapper.column_attrs]
+
+
+def convert_type(model, field, value):
+    column_type = model.__table__.columns[field].type
+    try:
+        if isinstance(column_type, Integer):
+            return int(value)
+        elif isinstance(column_type, Boolean):
+            return value.lower() in ('true', '1', 'yes', 'y')
+        elif isinstance(column_type, Float):
+            return float(value)
+        elif field == 'date':
+            datetime.strptime(value, '%d-%m-%Y')
+            return value
+        elif 'id' in field:
+            return int(value)
+    except ValueError:
+        print(f"Invalid value for {field}")
+        raise
+    return value
 
 
 def list_of_taxes(path_to_file: str | None = None) -> list[str]:

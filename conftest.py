@@ -12,6 +12,29 @@ from .app.database import MyEngine
 def admin_user() -> User:
     return User(name='admin', password='admin', admin=True)
 
+@pytest.fixture(scope='function')
+def normal_user(my_session) -> User:
+    user: User | None = my_session.create_user(
+            username='selfstandinguser',
+            password='mockpass',
+            with_taxes=True
+    )
+    assert user is not None
+    assert 'water' in [tax.taxname for tax in user.taxes if tax.taxname == 'water']
+    return user
+
+
+@pytest.fixture(scope='function')
+def simple_user(my_session) -> User:
+    user: User | None = my_session.create_user(
+            username='selfstandinguser',
+            password='mockpass',
+            with_taxes=False
+    )
+    assert user is not None
+    assert 'water' not in [tax.taxname for tax in user.taxes if tax.taxname == 'water']
+    return user
+
 
 @pytest.fixture(scope='function')
 def mock_engine() -> MagicMock:
@@ -159,7 +182,9 @@ def dict_of(my_session) -> Generator[dict[str, Any], None, None]:
     my_session.create_user(username=admin_name, password=admin_name, admin=True)
     my_session.create_user(username=username+'1', password=password+'1', with_taxes=False)
     auth: Authorization = Authorization(engine=my_session, action='register', username=username, password=password)
-    services: Services = Services(auth=auth, engine=my_session)
+    services: Services = Services(
+        user=auth.user,
+        engine=my_session)
 
     yield {
         'engine': my_session,
