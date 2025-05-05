@@ -2,8 +2,9 @@ name: Run Tests with PostgreSQL
 
 on:
   push:
-    branches: [main]
+    branches: [main, lap]
   pull_request:
+    branches: [main]
 
 jobs:
   test:
@@ -30,7 +31,7 @@ jobs:
       POSTGRES_DB: testtaxes
       POSTGRES_HOST: localhost
       POSTGRES_PORT: 5432
-      DATABASE_URL: postgres://testuser:testpass@localhost:5432/test_db
+      DATABASE_URL: postgres://testuser:testpass@localhost:5432/testtaxes
       LOGS_PATH: .
 
     steps:
@@ -48,3 +49,16 @@ jobs:
 
       - name: Run tests
         run: pytest -m regression
+
+      - name: Install GitHub CLI
+        run: |
+          sudo apt update
+          sudo apt install gh -y
+      
+      - name: Merge lap into main
+        if: github.ref == 'refs/heads/lap' && success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create --base main --head lap --title "Auto Merge: lap into main" --body
+          gh pr merge --auto --squash

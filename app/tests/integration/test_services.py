@@ -41,6 +41,7 @@ class TestServicesPositive:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         engine: MyEngine = my_session
 
@@ -69,6 +70,7 @@ class TestServicesPositive:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         engine: MyEngine = my_session
 
@@ -98,6 +100,7 @@ class TestServicesPositive:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         engine: MyEngine = my_session
 
@@ -139,6 +142,7 @@ class TestServicesPositive:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
 
         inputs: Iterable = iter([''])
@@ -155,6 +159,7 @@ class TestServicesPositive:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         inputs: Iterable = iter(['y', '100', 'q'])
         services.pay_taxes('water', input_method=lambda _: next(inputs))
@@ -175,6 +180,7 @@ class TestServicesPositive:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         inputs: Iterable = iter(['y', '100', '2', 'Y'])
         services.pay_taxes('water', input_method=lambda _: next(inputs))
@@ -198,6 +204,7 @@ class TestServicesPositive:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         inputs: Iterable = iter(['y', '100', '2', 'n'])
         services.pay_taxes('water', input_method=lambda _: next(inputs))
@@ -221,6 +228,7 @@ class TestServicesPositive:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         school_tax_id: int = next(tax for tax in services.user.taxes if tax.taxname == 'school').id
         inputs: Iterable = iter([
@@ -251,6 +259,7 @@ class TestServicesPositive:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         inputs: Iterable = iter([
             'y', '100', '1', '4', 'n', 'q', 'q'
@@ -277,6 +286,7 @@ class TestServicesPositive:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         inputs: Iterable = iter([
             'y', '100', '1', '4', 'Y', 'q'
@@ -301,6 +311,7 @@ class TestServicesPositive:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         inputs: Iterable = iter([
             'y', '100', '1', '8', '28', 'January', '1999','a', 'q'
@@ -329,6 +340,7 @@ class TestServicesPositive:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         school_tax_id: int = next(tax for tax in services.user.taxes if tax.taxname == 'school').id
         inputs: Iterable = iter([
@@ -358,6 +370,7 @@ class TestServicesPositive:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         engine: MyEngine = my_session 
         day, month, year = datetime.date.today().strftime('%d-%m-%Y').split('-')
@@ -386,6 +399,7 @@ class TestServicesPositive:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         user: User | None = my_session.get_user(username=username)
         inputs: Iterable = iter(['Y'])
@@ -400,6 +414,7 @@ class TestServicesPositive:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         user: User | None = my_session.get_user(username=username)
         inputs: Iterable = iter(['n'])
@@ -414,6 +429,7 @@ class TestServicesPositive:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         user: User | None = my_session.get_user(username=username)
         inputs: Iterable = iter(['Y'])
@@ -428,6 +444,7 @@ class TestServicesPositive:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         user: User | None = my_session.get_user(username=username)
         assert user is not None
@@ -444,6 +461,7 @@ class TestServicesPositive:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         user: User | None = my_session.get_user(username=username)
         assert user is not None
@@ -460,6 +478,7 @@ class TestServicesPositive:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         user: User | None = my_session.get_user(username=username)
         assert user is not None
@@ -477,6 +496,7 @@ class TestServicesPositive:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         user: User | None = my_session.get_user(username=username)
         assert user is not None
@@ -496,6 +516,7 @@ class TestServicesNegative:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
 
         with pytest.raises(AttributeError, match='This attribute cannot be changed directly'):
@@ -507,46 +528,31 @@ class TestServicesNegative:
         with pytest.raises(AttributeError, match='This attribute cannot be changed directly'):
             services.engine = no_session
 
-    def test_check_taxes_not_logged_in(self, my_session, capsys, monkeypatch) -> None:
+    def test_check_taxes_not_logged_in(self, my_session) -> None:
         username: str = 'tctnli11'
         password: str = 'StrongPass!'
         my_session.create_user(username=username, password=password)
         auth: Authorization = Authorization(engine=my_session)
         with pytest.raises(LoginError, match='Before accessing services, log in'):
+            assert auth.user is not None
             services: Services = Services(auth.user, engine=my_session)
             services.check_taxes()
 
-        # inputs: Iterable = iter([username, password])
-        # monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-        # services.check_taxes()
-        # captured_output = capsys.readouterr()
-        # coe: str = captured_output.out.strip()
-        # assert 'You must log in to use services!' in coe
-        # assert 'Tax' in coe
-        # assert 'Is paid?' in coe
-
-    def test_check_taxes_not_logged_in_second_try(self, monkeypatch, my_session, capsys) -> None:
+    def test_check_taxes_not_logged_in_second_try(self, my_session) -> None:
         username: str = 'tctnli11'
         password: str = 'StrongPass!'
         my_session.create_user(username=username, password=password)
         auth: Authorization = Authorization(engine=my_session)
         with pytest.raises(LoginError, match='Before accessing services, log in'):
+            assert auth.user is not None
             services: Services = Services(auth.user, engine=my_session)
             services.check_taxes()
-
-        # inputs: Iterable = iter(['wrongusername', 'wrongpass', username, password])
-        # monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-        # services.check_taxes()
-        # captured_output = capsys.readouterr()
-        # coe: str = captured_output.out.strip()
-        # assert 'You must log in to use services!' in coe
-        # assert 'Tax' in coe
-        # assert 'Is paid?' in coe
 
     def test_pay_taxes_no_float(self, my_session):
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         engine: MyEngine = my_session
 
@@ -571,6 +577,7 @@ class TestServicesNegative:
     def test_view_payments_while_no_taxes(self,dict_of, capsys, my_session) -> None:
         auth: Authorization = Authorization(engine=my_session)
         auth.login(username=dict_of['user_no_taxes']['username'], password=dict_of['user_no_taxes']['password'])
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
 
         services.view_payments('water')
@@ -583,6 +590,7 @@ class TestServicesNegative:
         password: str = 'Stronpass!'
         my_session.create_user(username, password, with_taxes=False)
         auth: Authorization = Authorization(engine=my_session, action='login', username=username, password=password)
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
 
         result: None = services.view_payments('water')  #  basic tax, should exist normally
@@ -595,6 +603,7 @@ class TestServicesNegative:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
 
         inputs: Iterable = iter(['Spain'])
@@ -613,6 +622,7 @@ class TestServicesNegative:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
 
         services.view_payments('Spain')
@@ -628,6 +638,7 @@ class TestServicesNegative:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         inputs: Iterable = iter(['y', '100', 'whatisthis', 'quit'])
         services.pay_taxes('water', input_method=lambda _: next(inputs))
@@ -649,6 +660,7 @@ class TestServicesNegative:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         inputs: Iterable = iter([
             'y', '100', '1', '1'] + ['lol', 'January', '1999']+ ['1', '28', 'nonmonth', '1999'] +
@@ -680,6 +692,7 @@ class TestServicesNegative:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         inputs: Iterable = iter([
             'y', '100', '1', '2'] + ['lol']+ ['2', '11p'] +
@@ -711,6 +724,7 @@ class TestServicesNegative:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         inputs: Iterable = iter([
             'y', '100', '1', '3'] + ['lol']+ ['3', '11p'] + ['3', '1111111111111111'] +
@@ -742,6 +756,7 @@ class TestServicesNegative:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         user: User | None = my_session.get_user(username=username)
         inputs: Iterable = iter(['Y'])
@@ -755,6 +770,7 @@ class TestServicesNegative:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         user: User | None = my_session.get_user(username=username)
         inputs: Iterable = iter(['Y'])
@@ -768,6 +784,7 @@ class TestServicesNegative:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         user: User | None = my_session.get_user(username=username)
         assert user is not None
@@ -781,6 +798,7 @@ class TestServicesNegative:
         username: str = 'checktaxessimple'
         password: str = 'StrongPass!'
         auth: Authorization = Authorization(engine=my_session, username=username, password=password, action='register')
+        assert auth.user is not None
         services: Services = Services(auth.user, my_session)
         user: User | None = my_session.get_user(username=username)
         assert user is not None
