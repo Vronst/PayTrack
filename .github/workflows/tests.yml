@@ -58,7 +58,8 @@ jobs:
       - name: Merge lap into main
         if: github.ref == 'refs/heads/lap' && success()
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
         run: |
+          gh auth login --with-token <<< "$GH_TOKEN"
           gh pr create --base main --head lap --title "Auto Merge: lap into main" --body "Automated merge after successful regression test"
           gh pr merge --auto --squash
