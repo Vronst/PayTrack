@@ -1,4 +1,3 @@
-
 name: Run Tests with PostgreSQL
 
 on:
@@ -14,9 +13,9 @@ jobs:
       postgres:
         image: postgres:17
         env:
-          POSTGRES_USER: vronst
-          POSTGRES_PASSWORD: 0134
-          POSTGRES_DB: test_db
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
         ports:
           - 5432:5432
         options: >-
