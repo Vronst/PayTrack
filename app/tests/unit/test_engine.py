@@ -136,10 +136,13 @@ class TestEnginePositive:
 
     @pytest.mark.regression
     def test_default_taxes_with_file(self, dict_of) -> None:
+        import os
+        path = os.path.dirname(__file__)
+        file_path = os.path.join(path, 'taxes_list.txt')
         user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
         taxes: list[str] = dict_of['engine'].default_taxes(
             user=user,
-            path_to_file='/home/vronst/Programming/Rachunki/app/tests/unit/taxes_list.txt')
+            path_to_file=file_path)
         assert isinstance(taxes, list)
         assert taxes == ['file_water', 'file_school', 'file_hospital']
 
