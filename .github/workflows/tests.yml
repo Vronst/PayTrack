@@ -60,5 +60,5 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh pr create --base main --head lap --title "Auto Merge: lap into main" --body
+          gh pr create --base main --head lap --title "Auto Merge: lap into main" --body "Automated merge after successful regression test"
           gh pr merge --auto --squash
