@@ -14,6 +14,7 @@ class TestAuthorizationPositive:
         assert auth.guest_list == []
 
     
+    @pytest.mark.regression
     def test_register_init(self,mock_engine) -> None:
         auth: Authorization = Authorization(engine=mock_engine, test=True, action='register', username='registertestinit', password='Testpass!')
 
@@ -23,6 +24,7 @@ class TestAuthorizationPositive:
         assert auth.guest_list == []
         assert auth.user.taxes != []
 
+    @pytest.mark.regression
     def test_logout(self, mock_engine) -> None:
         username: str = 'logouttest'
         password: str = 'Stongpass!'
@@ -33,6 +35,7 @@ class TestAuthorizationPositive:
         auth.logout()
         assert auth.is_logged == False
 
+    @pytest.mark.regression
     def test_register(self, mock_engine) -> None:
         username: str = 'registertest'
         password: str = 'StrongPassword!'
@@ -64,6 +67,7 @@ class TestAuthorizationNegative:
         with pytest.raises(LoginError):
              Authorization(engine=mock_engine, test=True, action='login')
         
+    @pytest.mark.regression
     def test_login_already_logged(self, mock_engine) -> None:
         username: str = 'tlnuaal'
         password: str = 'StrongPassword!'
@@ -78,6 +82,7 @@ class TestAuthorizationNegative:
             auth.login(username, password)
 
 
+    @pytest.mark.regression
     def test_register_while_logged(self, mock_engine) -> None:
         username: str = 'tttrwl'
         password: str = 'StrongPassword!'

@@ -5,6 +5,7 @@ from ...auth import Authorization
 
 
 class TestEnginePositive:
+    @pytest.mark.regression
     def test_change_password(self, dict_of, capsys) -> None:
         user: User | None = dict_of['engine'].session.query(User).filter_by(
             name=dict_of['user']['username']
@@ -21,6 +22,7 @@ class TestEnginePositive:
         assert auth.user is not None
         assert auth.user.name == user.name
 
+    @pytest.mark.regression
     def test_create_session(self, no_session, capsys) -> None:
         assert no_session.session is not None
         captured_output: str = capsys.readouterr().out.strip()
@@ -35,6 +37,7 @@ class TestEnginePositive:
         assert 'Tables dropped before creating successfully' in captured_output
 
 
+    @pytest.mark.regression
     def test_close_session(self, my_session, capsys) -> None:
         my_session.close_session()
         captured_output: str = capsys.readouterr().out.strip()
@@ -55,6 +58,7 @@ class TestEnginePositive:
         assert user.id == found_user.id
         assert user.admin == False
 
+    @pytest.mark.regression
     def test_create_admin_user(self, my_session) -> None:
         username: str = 'newadmin'
         password: str = '1234'
@@ -65,6 +69,7 @@ class TestEnginePositive:
         assert admin_user.admin == True
         assert my_session.get_user(username) is not None
 
+    @pytest.mark.regression
     def test_delete_user(self, my_session) -> None:
         username: str = 'tdutdu'
         password: str = 'somepass'
@@ -74,6 +79,7 @@ class TestEnginePositive:
         my_session.delete_user(username=username)
         assert my_session.get_user(username=username) is None
 
+    @pytest.mark.regression
     def test_delete_user_by_id(self, my_session) -> None:
         username: str = 'tdutdu'
         password: str = 'somepass'
@@ -83,6 +89,7 @@ class TestEnginePositive:
         my_session.delete_user(id_=user.id)
         assert my_session.get_user(username=username) is None
 
+    @pytest.mark.regression
     def test_hashing_password(self, my_session) -> None:
         username: str = 'tspenlu'
         password: str = 'pass'
@@ -93,6 +100,7 @@ class TestEnginePositive:
         my_session.create_user(username, password, hashpass=False)
         assert my_session.get_user(username=username).password == password
 
+    @pytest.mark.regression
     def test_create_user_no_pass(self, my_session) -> None:
         username: str = 'tcunpo'
         password: str = ''
@@ -108,6 +116,7 @@ class TestEnginePositive:
         assert user is not None
         assert user.password == ''
 
+    @pytest.mark.regression
     def test_default_taxes(self, dict_of) -> None:
         user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])      
         taxes: list[str] = dict_of['engine'].default_taxes(user=user)
@@ -125,6 +134,7 @@ class TestEnginePositive:
             'school',
         ]
 
+    @pytest.mark.regression
     def test_default_taxes_with_file(self, dict_of) -> None:
         user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
         taxes: list[str] = dict_of['engine'].default_taxes(
@@ -135,6 +145,7 @@ class TestEnginePositive:
 
 
 class TestEngineNegative:
+    @pytest.mark.regression
     def test_create_user_that_already_exists(self, my_session) -> None:
         username: str = 'tcutaeen'
         password: str = '1234'
@@ -143,6 +154,7 @@ class TestEngineNegative:
         with pytest.raises(UserCreationError, match='Username is taken'):
             my_session.create_user(username, password+'1')
 
+    @pytest.mark.regression
     def test_default_taxes_with_file_wrong_path(self, dict_of) -> None:
         user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
         taxes: list[str] = dict_of['engine'].default_taxes(

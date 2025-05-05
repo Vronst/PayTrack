@@ -18,6 +18,14 @@ class TestAdminServicesPositive:
         assert 'Payment Status' in out
 
     class TestPaymentsData:
+        @pytest.mark.regression
+        def test_add_new_payment(self, admin_user, capsys, mock_engine) -> None:
+            inputs: Iterator = iter(['111', '01-01-2024', '1', '1', 'S', 'exit'])
+            admin: AdminServices = AdminServices(admin_user, mock_engine)
+            admin.add_data(data='payment', input_method=lambda _: next(inputs))
+            out = capsys.readouterr().out.strip()
+            assert 'Successfully saved' in out
+
         def test_admin_show_data_payments(self, admin_user, capsys, mock_engine) -> None:
             inputs: Iterator = iter(['exit'])
             admin: AdminServices = AdminServices(admin_user, mock_engine)
@@ -34,6 +42,7 @@ class TestAdminServicesPositive:
             assert 'Price' in out
             assert 'Successfully saved' in out
 
+        @pytest.mark.regression
         def test_admin_payments_go_to_users(self, admin_user, capsys, mock_engine) -> None:
             inputs: Iterator = iter(['5', 'exit'])
             admin: AdminServices = AdminServices(admin_user, mock_engine)
@@ -42,6 +51,7 @@ class TestAdminServicesPositive:
             assert 'Price' in out
             assert 'Password' in out
 
+        @pytest.mark.regression
         def test_admin_payments_go_to_taxes(self, admin_user, capsys, mock_engine) -> None:
             inputs: Iterator = iter(['4', 'exit'])
             admin: AdminServices = AdminServices(admin_user, mock_engine)
@@ -50,6 +60,7 @@ class TestAdminServicesPositive:
             assert 'Price' in out
             assert 'Payment Status' in out
 
+        @pytest.mark.regression
         def test_admin_delete_payment(self, admin_user, capsys, mock_engine) -> None:
             inputs: Iterator = iter(['1', 'Y', 'exit'])
             admin: AdminServices = AdminServices(admin_user, mock_engine)
@@ -57,6 +68,7 @@ class TestAdminServicesPositive:
             out: str = capsys.readouterr().out.strip()
             assert 'Successfully deleted' in out
 
+        @pytest.mark.regression
         def test_admin_edit_data_payments_date(self, admin_user, capsys, mock_engine) -> None:
             inputs: Iterator = iter(['1', '3', '15-01-2025', 'S'])
             admin: AdminServices = AdminServices(admin_user, mock_engine)
@@ -66,6 +78,7 @@ class TestAdminServicesPositive:
             assert 'Invalid' not in out
             assert 'Successfully saved' in out
 
+        @pytest.mark.regression
         def test_admin_edit_data_payments_date_abandon(self, admin_user, capsys, mock_engine) -> None:
             inputs: Iterator = iter(['1', '3', '15-01-2025', 'S'])
             admin: AdminServices = AdminServices(admin_user, mock_engine)
@@ -74,6 +87,7 @@ class TestAdminServicesPositive:
             assert 'Invalid' not in out
             assert 'Abandon' in out
 
+        @pytest.mark.regression
         def test_admin_edit_data_payments_price(self, admin_user, capsys, mock_engine) -> None:
             inputs: Iterator = iter(['1', '2', '100', 'S'])
             admin: AdminServices = AdminServices(admin_user, mock_engine)
@@ -90,6 +104,7 @@ class TestAdminServicesPositive:
             assert 'Price' in out
             assert 'Abandon' in out
 
+        @pytest.mark.regression
         def test_admin_edit_data_payments_tax_id(self, admin_user, capsys, mock_engine) -> None:
             inputs: Iterator = iter(['1', '4', '100', 'S'])
             admin: AdminServices = AdminServices(admin_user, mock_engine)
@@ -106,6 +121,7 @@ class TestAdminServicesPositive:
             assert 'Price' in out
             assert 'Abandoned' in out
 
+        @pytest.mark.regression
         def test_admin_edit_data_payments_user_id(self, admin_user, capsys, mock_engine) -> None:
             inputs: Iterator = iter(['1', '5', '100', 'S'])
             admin: AdminServices = AdminServices(admin_user, mock_engine)
@@ -122,6 +138,7 @@ class TestAdminServicesPositive:
             assert 'Price' in out
             assert 'Abandoned' in out
             
+        @pytest.mark.regression
         def test_admin_edit_data_payments_id(self, admin_user, capsys, mock_engine) -> None:
             inputs: Iterator = iter(['1', '1', '100', 'S'])
             admin: AdminServices = AdminServices(admin_user, mock_engine)
@@ -146,6 +163,7 @@ class TestAdminServicesPositive:
             out: str = capsys.readouterr().out.strip()
             assert 'Password' in out
 
+        @pytest.mark.regression
         def test_add_new_user(self, admin_user, capsys, mock_engine) -> None:
             inputs: Iterator = iter(['false', 'newuser', 'password1', 'S', 'exit'])
             admin: AdminServices = AdminServices(admin_user, mock_engine)
@@ -169,6 +187,7 @@ class TestAdminServicesPositive:
             assert 'Password' in out
             assert 'Successfully saved' in out
 
+        @pytest.mark.regression
         def test_admin_edit_data_users_id(self, admin_user, capsys, mock_engine) -> None:
             inputs: Iterator = iter(['1', '1', '100', 'S', 'exit'])
             admin: AdminServices = AdminServices(admin_user, mock_engine)
@@ -219,6 +238,7 @@ class TestAdminServicesPositive:
             assert "Successfully saved" not in out
             assert 'Abandoned' in out
 
+        @pytest.mark.regression
         def test_admin_edit_data_users_delete(self, admin_user, capsys, mock_engine) -> None:
             inputs: Iterator = iter(['1', 'Y', 'exit'])
             admin: AdminServices = AdminServices(admin_user, mock_engine)
@@ -235,6 +255,22 @@ class TestAdminServicesPositive:
 
 
     class TestTaxData:
+        @pytest.mark.regression
+        def test_add_new_payment_new_tax(self, admin_user, capsys, mock_engine) -> None:
+            inputs: Iterator = iter(['Wlololo', 'True', '1', 'S', 'exit'])
+            admin: AdminServices = AdminServices(admin_user, mock_engine)
+            admin.add_data(data='tax', input_method=lambda _: next(inputs))
+            out = capsys.readouterr().out.strip()
+            assert 'Successfully saved' in out
+
+        @pytest.mark.regression
+        def test_add_new_payment_existing(self, admin_user, capsys, mock_engine) -> None:
+            inputs: Iterator = iter(['water', 'True', '1', 'S', 'exit'])
+            admin: AdminServices = AdminServices(admin_user, mock_engine)
+            admin.add_data(data='tax', input_method=lambda _: next(inputs))
+            out = capsys.readouterr().out.strip()
+            assert 'Successfully saved' in out
+
         def test_admin_edit_tax(self, admin_user, capsys, mock_engine) -> None:
             inputs: Iterator = iter(['1', 'S'])
             admin: AdminServices = AdminServices(admin_user, mock_engine)
@@ -243,6 +279,7 @@ class TestAdminServicesPositive:
             assert 'Payment Status' in out
             assert 'Successfully saved' in out
 
+        @pytest.mark.regression
         def test_admin_edit_tax_go_to_payments(self, admin_user, capsys, mock_engine) -> None:
             inputs: Iterator = iter(['5', 'exit'])
             admin: AdminServices = AdminServices(admin_user, mock_engine)
@@ -250,6 +287,7 @@ class TestAdminServicesPositive:
             out: str = capsys.readouterr().out.strip()
             assert 'Payment Status' in out
             
+        @pytest.mark.regression
         def test_admin_edit_tax_go_to_users(self, admin_user, capsys, mock_engine) -> None:
             inputs: Iterator = iter(['4', 'exit'])
             admin: AdminServices = AdminServices(admin_user, mock_engine)
@@ -257,6 +295,7 @@ class TestAdminServicesPositive:
             out: str = capsys.readouterr().out.strip()
             assert 'Password' in out
 
+        @pytest.mark.regression
         def test_admin_edit_tax_tax_id(self, admin_user, capsys, mock_engine) -> None:
             inputs: Iterator = iter(['1', '1', '1000', 'S', 'exit'])
             admin: AdminServices = AdminServices(admin_user, mock_engine)
@@ -273,6 +312,7 @@ class TestAdminServicesPositive:
             assert 'Payment Status' in out
             assert 'Successfully saved' in out
 
+        @pytest.mark.regression
         def test_admin_edit_tax_all_options(self, admin_user, capsys, mock_engine) -> None:
             inputs: Iterator = iter(['1', '2', 'newname1', '1', '1', '4', '3', 'False', 'S', 'exit'])
             admin: AdminServices = AdminServices(admin_user, mock_engine)
@@ -355,8 +395,6 @@ class TestAdminServicesNegative:
             out: str = capsys.readouterr().out.strip()
             assert 'Payment Status' in out
 
-            # TODO: ...
-        # def test_admin_
 
     class TestPaymentsData:
         def test_admin_show_data_payments_wrong_input(self, capsys, mock_engine, admin_user) -> None:
@@ -382,6 +420,7 @@ class TestAdminServicesNegative:
             out: str = capsys.readouterr().out.strip()
             assert 'Deletion failed due to' in out
 
+        @pytest.mark.regression
         def test_admin_edit_data_payment_date_not_date(self, mock_engine, capsys, admin_user) -> None:
             inputs: Iterator = iter(['1', '3', 'notdata', 'exit'])
             admin: AdminServices = AdminServices(admin_user, mock_engine)

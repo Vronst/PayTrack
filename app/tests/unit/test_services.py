@@ -8,6 +8,7 @@ from ...database import Payment, Tax, User
 
 class TestServicesPositive:
 
+    @pytest.mark.regression
     def test_check_taxes(self, capsys, mock_engine, normal_user):
         services: Services = Services(normal_user, mock_engine)
         capsys.readouterr()
@@ -27,6 +28,7 @@ class TestServicesPositive:
         assert '0' in captured_output.out.strip()
         assert isinstance(result, dict) == True
 
+    @pytest.mark.regression
     def test_pay_taxes(self, capsys, mock_engine, normal_user):
         services: Services = Services(normal_user, mock_engine)
 
@@ -48,6 +50,7 @@ class TestServicesPositive:
         assert ' not found, attempting to add tax' in captured_output.out.strip()
         assert 'paid successfully' in captured_output.out.strip()
 
+    @pytest.mark.regression
     def test_cancel_payment(self, capsys, ex_user, mock_engine, normal_user) -> None:
         services: Services = Services(normal_user, mock_engine)
         engine: MyEngine = mock_engine
@@ -94,6 +97,7 @@ class TestServicesPositive:
         assert 'ID' in coe
         assert 'Price' in coe
 
+    @pytest.mark.regression
     def test_edit_payment_delete_payment(self, normal_user, mock_engine, ex_user, capsys) -> None:
         services: Services = Services(normal_user, mock_engine)
         inputs: Iterable = iter(['y', '100', '2', 'Y'])
@@ -111,6 +115,7 @@ class TestServicesPositive:
         assert 'Removed successfully' in coe
         assert 'Canceled' not in coe
 
+    @pytest.mark.regression
     def test_edit_payment_delete_payment_cancel(self, normal_user, mock_engine, ex_user, capsys) -> None:
         services: Services = Services(normal_user, mock_engine)
         inputs: Iterable = iter(['y', '100', '2', 'n'])
@@ -128,6 +133,7 @@ class TestServicesPositive:
         assert 'Removed successfully' not in coe
         assert 'Canceled' in coe
 
+    @pytest.mark.regression
     def test_payment_edit_details(self, normal_user, mock_engine, ex_user, capsys) -> None:
         services: Services = Services(normal_user, mock_engine)
         school_tax_id: int = next(tax for tax in services.user.taxes if tax.taxname == 'school').id
@@ -148,6 +154,7 @@ class TestServicesPositive:
         assert 'Removed successfully' not in coe
         assert 'Canceled' not in coe
 
+    @pytest.mark.regression
     def test_payment_edit_details_delete_cancel(self, normal_user, mock_engine, ex_user, capsys) -> None:
         services: Services = Services(normal_user, mock_engine)
         inputs: Iterable = iter([
@@ -166,6 +173,7 @@ class TestServicesPositive:
         assert 'Deleted successfully' not in coe
         assert 'Canceled' in coe
 
+    @pytest.mark.regression
     def test_payment_edit_details_delete(self, normal_user, mock_engine, ex_user, capsys) -> None:
         services: Services = Services(normal_user, mock_engine)
         inputs: Iterable = iter([
@@ -223,6 +231,7 @@ class TestServicesPositive:
         assert 'Canceled' not in coe
         assert 'Abandoned changes' in coe
 
+    @pytest.mark.regression
     def test_delete_tax(self, mock_engine_with_user, normal_user, ex_user, capsys) -> None:
         services: Services = Services(normal_user, mock_engine_with_user)
         user: User | None = mock_engine_with_user.get_user(username=ex_user[0])
@@ -253,6 +262,7 @@ class TestServicesPositive:
         captured_output: str = capsys.readouterr().out.strip()
         assert 'Deleted successfully' in captured_output
 
+    @pytest.mark.regression
     def test_add_tax(self, normal_user, mock_engine_with_user, ex_user, capsys) -> None:
         services: Services = Services(normal_user, mock_engine_with_user)
         user: User | None = mock_engine_with_user.get_user(username=ex_user[0])
@@ -313,6 +323,7 @@ class TestServicesNegative:
         with pytest.raises(AttributeError, match='This attribute cannot be changed directly'):
             services.engine = no_session
 
+    @pytest.mark.regression
     def test_pay_taxes_no_float(self, mock_engine, normal_user, ex_user):
         services: Services = Services(normal_user, mock_engine)
         engine: MyEngine = mock_engine
@@ -324,6 +335,7 @@ class TestServicesNegative:
         user: User | None = engine.session.query(User).filter_by(name=ex_user[0]).first()
         assert user != None
 
+    @pytest.mark.regression
     def test_view_payments_while_no_taxes(self, simple_user, capsys, mock_engine_no_query) -> None:
         services: Services = Services(simple_user, mock_engine_no_query)
 
