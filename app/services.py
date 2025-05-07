@@ -19,25 +19,6 @@ class Services:
         self._user: User = user
         self._engine: "MyEngine" = engine
 
-    # @staticmethod
-    # def requires_login(func):
-    #     @wraps(func)
-    #     def wrapper(self, *args, **kwargs):
-    #         while (self.user is None):
-    #             print('You must log in to use services!')
-    #             try:
-    #                 username: str = input_method('Username: ')
-    #                 password: str = input_method('Password: ')
-    #             except NameError:
-    #                 username = input("Username: ")
-    #                 password = input("Password: ")
-    #             try:
-    #                 self.login(username, password)
-    #             except LoginError as e:
-    #                 print(e)
-    #         return func(self, *args, **kwargs)
-    #     return wrapper
-
     @staticmethod
     def requires_login(func):
         @wraps(func)
@@ -200,8 +181,9 @@ class Services:
                             "December": 12
                             }
                         try:
+                            assert not isinstance(month, int)
                             month = month_dict[month.capitalize()]
-                        except KeyError:
+                        except (KeyError, AssertionError):
                             print(f'This is not a month: {month}')
                             continue
                        

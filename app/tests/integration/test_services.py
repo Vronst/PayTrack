@@ -534,7 +534,7 @@ class TestServicesNegative:
         my_session.create_user(username=username, password=password)
         auth: Authorization = Authorization(engine=my_session)
         with pytest.raises(LoginError, match='Before accessing services, log in'):
-            assert auth.user is not None
+            # assert auth.user is not None
             services: Services = Services(auth.user, engine=my_session)
             services.check_taxes()
 
@@ -544,7 +544,7 @@ class TestServicesNegative:
         my_session.create_user(username=username, password=password)
         auth: Authorization = Authorization(engine=my_session)
         with pytest.raises(LoginError, match='Before accessing services, log in'):
-            assert auth.user is not None
+            # assert auth.user is not None
             services: Services = Services(auth.user, engine=my_session)
             services.check_taxes()
 

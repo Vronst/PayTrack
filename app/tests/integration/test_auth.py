@@ -37,6 +37,7 @@ class TestAuthorizationPositive:
         assert auth.guest == [], 'checking guests'
         assert auth.guest_list == [], 'checking guests list'
 
+    @pytest.mark.regression
     def test_logout(self, my_session) -> None:
         username: str = 'logouttest'
         password: str = '1234'
@@ -59,6 +60,7 @@ class TestAuthorizationPositive:
         assert auth.user is not None
         assert auth.user.name == username
 
+    @pytest.mark.regression
     def test_login(self, my_session) -> None:
         username: str = 'logintest'
         password: str = 'StrongPassword!'
@@ -71,6 +73,7 @@ class TestAuthorizationPositive:
         assert auth.user is not None
         assert auth.user.name == username
 
+    @pytest.mark.regression
     def test_delete_user(self, dict_of, capsys) -> None:
         inputs: Iterable = iter(['Y'])
         user: User | None = dict_of['engine'].get_user(username=dict_of['user']['username'])
@@ -103,6 +106,7 @@ class TestAuthorizationNegative:
         with pytest.raises(NameTaken, match='Username is already taken'):
             Authorization(engine=my_session, action='register', username=username, password=password)
 
+    @pytest.mark.regression
     def test_login_no_user_and_already_logged(self, my_session) -> None:
         username: str = 'tlnuaal'
         password: str = 'StrongPassword!'
@@ -124,6 +128,7 @@ class TestAuthorizationNegative:
             auth.login(username, password)
 
 
+    @pytest.mark.regression
     def test_register_while_logged(self, my_session) -> None:
         username: str = 'tttrwl'
         password: str = 'StrongPassword!'
@@ -134,6 +139,7 @@ class TestAuthorizationNegative:
         assert auth.user.name == username
         assert auth.register(username='someotheruserhere', password=password) == False
          
+    @pytest.mark.regression
     def test_delete_not_existing_user(self, dict_of) -> None:
         inputs: Iterable = iter(['Y'])
         username: str = 'ThatUserDoesNotExists'

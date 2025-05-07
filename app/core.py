@@ -1,6 +1,7 @@
 from getpass import getpass
+from typing import Callable
 from .auth import Authorization
-from . import MyEngine, Tax, User
+from . import MyEngine, Tax
 from .messages import (
         start_app as sam,
         check_taxes as ctl,
@@ -10,62 +11,88 @@ from .utils import LoginError, NameTaken, PasswordNotSafe
 
 
 class TextApp:
+    """
+    Main class, that creates and uses the rest of class in this app.
+    Takes no params on initiaton.
+
+    methods:
+    - start_app(*, input_method: Callable, debug: bool) -> None
+    - close_app() -> None
+    - main_loop(*, input_method: Callable) -> None
+    - check_taxes_loop(*, input_method: Callable) -> None
+    - pay_taxes_loop(*, input_method: Callable) -> None
+    """
     is_running: bool = False
     engine: MyEngine
     auth: Authorization
     debug: bool = False
 
-    def start_app(self, debug: bool = False) -> None:
+    def start_app(self, *, input_method: Callable = input, debug: bool = False) -> None:
+        """
+        When used starts app, setting is_running on True. Creates engine (MyEngine) and choses default database or if debug is True test_db to connect to.
+
+        Params:
+        Callable: input_method - function responsible for providing users input or mocks
+        Bool: debug - if true, choses connection with 'testtaxes' database.
+        """
+        if self.is_running:
+            raise RuntimeError('App is already running')
+        if debug:
+            self._engine = MyEngine(test=True, test_db='testtaxes')
+            self._engine.create_my_session()
+            assert self._engine.get_user(username='test') is None
+            self._engine.create_user(username='test', password='test')
+            # self.activate_debug_account() not working and pointless?
+        else:
+            self._engine = MyEngine()
+            self._engine.create_my_session()
         self.is_running = True
-        self._engine = MyEngine()
-        self._engine.create_my_session()
         self.auth = Authorization(engine=self._engine)
 
-        if debug:
-            self.debug =True
-            self.activate_debug_account()
 
-        self.main_loop()
-
-    def activate_debug_account(self):
-        if not self._engine.create_user(username='test', password='test'):
-            raise ValueError("Name already taken")
-        print("Test account created")
+        self.main_loop(input_method=input_method)
 
     def close_app(self) -> None:
+        """
+        Sets is_running on False, closing app.
+        Informs engine to drop connection and close session.
+        """
         self.is_running = False
-        if self.debug:
-            user: User | None = self._engine.session.query(User).filter_by(name='test').first()
-            self._engine.session.delete(user)
-            self._engine.session.commit()
-            print("Test account deleted")
         self._engine.close_session()
 
         
-    def main_loop(self) -> None:
+    def main_loop(self, *, input_method: Callable = input) -> None:
+        """Main loop (as in name)
+            Params:
+            Callable: input_method - function responsible for providing user inputs or mocks
+        """
         choice: str
         username: str
         password: str
         re_password: str
+        if input_method == input:
+            gtpass = getpass
+        else:
+            gtpass = input_method
 
         while self.is_running:
-            choice = input(sam)
+            choice = input_method(sam)
 
             match choice:
                 case '1':
-                    username = input("Username: ")
-                    password = getpass("Password: ") 
+                    username = input_method("Username: ")
+                    password = gtpass("Password: ") 
                     try:
                         self.auth.login(username, password)
                     except LoginError as e:
                         print(e)
                     else:
-                        self.after_login()
+                        self.after_login(input_method=input_method)
                 case '2':
-                    username = input("Username: ")
+                    username = input_method("Username: ")
                     while True:
-                        password = getpass("Password: ")
-                        re_password = getpass("Repeat password: ")
+                        password = gtpass("Password: ")
+                        re_password = gtpass("Repeat password: ")
                         if password == re_password:
                             try:
                                 self.auth.register(username, password)
@@ -79,7 +106,7 @@ class TextApp:
                         else:
                             print("Password does not match")
                     if self.auth.user:
-                        self.after_login()
+                        self.after_login(input_method=input_method)
                 case 'q':
                     self.close_app()
                 case 'exit':
@@ -87,8 +114,12 @@ class TextApp:
                 case _:
                     print('Unknown option')
 
-    def after_login(self) -> None:
-        # self.services = Services(auth=self.auth, engine=self._engine)
+    def after_login(self, *, input_method: Callable = input) -> None:
+        """Should be used after successful login. Provides access for users to use services.
+
+        Params:
+        Callable: input_method - function responsible for providing user inputs or mocks
+        """
         assert self.auth.user is not None
         assert self.auth.services is not None
 
@@ -99,12 +130,12 @@ class TextApp:
 
         while self.is_running:
             self.auth.services.update()
-            choice: str = input(inner_loop)
+            choice: str = input_method(inner_loop)
             match choice:
                 case '1':
-                    self.check_taxes_loop()
+                    self.check_taxes_loop(input_method=input_method)
                 case '2':   
-                    self.pay_taxes_loop()
+                    self.pay_taxes_loop(input_method=input_method)
                 case 'q':
                     self.auth.logout()
                     return 
@@ -113,14 +144,20 @@ class TextApp:
                 case _:
                     print("Unknown option")
 
-    def check_taxes_loop(self) -> None:
+    def check_taxes_loop(self, *, input_method: Callable = input) -> None:
         """
-            Allows to see payments associated with selected tax
+            Allows to see payments associated with selected tax.
+            Tax can be selected with starting letters due to .startswith() string method,
+            or with fullname.
+
+            Params:
+            - Callable: input_method - function that will provide users inputs or mocks
         """
+        assert self.auth.services is not None
         while self.is_running:
             self.auth.services.update()
             tax_list: dict[int, Tax] = self.auth.services.check_taxes()
-            choice: str = input(ctl)
+            choice: str = input_method(ctl)
             
             match choice:
 
@@ -136,27 +173,36 @@ class TextApp:
                 case _:
                     print('Unknown option')
 
-    def pay_taxes_loop(self) -> None:
+    def pay_taxes_loop(self, *, input_method: Callable = input) -> None:
+        """Responsible for allowing user to add payments. Can also when 'help' inputed,
+           will show existing taxes names
+
+           Params:
+           - Callable: input_method - function that will provide users inputs or mocks
+        """
+
+        assert self.auth.services is not None
         tax_list: dict[int, Tax] | None = None
         while self.is_running:
             ims: str = "Tax name to pay (or command): "
-            tax: str | int = input(ims)
+            tax: str | int = input_method(ims)
             if tax == 'help':
                 print('Possible comands: help, q, exit')
                 tax_list = self.auth.services.check_taxes(simple=True)
-                tax = input(ims)
+                tax = input_method(ims)
             try:
                 tax = int(tax)
             except ValueError:
                 pass
             else:
                 if tax_list and tax in tax_list.keys():
-                    self.auth.services.pay_taxes(tax_list[tax].taxname)
+                    self.auth.services.pay_taxes(tax_list[tax].taxname, input_method=input_method)
             if tax == 'q':
                 return
             elif tax == 'exit':
                 self.close_app()
+                return
             else:
                 if isinstance(tax, str):
-                    self.auth.services.pay_taxes(tax)
+                    self.auth.services.pay_taxes(tax, input_method=input_method)
         self.auth.services.update()
