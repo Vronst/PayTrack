@@ -6,7 +6,14 @@ from .app.database.models import User, Tax
 from .app.auth import Authorization
 from .app.services import Services
 from .app.database import MyEngine
+from .app.core import TextApp
 
+
+@pytest.fixture(scope='function')
+def app() -> TextApp:
+    app: TextApp = TextApp()
+    # my_session.create_user(username='test', password='test')
+    return app
 
 @pytest.fixture(scope='session')
 def admin_user() -> User:
@@ -182,6 +189,7 @@ def dict_of(my_session) -> Generator[dict[str, Any], None, None]:
     my_session.create_user(username=admin_name, password=admin_name, admin=True)
     my_session.create_user(username=username+'1', password=password+'1', with_taxes=False)
     auth: Authorization = Authorization(engine=my_session, action='register', username=username, password=password)
+    assert auth.user is not None
     services: Services = Services(
         user=auth.user,
         engine=my_session)

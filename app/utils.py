@@ -6,7 +6,7 @@ from datetime import datetime
 
 load_dotenv()
 
-
+# TODO: docstrings and readme for all functions and classes
 def get_model_columns(model):
     return [column.key for column in inspect(model).mapper.column_attrs]
 
