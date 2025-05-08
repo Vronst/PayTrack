@@ -1,18 +1,18 @@
-from typing import TypeVar, Type
+from typing import TypeVar, TYPE_CHECKING
 from dotenv import load_dotenv
 from sqlalchemy import Integer, Boolean, Float
+from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.inspection import inspect
 from datetime import datetime
-from .database import Base
 
 
-T = TypeVar("T", bound=base)
+T = TypeVar("T", bound=DeclarativeBase)
 
 
 load_dotenv()
 
 
-def get_model_columns(model: Type(T)) -> list[str]:
+def get_model_columns(model: type(T)) -> list[str]:
     """
     Returns list of kolumns of the selected model.
 
@@ -26,7 +26,7 @@ def get_model_columns(model: Type(T)) -> list[str]:
     return [column.key for column in inspect(model).mapper.column_attrs]
 
 
-def convert_type(model: Type(T), field: str, value: int | str) -> str | float | int:
+def convert_type(model: type(T), field: str, value: int | str) -> str | float | int:
     """
         Automatically converts type of value to given field of the model.
 
