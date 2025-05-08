@@ -60,9 +60,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
         run: |
-          # gh auth login --with-token <<< "$GH_TOKEN"
           echo "$GH_TOKEN" | gh auth login --with-token
-          # gh pr create --base main --head lap --title "Auto Merge: lap into main" --body "Automated merge after successful regression test" || true
           if ! gh pr view --head lap --base main &>/dev/null; then
             gh pr create --base main --head lap --title "Auto Merge: lap into main" --body "Automated merge after successful regression test"
           fi

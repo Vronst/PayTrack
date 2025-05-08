@@ -5,6 +5,7 @@ from .services import Services
 from .utils import NameTaken, PasswordNotSafe, LoginError
 
 
+# TODO: Docstrings and readme.
 class Authorization:
     # TODO: Maybe create abstract class and move some futures there?
     _user: User | None

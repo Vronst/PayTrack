@@ -13,14 +13,28 @@ if TYPE_CHECKING:
 
 
 class Services:
+    """
+    This class works with database to pay, show and edit entries in database
+    """
     # TODO: Maybe option to sync it to google sheets?
 
     def __init__(self, user: User, engine: "MyEngine") -> None:
+        """
+        Args:
+            user (:obj 'User'): User, needed for its id, to find related entries.
+            engine (:obj 'MyEngine'): SQLAlchemy Engine model, customized for needs of this app.
+        """
         self._user: User = user
         self._engine: "MyEngine" = engine
 
     @staticmethod
     def requires_login(func):
+        """
+        Makes sure that the user is set
+
+        Raises:
+            LoginError: If there is no user of type 'User'.
+        """
         @wraps(func)
         def wrapper(self, *args, **kwargs):
             if not isinstance(self._user, User):
@@ -31,6 +45,9 @@ class Services:
     @property
     @requires_login
     def user(self) -> User:
+        """
+        :obj 'User': Model of user, used to get related database entries
+        """
         if self._user is None:
             raise ValueError('You must be logged in to use Services')
         return self._user
@@ -41,6 +58,9 @@ class Services:
 
     @property
     def engine(self) -> "MyEngine":
+        """
+        :obj 'MyEngine': Engine with set connection to database, used by this app
+        """
         return self._engine
 
     @engine.setter
@@ -48,6 +68,15 @@ class Services:
         raise AttributeError("This attribute cannot be changed directly")
 
     def check_taxes(self, simple: bool = False) -> dict[int, Tax]:
+        """
+        Shows taxes and related to them database
+
+        Args:
+            simple (bool, optional): If set to True, shows taxes more simplistic.
+
+        Returns:
+            dict with int keys and :obj 'Tax' values. Same things that will be printed.
+        """
         # TODO: A way to see shared taxes
 
         result: dict = dict(enumerate(self.user.taxes))
@@ -63,7 +92,15 @@ class Services:
 
         return result
 
-    def pay_taxes(self, tax: str, *, input_method=input) -> None:
+    def pay_taxes(self, tax: str, *, input_method: Callable = input) -> None:
+        """
+        Responsible for adding new tax and payments to them or exisitng taxes.
+
+        Args:
+            tax (str): String that represents exisitng table/Model
+                Example: 'Tax' <- this is string.
+            input_method (:obj 'Callable', optional): Has to be function that returns str, default input.
+        """
         selected_tax: Tax | None
 
         if input_method(f'Is {tax} - correct (y/N)') != 'y':
@@ -98,7 +135,11 @@ class Services:
 
     def view_payments(self, tax_name: str, *, input_method: Callable =input) -> None:
         """
-            Prints out payments associated with user and tax passed as variable
+            Prints out payments associated with user and tax passed as variable, and can call edit_payment() method.
+
+            Args:
+                tax_name (str): name of tax that will be searched in database, if not existent, creates new one.
+                input_method (:obj 'Callable', optional): function to provide users inputs, default input.
         """
         selected_tax: Tax | None = self._engine.session.query(Tax).filter_by(
             taxname=tax_name, user_id=self.user.id).first()
@@ -125,6 +166,16 @@ class Services:
                 return
 
     def edit_payment(self, payment_id: int, *, input_method=input) -> None:
+        """
+            Prints details of selected payment with coressponding id.
+
+            Args:
+                payment_id (int): id of payment that will be searched in database.
+                input_method (:obj 'Callable', optional): function to provide users inputs, default input.
+
+            Raises:
+                ValueError: if there is no entry with selected id.
+        """
         selected_payment: Payment | None = self._engine.session.query(Payment).filter_by(
             id=payment_id, users_id=self.user.id).first()
         if not selected_payment:
@@ -154,6 +205,13 @@ class Services:
                     print("Invalid option")
     
     def edit_details(self, chosen_payment: Payment, *, input_method=input) -> None:
+        """
+            Prints details of selected payment with coressponding id and allows editing them.
+
+            Args:
+                chosen_payment (:obj 'Payment'): Database model of payments that will be edited.
+                input_method (:obj 'Callable', optional): function to provide users inputs, default input.
+        """
         while True:
             print('ID  |  Price  |  Date  |  Tax-name')
             print(f"{chosen_payment.id})", chosen_payment.price, chosen_payment.date, chosen_payment.tax.taxname, sep='\t')
@@ -243,6 +301,17 @@ class Services:
                     print(f"Invalid choice {choice}")
 
     def edit_tax(self, taxname: str | None = None, tax_id: int | None = None, *, input_method=input) -> None:
+        """
+            Responsible for editing Taxes, just their tax_names attribute.
+
+            Args:
+                taxname (str or None, optional): Default is None.
+                tax_id (int or None, optional): Default is None, will be checked first, if None, taxname is checked then.
+                input_method (:obj 'Callable', optional): function to provide users inputs, default input.
+
+            Raises:
+                KeyError: If taxname or tax_id is None and/or tax is not found in database.
+        """
         tax: Tax | None 
         if tax_id:
             tax = self._engine.session.get(Tax, tax_id)
@@ -261,6 +330,17 @@ class Services:
         return
 
     def delete_tax(self, taxname: str | None = None, tax_id: int | None = None, *, input_method=input) -> None:
+        """
+            Responsible for deleting Taxes.
+
+            Args:
+                taxname (str or None, optional): Default is None.
+                tax_id (int or None, optional): Default is None, will be checked first, if None, taxname is checked then.
+                input_method (:obj 'Callable', optional): function to provide users inputs, default input.
+
+            Raises:
+                KeyError: If taxname or tax_id is None and/or tax is not found in database.
+        """
         tax: Tax | None
         if tax_id:
             tax = self._engine.session.get(Tax, tax_id)
@@ -278,6 +358,13 @@ class Services:
         return
 
     def add_tax(self, taxname: str, *, input_method=input) -> None:
+        """
+            Responsible for adding new Taxes.
+
+            Args:
+                taxname (str or None, optional): Default is None.
+                input_method (:obj 'Callable', optional): function to provide users inputs, default input.
+        """
         if input_method(
             f"Are you sure, you want to create new tax: {taxname} (y/n)"
         ).lower() != 'y':
