@@ -1,17 +1,43 @@
+from typing import TypeVar, Type
 from dotenv import load_dotenv
 from sqlalchemy import Integer, Boolean, Float
 from sqlalchemy.inspection import inspect
 from datetime import datetime
+from .database import Base
+
+
+T = TypeVar("T", bound=base)
 
 
 load_dotenv()
 
-# TODO: docstrings and readme for all functions and classes
-def get_model_columns(model):
+
+def get_model_columns(model: Type(T)) -> list[str]:
+    """
+    Returns list of kolumns of the selected model.
+
+    Args:
+        model (Type[T]): A class that inherits from Base.
+
+    Returns:
+        list of str: List of column names
+    """
+
     return [column.key for column in inspect(model).mapper.column_attrs]
 
 
-def convert_type(model, field, value):
+def convert_type(model: Type(T), field: str, value: int | str) -> str | float | int:
+    """
+        Automatically converts type of value to given field of the model.
+
+        Args:
+            model (Type(T)): A class that inherits from Base.
+            field (str): Field of selected model, that type will be checked.
+            value (int or str): Value that we want to cast into type of selected field.
+
+        Returns:
+            str | float | int: Same param casted for suitable type.
+    """
     column_type = model.__table__.columns[field].type
     try:
         if isinstance(column_type, Integer):
@@ -39,7 +65,7 @@ def list_of_taxes(path_to_file: str | None = None) -> list[str]:
         path_to_file (str): The path to the directory containing the taxes file. Defaults to '/home/vronst/Programming/Rachunki/app/'.
 
     Returns:
-        list[str]: A list of tax names.
+        list of str: A list of tax names.
     """
     taxes_list: list[str] = []
     if path_to_file:
@@ -72,7 +98,7 @@ def simple_logs(message: str, error: str | None = None, log_file: list[str] = ['
     Args:
         message (str): The message to log.
         error (str, optional): An optional error message to log. Defaults to None.
-        log_file (list[str], optional): A list of log file names to write the message to. Defaults to ['default'].
+        log_file (list of str, optional): A list of log file names to write the message to. Defaults to ['default'].
 
     Raises:
         ValueError: If the LOGS_PATH environment variable is not set.

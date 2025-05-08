@@ -14,13 +14,6 @@ class TextApp:
     """
     Main class, that creates and uses the rest of class in this app.
     Takes no params on initiaton.
-
-    methods:
-    - start_app(*, input_method: Callable, debug: bool) -> None
-    - close_app() -> None
-    - main_loop(*, input_method: Callable) -> None
-    - check_taxes_loop(*, input_method: Callable) -> None
-    - pay_taxes_loop(*, input_method: Callable) -> None
     """
     is_running: bool = False
     engine: MyEngine
