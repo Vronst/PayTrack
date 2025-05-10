@@ -71,4 +71,4 @@ This project is licensed under the MIT License.
 
 ## Documentation
 
-Full documentation [link](https://github.com/Vronst/PayTrack/tree/main/app)
+Full documentation [link](https://vronst.github.io/PayTrack/)
