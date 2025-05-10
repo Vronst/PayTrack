@@ -2,11 +2,11 @@ from typing import Any, Generator, Iterable
 import pytest
 from unittest.mock import MagicMock
 
-from .app.database.models import User, Tax
-from .app.auth import Authorization
-from .app.services import Services
-from .app.database import MyEngine
-from .app.core import TextApp
+from app.database.models import User, Tax
+from app.auth import Authorization
+from app.services import Services
+from app.database import MyEngine
+from app.core import TextApp
 
 
 @pytest.fixture(scope='function')

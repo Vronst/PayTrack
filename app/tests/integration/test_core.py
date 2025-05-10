@@ -155,13 +155,13 @@ class TestNegativeCore:
         app.start_app(input_method=lambda _: next(inputs), debug=True)
 
         out: str = capsys.readouterr().out.strip()
-        assert 'Password does not match' in out
+        assert 'Passwords do not match' in out
 
     @pytest.mark.regression
     def testRegisterEmptyName(self, app) -> None:
         inputs: Iterator = iter(['2', '', 'Strongpass!', 'Strongpass!', 'exit'])
 
-        with pytest.raises(ValueError, match='Username cannot contain special signs'):
+        with pytest.raises(ValueError, match='Username cannot contain special characters'):
             app.start_app(input_method=lambda _: next(inputs), debug=True)
 
 

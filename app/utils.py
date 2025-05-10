@@ -1,4 +1,4 @@
-from typing import TypeVar, TYPE_CHECKING
+from typing import TypeVar, Callable, Type
 from dotenv import load_dotenv
 from sqlalchemy import Integer, Boolean, Float
 from sqlalchemy.orm import DeclarativeBase
@@ -12,7 +12,7 @@ T = TypeVar("T", bound=DeclarativeBase)
 load_dotenv()
 
 
-def get_model_columns(model: type(T)) -> list[str]:
+def get_model_columns(model: Type[T]) -> list[str]:
     """
     Returns list of kolumns of the selected model.
 
@@ -26,7 +26,7 @@ def get_model_columns(model: type(T)) -> list[str]:
     return [column.key for column in inspect(model).mapper.column_attrs]
 
 
-def convert_type(model: type(T), field: str, value: int | str) -> str | float | int:
+def convert_type(model: Type[T], field: str, value: int | str, *, out_method: Callable = print) -> str | float | int:
     """
         Automatically converts type of value to given field of the model.
 
@@ -34,6 +34,7 @@ def convert_type(model: type(T), field: str, value: int | str) -> str | float | 
             model (Type(T)): A class that inherits from Base.
             field (str): Field of selected model, that type will be checked.
             value (int or str): Value that we want to cast into type of selected field.
+            out_method (Callable, optional): A function that accepts a string and outputs it.
 
         Returns:
             str | float | int: Same param casted for suitable type.
@@ -43,26 +44,29 @@ def convert_type(model: type(T), field: str, value: int | str) -> str | float | 
         if isinstance(column_type, Integer):
             return int(value)
         elif isinstance(column_type, Boolean):
+            assert isinstance(value, str)
             return value.lower() in ('true', '1', 'yes', 'y')
         elif isinstance(column_type, Float):
             return float(value)
         elif field == 'date':
+            assert isinstance(value, str)
             datetime.strptime(value, '%d-%m-%Y')
             return value
         elif 'id' in field:
             return int(value)
     except ValueError:
-        print(f"Invalid value for {field}")
+        out_method(f"Invalid value for {field}")
         raise
     return value
 
 
-def list_of_taxes(path_to_file: str | None = None) -> list[str]:
+def list_of_taxes(path_to_file: str | None = None, *, out_method: Callable = print) -> list[str]:
     """
     Reads a list of taxes from a file or returns a default list if the file is not found.
 
     Args:
         path_to_file (str): The path to the directory containing the taxes file. Defaults to '/home/vronst/Programming/Rachunki/app/'.
+        out_method (Callable, optional): A function that accepts a string and outputs it.
 
     Returns:
         list of str: A list of tax names.
@@ -74,7 +78,7 @@ def list_of_taxes(path_to_file: str | None = None) -> list[str]:
                 for line in file:
                     taxes_list.append(line.strip())
         except FileNotFoundError:
-            print('File with list of taxes not found\nDefault taxes applied')
+            out_method('File with list of taxes not found\nDefault taxes applied')
     if not taxes_list:
         return [
             'water',
@@ -91,7 +95,7 @@ def list_of_taxes(path_to_file: str | None = None) -> list[str]:
     return taxes_list
 
 
-def simple_logs(message: str, error: str | None = None, log_file: list[str] = ['default']) -> None:
+def simple_logs(message: str, error: str | None = None, log_file: list[str] = ['default'], *, out_method: Callable = print) -> None:
     """
     Logs a message to specified log files.
 
@@ -99,12 +103,13 @@ def simple_logs(message: str, error: str | None = None, log_file: list[str] = ['
         message (str): The message to log.
         error (str, optional): An optional error message to log. Defaults to None.
         log_file (list of str, optional): A list of log file names to write the message to. Defaults to ['default'].
+        out_method (Callable, optional): A function that accepts a string and outputs it.
 
     Raises:
         ValueError: If the LOGS_PATH environment variable is not set.
     """
     import os
-    print(f'{message} {error}' if error else message)
+    out_method(f'{message} {error}' if error else message)
     path: str | None = os.getenv('LOGS_PATH', None)
     if not path:
         raise ValueError('PATH environment variable is not set')

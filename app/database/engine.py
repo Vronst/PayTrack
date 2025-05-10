@@ -18,10 +18,9 @@ class MyEngine:
             For example when creating user there is no need to care about
             length of the password.
 
-            Can be initiated with arguments:
-            - test: bool -> if true swaps targeted database from one from .env to on provided 
-            with test_db arguments
-            - test_db: str -> database that should be targeted during tests
+            Args:
+            test (bool): if True swaps targeted database to one provided in test_db arg.
+            test_db (str): database that should be targeted during tests
     """
     def __init__(self, test: bool = False, test_db: str = ''):
         self._session: scoped_session | None = None
@@ -65,14 +64,19 @@ class MyEngine:
         self.session.commit()
         return taxes
 
-    def create_user(self, username: str, password: str, *, hashpass: bool = True, admin: bool = False, with_taxes: bool = True) -> User | None:
+    def create_user(self, username: str, password: str, *, hashpass: bool = True, admin: bool = False, with_taxes: bool = True) -> User:
         """
         Allows for creation of user with any password
-        Arguments:
-            - username: str -> username
-            - password: str -> password
-            - hashpass: bool -> defualt True, hashes password and stores that hash instead
-                of plain passowrd
+        Args:
+            username (str): username
+            password (str): password
+            hashpass (bool): defualt True, hashes password and stores result instead  of plain passowrd.
+
+        Returns:
+            :obj 'User'
+
+        Raises:
+            UserCreationError: if username is taken.
         """
         if self.get_user(username):
             raise UserCreationError('Username is taken')
@@ -93,13 +97,13 @@ class MyEngine:
 
     def get_user(self, username: str | None = None, user_id: int | None = None) -> User | None:
         """
-        Returns user from databse by name or id 
-        Arguments:
-            - username: str -> if provided searches by name
-            - user_id: int -> if provided searches by id
-            if both are provided username is first considered
+        Returns user from databse by name or id.
+
+        Args:
+            username (str): if provided searches by name
+            user_id (int): if provided searches by id, if both are provided username is first considered
         Returns:
-            User
+            :obj 'User'
         """
         
         user: None | User
@@ -111,6 +115,10 @@ class MyEngine:
         return user
 
     def delete_user(self, *, username: str | None = None, id_: int | None = None) -> None:
+        """
+
+        """
+
         warn('If possible you should be using Auth.delete_user instead of engine.delete_user')
 
         user: User | None
@@ -129,10 +137,10 @@ class MyEngine:
 
     def create_my_session(self) -> scoped_session:
         """
-            Creates engine and binds it to the session that
-            is retuned by this function. The session is also stored in 
-            variable in this class
-        Returns: session: scoped_session
+        Creates engine and binds it to the session that is retuned by this function.
+
+        Returns:
+            scoped_session
         """
         if not self.POSTGRES_DB:
             raise ValueError('Missing env variable - POSTGRESS_DB')
