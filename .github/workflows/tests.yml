@@ -49,20 +49,3 @@ jobs:
 
       - name: Run tests
         run: pytest -m regression
-
-      - name: Install GitHub CLI
-        run: |
-          sudo apt update
-          sudo apt install gh -y
-      
-      - name: Merge lap into main
-        if: github.ref == 'refs/heads/lap' && success()
-        env:
-          GH_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
-        run: |
-          echo "$GH_TOKEN" | gh auth login --with-token
-          if ! gh pr view --head lap --base main &>/dev/null; then
-            gh pr create --base main --head lap --title "Auto Merge: lap into main" --body "Automated merge after successful regression test"
-          fi
-          gh pr merge --auto --squash
-          gh auth logout --hostname github.com --yes
