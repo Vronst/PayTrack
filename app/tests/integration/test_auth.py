@@ -113,7 +113,7 @@ class TestAuthorizationNegative:
         auth: Authorization | None = None
 
         assert my_session.create_user(username, password) != None
-        with pytest.raises(LoginError, match='User doesn\'t exists'):
+        with pytest.raises(LoginError, match='User doesn\'t exist'):
             auth = Authorization(engine=my_session, action='login', username='nouserlikethis', password='lol')
         if not auth:
             auth = Authorization(engine=my_session)

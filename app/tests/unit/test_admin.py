@@ -351,7 +351,7 @@ class TestAdminServicesNegative:
 
     def test_init_normal_user(self, mock_engine) -> None:
         normal_user = mock_engine.create_user()
-        with pytest.raises(LoginError, match="You don't have admin privilages to access this"):
+        with pytest.raises(LoginError, match="You don't have admin privileges to access this"):
              AdminServices(admin_user=normal_user, engine=mock_engine)
 
     class TestUserData:  

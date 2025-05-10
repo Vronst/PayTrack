@@ -10,13 +10,18 @@ Rachunki is a Python application for managing user taxes and payments. It allows
 - View and edit payment details
 - Log activities and errors
 
+## Table of content
+1. [Installation](#Installation)
+2. [Logging](#Logging)
+3. [Documentation](#Documentation)
+
 ## Installation
 
 This project uses PostgreSQL, be sure you have it installed.
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/Vronst/Did_I_pay_my_taxes.git
+    git clone https://github.com/Vronst/PayTrack.git
     cd rachunki
     ```
 
@@ -31,7 +36,7 @@ This project uses PostgreSQL, be sure you have it installed.
     pip install -r requirements.txt
     ```
 
-4. Set up the environment variables in the [.env](http://_vscodecontentref_/3) file:
+4. Set up the environment variables in the [.env]() file:
     ```env
     POSTGRES_USER='your_postgres_user'
     POSTGRES_PASSWORD='your_postgres_password'
@@ -43,23 +48,18 @@ This project uses PostgreSQL, be sure you have it installed.
 
 ## Usage
 
-1. Initialize the database:
+Run the application in text mode:
     ```sh
-    python -m app.database.engine
-    ```
-
-2. Run the application:
-    ```sh
-    python manage.py
+    python manage.py -t
     ```
 
 ## Logging
 
 Logs are stored in the [logs](http://_vscodecontentref_/4) directory:
-- [db.log](http://_vscodecontentref_/5): Logs related to database operations
-- [logs.txt](http://_vscodecontentref_/6): General logs
-- [taxes.log](http://_vscodecontentref_/7): Logs related to tax payments
-- [user.log](http://_vscodecontentref_/8): Logs related to user activities
+- [db.log](): Logs related to database operations
+- [logs.txt](): General logs
+- [taxes.log](): Logs related to tax payments
+- [user.log](): Logs related to user activities
 
 ## Contributing
 
@@ -68,3 +68,7 @@ Contributions are welcome! Please open an issue or submit a pull request.
 ## License
 
 This project is licensed under the MIT License.
+
+## Documentation
+
+Full documentation [link](https://github.com/Vronst/PayTrack/tree/main/app)
