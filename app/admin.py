@@ -22,7 +22,7 @@ class AdminServices:
         options (dict): Maps table names to their SQLAlchemy models and display headers.
         models (dict): Maps table names to their corresponding SQLAlchemy models.
     """
-
+    is_running: bool = True
     options = {
         'tax': (
             Tax,
