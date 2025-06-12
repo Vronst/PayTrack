@@ -59,6 +59,5 @@ jobs:
             --head lap \
             --title "Regression tests passed" \
             --body "Recent changes contained in this pull request has passed regressions tests." \
-            --draft=false
         env:
           GH_TOKEN: ${{ secrets.PRO_TOKEN }}
