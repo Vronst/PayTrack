@@ -3,7 +3,7 @@ import sys
 from .app.core import TextApp
 
 
-if __name__ == '__main__':
+def main():
     if '-t' in sys.argv:
         app: TextApp = TextApp()
         if '-d' in sys.argv:
@@ -23,3 +23,7 @@ if __name__ == '__main__':
         print("Possible commands:"
               "\n-t     starts text app"
               "\n-w     starts web app")
+
+
+if __name__ == '__main__':
+    main()
