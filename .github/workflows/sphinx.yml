@@ -35,7 +35,7 @@ jobs:
         run: | 
           python -m pip install --upgrade pip
           pip install uv
-          uv sync --frozen
+          uv sync --groups default,doc --frozen
           source .venv/bin/activate
       - name: Build HTML
         run: | 
