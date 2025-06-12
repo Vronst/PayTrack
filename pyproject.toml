@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [project.scripts]
-paytrack = "paytrack:manage.py"
+paytrack = "paytrack.manage:main"
 
 [build-system]
 requires = ["hatchling"]
