@@ -3,8 +3,6 @@ name: Run All Tests with PostgreSQL
 on:
   push:
     branches: [stage]
-  pull_request:
-    branches: [stage]
 
 jobs:
   test:
