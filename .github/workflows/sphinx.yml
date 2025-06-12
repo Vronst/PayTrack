@@ -23,10 +23,10 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Python 3.13
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
            python-version: "3.13"
       # Runs a single command using the runners shell
@@ -36,14 +36,15 @@ jobs:
       - name: Install dependencies
         run: | 
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install uv
+          uv sync --frozen
       - name: Build HTML
         run: | 
           cd docs/
           make html
 
       - name: Install ghp-import
-        run: pip install ghp-import
+        run: uv pip install ghp-import
 
       - name: Run ghp-import
         run: | 

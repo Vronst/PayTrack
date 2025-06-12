@@ -1,0 +1,4 @@
+Simple text app.
+- Allows user to create and manage taxes.
+- Tacks date of payments to inform if tax is already paid for this month.
+- Allows for edition of tax, payments and creation of new ones.

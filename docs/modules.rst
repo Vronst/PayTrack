@@ -1,9 +1,7 @@
-Rachunki
-========
+src
+===
 
 .. toctree::
    :maxdepth: 4
 
-   app
-   conftest
-   manage
+   paytrack
