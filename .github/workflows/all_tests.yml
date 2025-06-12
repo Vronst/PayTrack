@@ -1,10 +1,8 @@
-name: Run Regression Tests with PostgreSQL
+name: Run All Tests with PostgreSQL
 
 on:
   push:
-    branches: [lap]
-  pull_request:
-    branches: [lap]
+    branches: [stage]
 
 jobs:
   test:
@@ -49,15 +47,15 @@ jobs:
           uv sync --frozen
 
       - name: Run tests
-        run: uv run pytest -m regression
+        run: uv run pytest
 
-      - name: Create Pull Request to Stage
+      - name: Create Pull Request to Main
         if: success()
         run: |
           gh pr create \
-            --base stage \
-            --head lap \
+            --base main \
+            --head stage \
             --title "Regression tests passed" \
-            --body "Recent changes contained in this pull request has passed regressions tests." \
+            --body "Recent changes contained in this pull request has passed tests." \
         env:
           GH_TOKEN: ${{ secrets.PRO_TOKEN }}
