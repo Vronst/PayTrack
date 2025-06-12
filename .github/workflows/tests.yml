@@ -50,3 +50,15 @@ jobs:
 
       - name: Run tests
         run: uv run pytest -m regression
+
+      - name: Create Draft Pull Request to Stage
+       if: success()
+       run: |
+         gh pr create \
+           --base stage \
+           --head lap \
+           --title "Regression tests passed" \
+           --body "Recent changes contained in this pull request has passed regressions tests." \
+           --draft=false
+       env:
+         GH_TOKEN: ${{ secrets.PRO_TOKEN }}
