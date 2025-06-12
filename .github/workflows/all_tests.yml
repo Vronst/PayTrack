@@ -2,9 +2,9 @@ name: Run All Tests with PostgreSQL
 
 on:
   push:
-    branches: [main, stage]
+    branches: [stage]
   pull_request:
-    branches: [main, stage]
+    branches: [stage]
 
 jobs:
   test:
