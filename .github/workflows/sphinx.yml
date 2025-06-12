@@ -5,7 +5,7 @@ name: Build-sphinx-docs
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
-  pull_request:
+  push:
     branches: [ main ]
 
   # Allows you to run this workflow manually from the Actions tab
@@ -37,9 +37,9 @@ jobs:
           pip install uv
           uv sync --group doc --frozen
           uv sync --frozen
-          source .venv/bin/activate
       - name: Build HTML
         run: | 
+          source .venv/bin/activate
           cd docs/
           make html
 
@@ -48,6 +48,7 @@ jobs:
 
       - name: Run ghp-import
         run: | 
+          source .venv/bin/activate
           ghp-import -n -p -f docs/_build/html
 
       # Runs a set of commands using the runners shell
