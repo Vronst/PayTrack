@@ -51,7 +51,7 @@ jobs:
       - name: Run tests
         run: uv run pytest -m regression
 
-      - name: Create Draft Pull Request to Stage
+      - name: Create Pull Request to Stage
         if: success()
         run: |
           gh pr create \
