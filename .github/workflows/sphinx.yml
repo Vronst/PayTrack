@@ -38,6 +38,7 @@ jobs:
           uv sync --group doc --frozen
           uv sync --frozen
       - name: Build HTML
+        shell: bash
         run: | 
           source .venv/bin/activate
           cd docs/
