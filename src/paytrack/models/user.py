@@ -1,25 +1,29 @@
+from typing import TYPE_CHECKING
 from sqlalchemy import (
     ForeignKey,
     String,
     Boolean,
-    Table,
-    Column,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base
-
-
-association_included = Table(
-        "association_included",
-        Base.metadata,
-        Column("user_id", ForeignKey("user.id"), primary_key=True),
-        Column("included_user_id", ForeignKey("user.id"), primary_key=True)
+from .associations import (
+    association_transaction,
+    association_included,
+    association_receivers,
 )
+from .transaction import Transaction
+
+
+if TYPE_CHECKING:
+    from .receiver import Receiver
+    from .setting import Setting
+
+
 
 
 
 class User(Base):
-    __tablename__ = 'user'
+    __tablename__ = 'users'
 
     id: Mapped[int] = mapped_column(primary_key=True)
     company: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -29,12 +33,12 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(50), unique=True)
     phone: Mapped[str | None] = mapped_column(String(12), nullable=True)
     password: Mapped[str] = mapped_column(String, nullable=False)
-    parent_id: Mapped[int | None] = mapped_column(ForeignKey('user.id'), nullable=True)
+    parent_id: Mapped[int | None] = mapped_column(ForeignKey('users.id'), nullable=True)
 
     parent: Mapped["User"] = relationship(back_populates="subaccounts", remote_side=[id],
                                           lazy='selectin')
     subaccounts: Mapped[list['User']] = relationship(
-            back_populates='parent', cascade='all, delete-orphan',
+            back_populates='parent'
     )
 
     included: Mapped[list["User"]] = relationship(
@@ -49,6 +53,24 @@ class User(Base):
             primaryjoin=id ==association_included.c.included_user_id,
             secondaryjoin=id == association_included.c.user_id,
             lazy='selectin'
+    )
+
+    settings: Mapped['Setting'] = relationship(back_populates='owner', cascade='all, delete-orphan')
+
+    transactions: Mapped[list["Transaction"] | None] = relationship(back_populates='owner')
+
+    included_in_transactions: Mapped[list['Transaction'] | None] = relationship(
+            back_populates='included',
+            secondary=association_transaction,
+        primaryjoin=id == association_transaction.c.user_id,
+        secondaryjoin=Transaction.id == association_transaction.c.included_to_transaction
+    )
+
+    other_receivers: Mapped[list['Receiver'] | None] = relationship(
+            back_populates='included',
+            secondary=association_receivers,
+            primaryjoin=id == association_receivers.c.user_id,
+            secondaryjoin="Receiver.id == association_receivers.c.receiver_shared_with"
     )
 
     def __repr__(self) -> str:

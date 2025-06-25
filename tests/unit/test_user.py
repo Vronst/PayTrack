@@ -3,12 +3,10 @@ from paytrack.models import User
 
 
 class TestPositiveUser:
-    
+
     @pytest.mark.regression
-    def test_included_relationship(self, session) -> None:
-        u1 = User(name="John", surname="Smith", email="john@example.com", password="pw")
-        u2 = User(name="Jane", surname="Doe", email="jane@example.com", password="pw")
-        u3 = User(name="Mark", surname="Twain", email="mark@example.com", password="pw")
+    def test_included_relationship(self, session, users) -> None:
+        u1, u2, u3 = users
 
         u1.included.extend([u2, u3])
 
@@ -22,6 +20,28 @@ class TestPositiveUser:
         assert u1 in u3.included_in
 
         assert u2.included == []
+        assert u3.included == []
+
+    @pytest.mark.regression
+    def test_parent_and_child(self, session, users):
+        u1, u2, u3 = users 
+        
+        session.add_all([u1, u2, u3])
+        session.commit()
+        assert u1.subaccounts == []
+        u2.parent_id = u1.id 
+        session.add(u2)
+        session.commit()
+        assert u1.subaccounts == [u2]
+
+        u3.parent_id = u2.id 
+        session.add(u3)
+        session.commit()
+
+        assert u1.parent == None 
+        assert len(u1.subaccounts) == 1
+        assert u2.subaccounts == [u3]
+        assert u3.parent == u2
 
 
 class TestNegativeUser:
