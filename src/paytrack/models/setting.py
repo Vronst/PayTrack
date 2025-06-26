@@ -2,14 +2,14 @@ from typing import TYPE_CHECKING
 from sqlalchemy import (
     ForeignKey,
     String,
-    UniqueConstraint
+    # UniqueConstraint
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base
 
 
 if TYPE_CHECKING:
-    from .user import User
+    # from .user import User
     from .language import Language
 
 
@@ -22,8 +22,8 @@ class Setting(Base):
     type: Mapped[str] = mapped_column(String(15), default="standard")
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, unique=True)
 
-    owner: Mapped['User'] = relationship(back_populates='settings', single_parent=True)
+    # owner: Mapped['User'] = relationship(back_populates='settings', single_parent=True)
 
-    language: Mapped['Language'] = relationship(back_populates='settings')
+    language: Mapped['Language'] = relationship()  # back_populates='settings'
 
-__table_args__ = (UniqueConstraint("owner_id"),)
+# __table_args__ = (UniqueConstraint("owner_id"),)

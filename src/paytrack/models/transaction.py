@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from .user import User
     from .category import Category
     from .currency import Currency
+    from .receiver import Receiver
 
 
 class Transaction(Base):
@@ -26,6 +27,7 @@ class Transaction(Base):
     done: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     owner_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
     category_id: Mapped[int] = mapped_column(ForeignKey('categories.id'), nullable=False)
+    receiver_id: Mapped[int] = mapped_column(ForeignKey('receivers.id'), nullable=True)
     type: Mapped[str] = mapped_column(String(30), nullable=False)
     amount: Mapped[float] = mapped_column(Float, nullable=False)
     currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id'), nullable=False)
@@ -42,4 +44,6 @@ class Transaction(Base):
 
     category: Mapped['Category'] = relationship(back_populates='transactions')
 
-    currency: Mapped['Currency'] = relationship(back_populates='transactions')
+    currency: Mapped['Currency'] = relationship()  # back_populates='transactions'
+
+    receiver: Mapped['Receiver'] = relationship()  # back_populates='transactions'

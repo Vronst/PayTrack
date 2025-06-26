@@ -3,7 +3,7 @@ from sqlalchemy import (
     String,
     Float
 )
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 from .base import Base
 
 
@@ -19,4 +19,4 @@ class Currency(Base):
     name: Mapped[str] = mapped_column(String(20), nullable=False, unique=True)
     value: Mapped[float] = mapped_column(Float, nullable=False)
 
-    transactions: Mapped[list['Transaction']] = relationship(back_populates='currency')
+    # transactions: Mapped[list['Transaction']] = relationship(back_populates='currency')

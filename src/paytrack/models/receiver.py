@@ -10,6 +10,7 @@ from .associations import association_receivers
 
 if TYPE_CHECKING:
     from .user import User
+    # from .transaction import Transaction
 
 
 class Receiver(Base):
@@ -17,7 +18,7 @@ class Receiver(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     owner_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
-    reciver_name: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
+    name: Mapped[str] = mapped_column(String(50), nullable=False)
     
     included: Mapped[list['User'] | None] = relationship(
     back_populates='other_receivers',
@@ -25,3 +26,6 @@ class Receiver(Base):
         primaryjoin="User.id == association_receivers.c.user_id",
         secondaryjoin=id == association_receivers.c.receiver_shared_with
     )
+
+
+    # transactions: Mapped[list['Transaction']] = relationship(back_populates='receiver')

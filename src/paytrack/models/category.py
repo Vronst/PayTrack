@@ -13,6 +13,14 @@ class Category(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     root_category: Mapped[int] = mapped_column(ForeignKey('categories.id'), nullable=True)
-    name: Mapped[str | None] = mapped_column(String(15), nullable=True, unique=True)
+    name: Mapped[str | None] = mapped_column(String(15), nullable=True)
     
     transactions: Mapped[list['Transaction']] = relationship(back_populates='category')
+
+    root: Mapped['Category | None'] = relationship(
+        back_populates='subcategories',
+        remote_side=[id]
+    )
+
+    subcategories: Mapped[list['Category']] = relationship(back_populates='root')
+
