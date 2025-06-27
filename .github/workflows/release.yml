@@ -32,6 +32,7 @@ jobs:
       
       - name: Run release preparation script
         run: |
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
           release
 
       - name: Create release notes
