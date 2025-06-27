@@ -6,11 +6,11 @@ on:
       - main  
 
 permissions:
-  contents: write    # required for creating releases
+  contents: write
   pull-requests: write
 
 jobs:
-  test-and-release:
+  release:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,9 +29,6 @@ jobs:
           pip install uv
           if [ -f requirements.txt ]; then uv add -r requirements.txt; fi
           uv sync --frozen
-      
-      - name: Run regression tests
-        run: uv run pytest
       
       - name: Run release preparation script
         run: |

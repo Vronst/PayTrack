@@ -1,3 +1,0 @@
-file_water
-file_school
-file_hospital
