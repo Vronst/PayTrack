@@ -42,7 +42,7 @@ This project uses PostgreSQL, be sure you have it installed.
     POSTGRES_PASSWORD='your_postgres_password'
     POSTGRES_HOST='localhost'
     POSTGRES_PORT='5432'
-    POSTGRES_DB='your_database_name'
+    DataBase='your_database_name'
     LOGS_PATH='/path/to/logs/'
     ```
 

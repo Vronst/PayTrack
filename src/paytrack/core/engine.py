@@ -1,26 +1,23 @@
-from typing import TYPE_CHECKING
 from warnings import warn
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, Engine as EN
 from sqlalchemy.orm import sessionmaker, scoped_session
 import os
 from ..models.base import Base
 
 
-if TYPE_CHECKING:
-    from sqlalchemy import Engine as EN
-
-
 class Engine():
     """
             Creates, closes and manages:
-            - engine
+            - engine (either sqlite or postgres)
             - session
 
             Args:
             test (bool): if True swaps targeted database to one provided in test_db arg.
             test_db (str): database that should be targeted during tests
     """
-    def __init__(self, test: bool = False, test_db: str = ''):
+    engine: EN
+
+    def __init__(self, test: bool = False, test_db: str | None = None):
         self._session: scoped_session | None = None
         self.test = test
         self.POSTGRES_USER = os.getenv('POSTGRES_USER', None)
@@ -29,19 +26,19 @@ class Engine():
         self.POSTGRES_PORT = os.getenv('POSTGRES_PORT', None)
         if self.test:
             warn("Warning: Session is running on test database", RuntimeWarning)
-            self.POSTGRES_DB = test_db
+            self.DataBase = test_db if test_db else 'sqlite:///:memory:'
         else:
-            self.POSTGRES_DB = os.getenv('POSTGRES_DB', None)
+            self.DataBase = os.getenv('DataBase', None)
 
         if not all([
             self.POSTGRES_USER,
             self.POSTGRES_PASSWORD, 
             self.POSTGRES_HOST,
-            self.POSTGRES_DB,
+            self.DataBase,
             self.POSTGRES_PORT]):
             raise ValueError('One or more environment variables are not set')
 
-    def create_my_session(self) -> scoped_session:
+    def create_session(self) -> scoped_session:
         """
         Creates engine and binds it to the session that is returned by this function.
         If session already exists, returns the existing session.
@@ -52,11 +49,14 @@ class Engine():
         if self._session:
             return self._session
 
-        if not self.POSTGRES_DB:
+        if not self.DataBase:
             raise ValueError('Missing env variable - POSTGRESS_DB')
-        self.engine: EN = create_engine(
-            f'postgresql+psycopg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}'
-                f'@{self.POSTGRES_HOST}:{self.POSTGRES_PORT or 5432}/{self.POSTGRES_DB}')
+        if self.test and 'sqlite' in self.DataBase:
+            self.engine = create_engine(self.DataBase)
+        else:
+            self.engine = create_engine(
+                f'postgresql+psycopg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}'
+                    f'@{self.POSTGRES_HOST}:{self.POSTGRES_PORT or 5432}/{self.DataBase}')
         local_session: sessionmaker = sessionmaker(bind=self.engine)
         self._session = scoped_session(local_session)
 
@@ -75,7 +75,7 @@ class Engine():
     @property
     def session(self) -> scoped_session:
         if self._session == None:
-            self.create_my_session()
+            self.create_session()
             # TODO: log creating session without using method
         if self._session:
             return self._session  

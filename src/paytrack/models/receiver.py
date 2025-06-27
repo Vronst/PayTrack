@@ -3,18 +3,21 @@ from sqlalchemy import (
     ForeignKey,
     String,
 )
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
+from ..validators import MaxLengthValidator
 from .base import Base
 from .associations import association_receivers
 
 
 if TYPE_CHECKING:
     from .user import User
-    # from .transaction import Transaction
+    from ..validators import Validator
 
 
 class Receiver(Base):
     __tablename__ = 'receivers'
+    __name_length: int = 50
+    _name_validator: 'Validator' = MaxLengthValidator(__name_length)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     owner_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
@@ -29,3 +32,7 @@ class Receiver(Base):
 
 
     # transactions: Mapped[list['Transaction']] = relationship(back_populates='receiver')
+
+    @validates("name")
+    def validate_name(self, key, value):
+        return self._name_validator(key, value)

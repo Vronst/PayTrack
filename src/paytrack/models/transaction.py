@@ -7,9 +7,11 @@ from sqlalchemy import (
     String,
     Float
 )
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
+
 from .base import Base
 from .associations import association_transaction
+from ..validators import AmountValidator, ChoiceValidator, DateValidator
 
 
 if TYPE_CHECKING:
@@ -17,10 +19,16 @@ if TYPE_CHECKING:
     from .category import Category
     from .currency import Currency
     from .receiver import Receiver
+    from ..validators import Validator
 
 
 class Transaction(Base):
     __tablename__ = 'transactions'
+    __amount_min: float = 0
+    __type_choice: list[str] = ['income', 'payment']
+    _amount_validator: 'Validator' = AmountValidator(min_amount=__amount_min)
+    _type_validator: 'Validator' = ChoiceValidator(__type_choice)
+    _date_validator: 'Validator' = DateValidator()
 
     id: Mapped[int] = mapped_column(primary_key=True)
     date: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
@@ -47,3 +55,15 @@ class Transaction(Base):
     currency: Mapped['Currency'] = relationship()  # back_populates='transactions'
 
     receiver: Mapped['Receiver'] = relationship()  # back_populates='transactions'
+
+    @validates("type")
+    def validate_type(self, key: str, value: str) -> str:
+        return self._type_validator(key, value)
+
+    @validates("amount")
+    def validate_amount(self, key: str, value: float) -> float:
+        return self._amount_validator(key, value)
+
+    @validates("date")
+    def validate_date(self, key, value) -> datetime:
+        return self._date_validator(key, value)
