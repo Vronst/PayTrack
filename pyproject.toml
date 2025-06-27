@@ -1,7 +1,7 @@
 [project]
 name = "paytrack"
-version = "0.9.0"
-description = "Simple app to track your taxes. This project contains text app, and will contain webpage gui."
+version = "0.6.1"
+description = "Simple app to track your taxes. This project contains text app, and will webAPI."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
