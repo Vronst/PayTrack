@@ -3,7 +3,7 @@ name: Tests and Pull Request Pipeline
 on:
   push:
     branches:
-      - stage
+      - develop
 
 # needed permissions
 permissions:
