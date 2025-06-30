@@ -3,7 +3,7 @@ name: Tests and Pull Request Pipeline
 on:
   push:
     branches:
-      - develop
+      - lap
 
 # needed permissions
 permissions:
