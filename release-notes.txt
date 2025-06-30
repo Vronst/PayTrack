@@ -1,16 +1,3 @@
-# Patch 0.6.1
-
 ## About
-I'm currently reworking Paytrack (formerly Rachunki) from scratch.
-I found it interesting to work on and practice few new thind for me (pydantic, fastapi).
-
-Last version of Paytrack has been working, but was not advanced nor SOLID, nor modlular.
-This version is aiming to be so.
 
 ## Changes:
-- deleted old code and started from scratch 
-- made new models and rebuild old 
-- made validators to work with models 
-- deleted old tests, working on new ones (some unit are already done!)
-- created Dockerfile and docker-compose.yml
-- changed layout of project to be more modular, now it also look a lot cleaner
