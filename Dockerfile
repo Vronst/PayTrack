@@ -13,6 +13,9 @@ COPY pyproject.toml uv.lock README.md .
 
 COPY src/ ./src
 COPY tests ./tests
+COPY release-notes.txt ./release-notes.txt
+COPY release-title.txt ./release-title.txt
+COPY docs/ ./docs
 
 # ENV UV_ENV_FILE="/app/.venv"
 
@@ -22,5 +25,6 @@ EXPOSE 8080
 EXPOSE 8081
 EXPOSE 8082
 
-CMD ["uv", "run", "--frozen", "paytrack"]
+# CMD ["uv", "run", "--frozen", "paytrack"]
+CMD ["sleep", "infinity"]
 
