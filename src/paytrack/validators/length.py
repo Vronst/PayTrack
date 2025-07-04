@@ -12,7 +12,10 @@ class MaxLengthValidator(Validator):
         self.max_length = max_length
 
     def __call__(self, key, value):
-        if value and len(value) > self.max_length:
-            raise ValueError(f"{key.capitalize()} must be at most {self.max_length} characters")
+        try:
+            if value and len(value) > self.max_length:
+                raise ValueError(f"{key.capitalize()} must be at most {self.max_length} characters")
+        except TypeError:
+            raise TypeError(f"{key.capitalize()} must work with len() function")
         return value
 
