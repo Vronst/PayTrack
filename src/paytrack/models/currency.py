@@ -6,6 +6,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, validates
 from .base import Base
 from ..validators import MaxLengthValidator
+from ..constants.currency import CODE_LENGTH, NAME_LENGTH
 
 
 if TYPE_CHECKING:
@@ -14,17 +15,14 @@ if TYPE_CHECKING:
 
 class Currency(Base):
     __tablename__ = 'currencies'
-    __code_length: int = 3
-    __name_length: int = 20
-    _code_validator: 'Validator' = MaxLengthValidator(__code_length)
-    _name_validator: 'Validator' = MaxLengthValidator(__name_length)
+    _code_validator: 'Validator' = MaxLengthValidator(CODE_LENGTH)
+    _name_validator: 'Validator' = MaxLengthValidator(NAME_LENGTH)
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    code: Mapped[str] = mapped_column(String(__code_length), nullable=False, unique=True)
-    name: Mapped[str] = mapped_column(String(__name_length), nullable=False, unique=True)
+    code: Mapped[str] = mapped_column(String(CODE_LENGTH), nullable=False, unique=True)
+    name: Mapped[str] = mapped_column(String(NAME_LENGTH), nullable=False, unique=True)
     value: Mapped[float] = mapped_column(Float, nullable=False)
 
-    # transactions: Mapped[list['Transaction']] = relationship(back_populates='currency')
 
     @validates("code")
     def validates_code(self, key, value):

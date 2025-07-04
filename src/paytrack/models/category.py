@@ -3,6 +3,7 @@ from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates 
 from .base import Base 
 from ..validators import MaxLengthValidator
+from ..constants.category import NAME_LENGTH
 
 
 if TYPE_CHECKING:
@@ -12,12 +13,11 @@ if TYPE_CHECKING:
 
 class Category(Base):
     __tablename__ = 'categories'
-    __name_length: int = 15
-    _name_validator: 'Validator' = MaxLengthValidator(__name_length)
+    _name_validator: 'Validator' = MaxLengthValidator(NAME_LENGTH)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     root_category: Mapped[int] = mapped_column(ForeignKey('categories.id'), nullable=True)
-    name: Mapped[str | None] = mapped_column(String(__name_length), nullable=True)
+    name: Mapped[str | None] = mapped_column(String(NAME_LENGTH), nullable=True)
     
     transactions: Mapped[list['Transaction']] = relationship(back_populates='category')
 
