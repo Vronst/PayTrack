@@ -20,20 +20,30 @@ class DateValidator(Validator):
             self.future = future_date
             self.past = past_date
 
-    def __call__(self, key, value) -> datetime:
+    def __call__(self, key, value: str | datetime) -> datetime:
+        formats: list [str] = [
+                '%d-%m-%y',
+                '%d-%m-%Y',
+                '%Y-%m-%d',
+        ]
         if isinstance(value, str):
-            try:
-                value = datetime.fromisoformat(value)
-            except ValueError:
-                raise ValueError(f"Invalid datetime string format: {key}")
-        elif not isinstance(value, datetime):
-            raise ValueError(f"Expected datetime object or iso 8601 string, got {key}")
+            for format in formats:
+                try:
+                    value = datetime.strptime(value, format)
+                except ValueError:
+                    continue
+                else:
+                    break
+        
+        if not isinstance(value, datetime):
+            raise ValueError(f"Invalid datetime string format: {value}")
 
         now = datetime.now(tz=value.tzinfo) if value.tzinfo else datetime.now()
+        absolute = abs(value - now).days
 
-        if self.future and value < now and abs(value - now).days != 0:
+        if self.future and value < now and absolute != 0:
             raise ValueError(f"Expected future date, got {value}")
-        elif self.past and value > now and abs(value - now).days != 0:
+        elif self.past and value > now and absolute != 0:
             raise ValueError(f"Expected past date, got {value}")
 
         return value
