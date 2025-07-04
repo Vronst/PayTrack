@@ -43,13 +43,13 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     company: Mapped[bool] = mapped_column(Boolean, default=False)
-    name: Mapped[str] = mapped_column(String(30))
-    surname: Mapped[str] = mapped_column(String(30), nullable=True)
-    admin: Mapped[bool] = mapped_column(Boolean, default=False)
-    email: Mapped[str] = mapped_column(String(50), unique=True)
+    name: Mapped[str] = mapped_column(String(30), nullable=False)
+    surname: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    email: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     phone: Mapped[str | None] = mapped_column(String(12), nullable=True)
     password: Mapped[str] = mapped_column(String, nullable=False)
-    pin: Mapped[str] = mapped_column(String(6), nullable=True)
+    pin: Mapped[str | None] = mapped_column(String(6), nullable=True)
     premium: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     parent_id: Mapped[int | None] = mapped_column(ForeignKey('users.id'), nullable=True)
 
