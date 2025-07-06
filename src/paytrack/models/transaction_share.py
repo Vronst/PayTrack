@@ -11,7 +11,6 @@ if TYPE_CHECKING:
 
 class TransactionShare(Base):
     __tablename__ = 'transaction_shares'
-    __amount_min: float = 0.0
     _amount_validator: 'Validator' = AmountValidator(min_amount=__amount_min)
 
     id: Mapped[int] = mapped_column(primary_key=True)

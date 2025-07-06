@@ -3,6 +3,7 @@ from sqlalchemy import ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, validates
 from .base import Base 
 from ..validators import MaxLengthValidator
+from ..constants.translation import WORD_LENGTH 
 
 
 if TYPE_CHECKING:
@@ -11,8 +12,7 @@ if TYPE_CHECKING:
 
 class Translation(Base):
     __tablename__ = 'translations'
-    __word_length: int = 30
-    _word_validator: 'Validator' = MaxLengthValidator(__word_length)
+    _word_validator: 'Validator' = MaxLengthValidator(WORD_LENGTH)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     category_id: Mapped[int] = mapped_column(ForeignKey('categories.id'), nullable=False)
