@@ -7,3 +7,7 @@ class Validator[T](ABC):
     def __call__(self, key: str, value: T) -> T:
         pass
 
+    def validate(self, value: T) -> T:
+        return self('Value', value)
+
+

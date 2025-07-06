@@ -9,7 +9,6 @@ if TYPE_CHECKING:
 class BaseSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True, revalidate_instances='always')
 
-    id: int 
     created_at: 'datetime'
     updated_at: 'datetime | None' 
     deleted_at: 'datetime | None' 
@@ -17,3 +16,12 @@ class BaseSchema(BaseModel):
 
 class BaseReadSchema(BaseSchema):
     id: int
+
+
+class BaseUpdateSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True, revalidate_instances='always')
+
+    id: int | None = None
+    updated_at: 'datetime | None' = None
+    delete_at: 'datetime | None' = None
+

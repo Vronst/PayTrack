@@ -16,6 +16,12 @@ from ..validators import (
         AmountValidator,
         DateValidator,
 )
+from ..constants.subscription import (
+    NAME_LENGTH,
+    PERIOD_LENGTH,
+    MIN_AMOUNT,
+    PERIOD_CHOICES,
+)
 
 
 if TYPE_CHECKING:
@@ -27,21 +33,17 @@ if TYPE_CHECKING:
 
 class Subscription(Base):
     __tablename__ = 'subscriptions'
-    __name_length: int = 30
-    __period_length: int = 8
-    __amount_min: float = 0
-    __period_choices: list[str] = ['daily', 'monthly', 'yearly']
-    _name_validator: 'Validator' = MaxLengthValidator(__name_length)
-    _amount_validator: 'Validator' = AmountValidator(min_amount=__amount_min)
-    _period_validator: 'Validator' = ChoiceValidator(__period_choices)
+    _name_validator: 'Validator' = MaxLengthValidator(NAME_LENGTH)
+    _amount_validator: 'Validator' = AmountValidator(min_amount=MIN_AMOUNT)
+    _period_validator: 'Validator' = ChoiceValidator(PERIOD_CHOICES)
     _date_validator: 'Validator' = DateValidator(future_date=True)
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(__name_length), nullable=False)
+    name: Mapped[str] = mapped_column(String(NAME_LENGTH), nullable=False)
     amount: Mapped[float] = mapped_column(Float, nullable=False)
     currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id'), nullable=False)
     date: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, nullable=False)
-    period: Mapped[str] = mapped_column(String(__period_length), default=__period_choices[1], nullable=False)
+    period: Mapped[str] = mapped_column(String(PERIOD_LENGTH), default=PERIOD_CHOICES[1], nullable=False)
     shared: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     owner_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)

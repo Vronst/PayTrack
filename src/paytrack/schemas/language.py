@@ -1,8 +1,8 @@
 from typing import Annotated 
-from pydantic import BaseModel, ConfigDict, StringConstraints 
+from pydantic import StringConstraints 
 
 from ..constants.language import CODE_LENGTH, NAME_LENGTH
-from .base import BaseReadSchema, BaseSchema
+from .base import BaseReadSchema, BaseSchema, BaseUpdateSchema
 
 
 class LanguageSchema(BaseSchema):
@@ -16,3 +16,8 @@ class LanguageCreateSchema(LanguageSchema):
 
 class LanguageReadSchema(BaseReadSchema, LanguageSchema):
     pass
+
+
+class LanguageUpdateSchema(BaseUpdateSchema):
+    language_code: Annotated[str | None, StringConstraints(max_length=CODE_LENGTH)] = None
+    language_code: Annotated[str | None, StringConstraints(max_length=NAME_LENGTH)] = None
