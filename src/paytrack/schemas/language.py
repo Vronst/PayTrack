@@ -20,4 +20,4 @@ class LanguageReadSchema(BaseReadSchema, LanguageSchema):
 
 class LanguageUpdateSchema(BaseUpdateSchema):
     language_code: Annotated[str | None, StringConstraints(max_length=CODE_LENGTH)] = None
-    language_code: Annotated[str | None, StringConstraints(max_length=NAME_LENGTH)] = None
+    language_name: Annotated[str | None, StringConstraints(max_length=NAME_LENGTH)] = None

@@ -1,18 +1,24 @@
-from typing import TYPE_CHECKING, Annotated
-from pydantic import StringConstraints, Field
+from typing import Annotated
+from pydantic import StringConstraints, Field, model_validator
 
 from ..constants.category import NAME_LENGTH
 from .base import BaseSchema, BaseReadSchema, BaseUpdateSchema
-
-
-if TYPE_CHECKING:
-    from ..models import Transaction
-    from ..models import Category
+from ..models import Category
 
 
 class CategorySchema(BaseSchema):
     root_category: int | None = None
     name: Annotated[str | None, StringConstraints(max_length=NAME_LENGTH)] = None
+    custom: bool = False
+
+    @model_validator(mode='after')
+    def validate_name_if_custom(self) -> 'CategorySchema':
+        if self.custom and not self.name:
+            raise ValueError('Name for custom categories must be provided')
+        elif not self.custom and self.name:
+            raise ValueError('Name for non custom categories cannot be edited')
+        else:
+            return self
 
 
 class CategoryCreateSchema(CategorySchema):
@@ -20,12 +26,13 @@ class CategoryCreateSchema(CategorySchema):
 
 
 class CategoryReadSchema(BaseReadSchema, CategorySchema):
-    subcategories: list['CategoryReadSchema'] = Field(default_factory=list)
-    root: 'CategoryReadSchema | None ' = None
+    subcategories: list[Category] = Field(default_factory=list)
+    root_category: int | None = None
 
 
 class CategoryUpdateSchema(BaseUpdateSchema):
-    root: 'Category | None' = None
+    root_category: int | None = None
+    name: str | None = None
 
 
 
