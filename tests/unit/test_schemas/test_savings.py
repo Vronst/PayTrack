@@ -2,26 +2,35 @@ from pydantic import ValidationError
 import pytest
 from paytrack.schemas import SavingsCreateSchema, SavingsReadSchema, SavingsUpdateSchema
 
+# FIXME: fix this and DRY tests files above
+
+class TestSavingsCreate:
+
+    class TestValid:
+        def test_create(self):
+            data: dict = {
+                    'amount': 11.5,
+                    'currency_id': 1,
+                    'owner_id': 1,
+            }
+
+            SavingsCreateSchema(**data)
+
+        def test_create_with_budget(self):
+            data: dict = {
+                    'amount': 11.5,
+                    'currency_id': 1,
+                    'budget': 12.5,
+                    'owner_id': 1,
+            }
+
+            SavingsCreateSchema(**data)
+
+    class TestInvalid:
+
+
 
 class TestPositiveSavingsSchema:
-    def test_create(self):
-        data: dict = {
-                'amount': 11.5,
-                'currency_id': 1,
-                'owner_id': 1,
-        }
-
-        SavingsCreateSchema(**data)
-
-    def test_create_with_budget(self):
-        data: dict = {
-                'amount': 11.5,
-                'currency_id': 1,
-                'budget': 12.5,
-                'owner_id': 1,
-        }
-
-        SavingsCreateSchema(**data)
 
     def test_read(self):
         data: dict = {

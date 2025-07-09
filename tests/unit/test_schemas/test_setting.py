@@ -1,143 +1,132 @@
+from copy import deepcopy
 import pytest 
 from pydantic import ValidationError 
 
 from paytrack.schemas import SettingCreateSchema, SettingReadSchema, SettingUpdateSchema
 from paytrack.constants.setting import MODE_CHOICES
 
+create_params = [{
+        'mode': MODE_CHOICES[0],
+        'language_id': 1,
+        'owner_id': 1,
+}]
 
-class TestPositiveSettingSchema:
-    
-    def test_create(self):
-        data: dict = {
-                'mode': MODE_CHOICES[0],
-                'language_id': 1,
-                'owner_id': 1,
-        }
+read_params = deepcopy(create_params)
+read_params[0]['id'] = 1
 
-        SettingCreateSchema(**data)
+update_params = deepcopy(create_params)
+update_params[0].pop('owner_id')
 
-    def test_read(self):
-        data: dict = {
-                'id': 1,
-                'mode': MODE_CHOICES[0],
-                'language_id': 1,
-                'owner_id': 1,
-        }
-        
-        SettingReadSchema(**data)
+invalid_data = [ 
+    ('mode', 10),
+    ('language_id', 'str'),
+    ('owner_id', 'id')
+]
 
-    def test_update(self):
-        data: dict = {
-                'mode': MODE_CHOICES[0],
-                'language_id': 1,
-        }
-        
-        SettingUpdateSchema(**data)
-
-    def test_partial_update(self):
-        data: dict = {
-                'language_id': 1,
-        }
-        
-        SettingUpdateSchema(**data)
+missing_fields = [ 
+        'mode',
+        'language_id', 
+        'owner_id',
+]
 
 
-class TestNegativeSettingSchema:
-    
-    def test_create_missing_owner(self):
-        data: dict = {
-                'mode': MODE_CHOICES[0],
-                'language_id': 1,
-        }
+class TestSettingCreate:
 
-        with pytest.raises(ValidationError):
-            SettingCreateSchema(**data)
+    class TestValid:
 
-    def test_create_missing_language(self):
-        data: dict = {
-                'mode': MODE_CHOICES[0],
-                'owner_id': 1,
-        }
+        @pytest.mark.parametrize('value', create_params)
+        def test_create(self, value):
 
-        with pytest.raises(ValidationError):
-            SettingCreateSchema(**data)
-        pass 
+            SettingCreateSchema(**value)
 
-    def test_create_missing_mode(self):
-        data: dict = {
-                'language_id': 1,
-                'owner_id': 1,
-        }
+    class TestInvalid:
 
-        with pytest.raises(ValidationError):
-            SettingCreateSchema(**data)
-        
-    def test_create_invalid_mode(self):
-        data: dict = {
-                'mode': 'my_mode',
-                'language_id': 1,
-                'owner_id': 1,
-        }
+        @pytest.mark.parametrize('value', create_params)
+        @pytest.mark.parametrize('field,data', 
+                                 invalid_data, 
+                                 ids=lambda f: f'missing_{f}')
+        def test_create_invalid_data(self, value, data, field):
+            if field == 'id':
+                return 
+            data = deepcopy(value)
+            data[field] = data
 
-        with pytest.raises(ValidationError):
-            SettingCreateSchema(**data)
+            with pytest.raises(ValidationError):
+                SettingCreateSchema(**data)
 
-    def test_read_missing_id(self):
-        data: dict = {
-                'mode': MODE_CHOICES[0],
-                'language_id': 1,
-                'owner_id': 1,
-        }
-        
-        with pytest.raises(ValidationError):
-            SettingReadSchema(**data)
+        @pytest.mark.parametrize('value', create_params)
+        @pytest.mark.parametrize('field', missing_fields, ids=lambda f: f'missing_{f}')
+        def test_create_missing(self, value, field):
+            data = deepcopy(value)
+            data.pop(field)
 
-    def test_read_missing_mode(self):
-        data: dict = {
-                'id': 1,
-                'language_id': 1,
-                'owner_id': 1,
-        }
-        
-        with pytest.raises(ValidationError):
-            SettingReadSchema(**data)
+            with pytest.raises(ValidationError):
+                SettingCreateSchema(**data)
 
-    def test_read_invalid_mode(self):
-        data: dict = {
-                'id': 1,
-                'mode': 'my_mode',
-                'language_id': 1,
-                'owner_id': 1,
-        }
-        
-        with pytest.raises(ValidationError):
-            SettingReadSchema(**data)
 
-    def test_read_missing_language(self):
-        data: dict = {
-                'id': 1,
-                'mode': MODE_CHOICES[0],
-                'owner_id': 1,
-        }
-        
-        with pytest.raises(ValidationError):
-            SettingReadSchema(**data)
+class TestSettingRead:
 
-    def test_update_invalid_mode(self):
-        data: dict = {
-                'mode': 'mode',
-                'language_id': 1,
-        }
-        
-        with pytest.raises(ValidationError):
+    class TestValid:
+
+        @pytest.mark.parametrize('value', read_params)
+        def test_read(self, value):
+            
+            SettingReadSchema(**value)
+
+    class TestInvalid:
+
+        @pytest.mark.parametrize('value', create_params)
+        @pytest.mark.parametrize('field,data', 
+                                 invalid_data, 
+                                 ids=lambda f: f'missing_{f}')
+        def test_create_invalid_data(self, value, data, field):
+            data = deepcopy(value)
+            data[field] = data
+
+            with pytest.raises(ValidationError):
+                SettingReadSchema(**data)
+
+        @pytest.mark.parametrize('value', create_params)
+        @pytest.mark.parametrize('field', missing_fields, ids=lambda f: f'missing_{f}')
+        def test_create_missing(self, value, field):
+            data = deepcopy(value)
+            data.pop(field)
+
+            with pytest.raises(ValidationError):
+                SettingReadSchema(**data)
+
+
+class TestSettingUpdate:
+
+    class TestValid:
+
+        @pytest.mark.parametrize('value', update_params)
+        def test_update(self, value):
+            
+            SettingUpdateSchema(**value)
+
+        @pytest.mark.parametrize('value', update_params)
+        def test_partial_update(self, value):
+            data = deepcopy(value)
+            data.pop('language_id')
+            
             SettingUpdateSchema(**data)
 
-    def test_update_language_str(self):
-        data: dict = {
-                'mode': MODE_CHOICES[0],
-                'language_id': 'id',
-        }
-        
-        with pytest.raises(ValidationError):
-            SettingUpdateSchema(**data)
+    class TestInvalid:
+
+        @pytest.mark.parametrize('value', update_params)
+        def test_update_invalid_mode(self, value):
+            data = deepcopy(value)
+            data['mode'] = 'invalid mode'
+            
+            with pytest.raises(ValidationError):
+                SettingUpdateSchema(**data)
+
+        @pytest.mark.parametrize('value', update_params)
+        def test_update_language_str(self, value):
+            data = deepcopy(value)
+            data['language_id'] = 'str'
+            
+            with pytest.raises(ValidationError):
+                SettingUpdateSchema(**data)
 

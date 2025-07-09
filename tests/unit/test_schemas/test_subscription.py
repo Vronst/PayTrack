@@ -7,18 +7,6 @@ from paytrack.schemas import SubscriptionCreateSchema, SubscriptionReadSchema, S
 from paytrack.constants.subscription import PERIOD_CHOICES, MIN_AMOUNT
 
 
-# pytestmark = pytest.mark.parametrize(
-#         'field,value', [ 
-#             ('name', 'name'),
-#             ('amount', 12.5), 
-#             ('currency_id', 1),
-#             ('period', PERIOD_CHOICES[0]),
-#             ('shared', False),
-#             ('active', True),
-#             ('date', datetime.now().date()),
-#             ('owner_id', 1)
-#     ]
-# )
 create_param = [{
     'name': 'name',
     'amount': 12.5, 
@@ -36,8 +24,35 @@ read_param[0]['id'] = 1
 read_param[0]['included'] = []
 read_param[0]['subscription_share'] = []
 
+update_param = deepcopy(create_param)
+update_param[0].pop('owner_id')
 
-class TestSubsriptionCreate:
+missing_fields = [
+            'name',
+            'amount', 
+            'currency_id', 
+            'id', 
+            'period', 
+            'shared',
+            'active',
+            'date', 
+            'owner_id'
+                   ]
+
+invalid_values = [ 
+    ('name', 10),
+    ('amount', 'amount'),
+    ('currency_id', 'id'),
+    ('id', 'id'),
+    ('period', 'invalid period'),
+    ('shared', 10),
+    ('active', 10),
+    ('date', 'invalid date'),
+    ('owner_id', 'id')
+]
+
+
+class TestSubscriptionCreate:
     class TestValid:
 
         @pytest.mark.parametrize('value', create_param)
@@ -47,66 +62,13 @@ class TestSubsriptionCreate:
     class TestInvalid:
 
         @pytest.mark.parametrize('value', create_param)
-        def test_create_missing_name(self, value):
+        @pytest.mark.parametrize('field', missing_fields, ids=lambda f: f'missing_{f}')
+        def test_missing_field(self, field, value):
+            if field == 'id':
+                return
             data = deepcopy(value)
-            data.pop('name')
-
-            with pytest.raises(ValidationError):
-                SubscriptionCreateSchema(**data)
-
-        @pytest.mark.parametrize('value', create_param)
-        def test_create_missing_amount(self, value):
-            data = deepcopy(value)
-            data.pop('amount')
-
-            with pytest.raises(ValidationError):
-                SubscriptionCreateSchema(**data)
-
-        @pytest.mark.parametrize('value', create_param)
-        def test_create_missing_currency_id(self, value):
-            data = deepcopy(value)
-            data.pop('currency_id')
-
-            with pytest.raises(ValidationError):
-                SubscriptionCreateSchema(**data)
-
-        @pytest.mark.parametrize('value', create_param)
-        def test_create_missing_period(self, value):
-            data = deepcopy(value)
-            data.pop('period')
-
-            with pytest.raises(ValidationError):
-                SubscriptionCreateSchema(**data)
-
-        @pytest.mark.parametrize('value', create_param)
-        def test_create_missing_shared(self, value):
-            data = deepcopy(value)
-            data.pop('shared')
-
-            with pytest.raises(ValidationError):
-                SubscriptionCreateSchema(**data)
-
-        @pytest.mark.parametrize('value', create_param)
-        def test_create_missing_active(self, value):
-            data = deepcopy(value)
-            data.pop('active')
-
-            with pytest.raises(ValidationError):
-                SubscriptionCreateSchema(**data)
-
-        @pytest.mark.parametrize('value', create_param)
-        def test_create_missing_date(self, value):
-            data = deepcopy(value)
-            data.pop('date')
-
-            with pytest.raises(ValidationError):
-                SubscriptionCreateSchema(**data)
-
-        @pytest.mark.parametrize('value', create_param)
-        def test_create_missing_owner_id(self, value):
-            data = deepcopy(value)
-            data.pop('owner_id')
-
+            data.pop(field)
+            
             with pytest.raises(ValidationError):
                 SubscriptionCreateSchema(**data)
 
@@ -119,65 +81,14 @@ class TestSubsriptionCreate:
                 SubscriptionCreateSchema(**data)
 
         @pytest.mark.parametrize('value', create_param)
-        def test_create_invalid_period(self, value):
+        @pytest.mark.parametrize('field,data',
+                                 invalid_values,
+                                 ids=lambda f: f'invalid_{f}')
+        def test_create_invalid_data(self, value, field, data):
             data = deepcopy(value)
-            data['period'] = 'custom'
-
-            with pytest.raises(ValidationError):
-                SubscriptionCreateSchema(**data)
-
-        @pytest.mark.parametrize('value', create_param)
-        def test_create_name_int(self, value):
-            data = deepcopy(value)
-            data['name'] = 1
-
-            with pytest.raises(ValidationError):
-                SubscriptionCreateSchema(**data)
-
-        @pytest.mark.parametrize('value', create_param)
-        def test_create_amount_str(self, value):
-            data = deepcopy(value)
-            data['amount'] = 'value'
-
-            with pytest.raises(ValidationError):
-                SubscriptionCreateSchema(**data)
-
-        @pytest.mark.parametrize('value', create_param)
-        def test_create_currency_id_str(self, value):
-            data = deepcopy(value)
-            data['currency_id'] = 'str'
-
-            with pytest.raises(ValidationError):
-                SubscriptionCreateSchema(**data)
-
-        @pytest.mark.parametrize('value', create_param)
-        def test_create_shared_str(self, value):
-            data = deepcopy(value)
-            data['shared'] = 'maybe'
-
-            with pytest.raises(ValidationError):
-                SubscriptionCreateSchema(**data)
-
-        @pytest.mark.parametrize('value', create_param)
-        def test_create_active_str(self, value):
-            data = deepcopy(value)
-            data['active'] = 'probably'
-
-            with pytest.raises(ValidationError):
-                SubscriptionCreateSchema(**data)
-
-        @pytest.mark.parametrize('value', create_param)
-        def test_create_date_str(self, value):
-            data = deepcopy(value)
-            data['date'] = 'date'
-
-            with pytest.raises(ValidationError):
-                SubscriptionCreateSchema(**data)
-
-        @pytest.mark.parametrize('value', create_param)
-        def test_create_owner_id_str(self, value):
-            data = deepcopy(value)
-            data['owner_id'] = 'id'
+            if field == 'id':
+                return
+            data[field] = data
 
             with pytest.raises(ValidationError):
                 SubscriptionCreateSchema(**data)
@@ -193,145 +104,64 @@ class TestSubscriptionRead:
     class TestInvalid:
 
         @pytest.mark.parametrize('value', read_param)
-        def test_read_missing_name(self, value):
+        @pytest.mark.parametrize('field', missing_fields, ids=lambda f: f'missing_{f}')
+        def test_missing_field(self, field, value):
             data = deepcopy(value)
-            data.pop('name')
+            data.pop(field)
             
             with pytest.raises(ValidationError):
                 SubscriptionReadSchema(**data)
 
-        @pytest.mark.parametrize('value', read_param)
-        def test_read_missing_amount(self, value):
+        @pytest.mark.parametrize('value', create_param)
+        @pytest.mark.parametrize('field,data',
+                                 invalid_values,
+                                 ids=lambda f: f'invalid_{f}')
+        def test_create_invalid_data(self, value, field, data):
             data = deepcopy(value)
-            data.pop('amount')
-            
-            with pytest.raises(ValidationError):
-                SubscriptionReadSchema(**data)
-
-        @pytest.mark.parametrize('value', read_param)
-        def test_read_missing_currency_id(self, value):
-            data = deepcopy(value)
-            data.pop('currency_id')
-            
-            with pytest.raises(ValidationError):
-                SubscriptionReadSchema(**data)
-
-        @pytest.mark.parametrize('value', read_param)
-        def test_read_missing_id(self, value):
-            data = deepcopy(value)
-            data.pop('id')
-            
-            with pytest.raises(ValidationError):
-                SubscriptionReadSchema(**data)
-
-        @pytest.mark.parametrize('value', read_param)
-        def test_read_missing_period(self, value):
-            data = deepcopy(value)
-            data.pop('period')
-            
-            with pytest.raises(ValidationError):
-                SubscriptionReadSchema(**data)
-
-        @pytest.mark.parametrize('value', read_param)
-        def test_read_missing_shared(self, value):
-            data = deepcopy(value)
-            data.pop('shared')
-            
-            with pytest.raises(ValidationError):
-                SubscriptionReadSchema(**data)
-
-        @pytest.mark.parametrize('value', read_param)
-        def test_read_missing_active(self, value):
-            data = deepcopy(value)
-            data.pop('active')
-            
-            with pytest.raises(ValidationError):
-                SubscriptionReadSchema(**data)
-
-        @pytest.mark.parametrize('value', read_param)
-        def test_read_missing_date(self, value):
-            data = deepcopy(value)
-            data.pop('date')
-            
-            with pytest.raises(ValidationError):
-                SubscriptionReadSchema(**data)
-
-        @pytest.mark.parametrize('value', read_param)
-        def test_read_missing_owner_id(self, value):
-            data = deepcopy(value)
-            data.pop('owner_id')
-            
-            with pytest.raises(ValidationError):
-                SubscriptionReadSchema(**data)
-
-        @pytest.mark.parametrize('value', read_param)
-        def test_read_name_int(self, value):
-            data = deepcopy(value)
-            data['name'] = 1
-            
-            with pytest.raises(ValidationError):
-                SubscriptionReadSchema(**data)
-
-        @pytest.mark.parametrize('value', read_param)
-        def test_read_amount_str(self, value):
-            data = deepcopy(value)
-            data['amount'] = 'str'
-            
-            with pytest.raises(ValidationError):
-                SubscriptionReadSchema(**data)
-
-        @pytest.mark.parametrize('value', read_param)
-        def test_read_currency_id_str(self, value):
-            data = deepcopy(value)
-            data['currency_id'] = 'str'
-            
-            with pytest.raises(ValidationError):
-                SubscriptionReadSchema(**data)
-
-        @pytest.mark.parametrize('value', read_param)
-        def test_read_invalid_period(self, value):
-            data = deepcopy(value)
-            data['period'] = 'my period'
+            data[field] = data
 
             with pytest.raises(ValidationError):
                 SubscriptionReadSchema(**data)
 
-        @pytest.mark.parametrize('value', read_param)
-        def test_read_shared_str(self, value):
-            data = deepcopy(value)
-            data['shared'] = 'could be'
-            
-            with pytest.raises(ValidationError):
-                SubscriptionReadSchema(**data)
-
-        @pytest.mark.parametrize('value', read_param)
-        def test_read_active_str(self, value):
-            data = deepcopy(value)
-            data['active'] = 'possum'
-            
-            with pytest.raises(ValidationError):
-                SubscriptionReadSchema(**data)
-
-        @pytest.mark.parametrize('value', read_param)
-        def test_read_date_str(self, value):
-            data = deepcopy(value)
-            data['date'] = 'date'
-            
-            with pytest.raises(ValidationError):
-                SubscriptionReadSchema(**data)
-
-        @pytest.mark.parametrize('value', read_param)
-        def test_read_owner_id_str(self, value):
-            data = deepcopy(value)
-            data['owner_id'] = 'str'
-            
-            with pytest.raises(ValidationError):
-                SubscriptionReadSchema(**data)
 
 class TestSubscriptionUpdate:
 
     class TestValid:
-        pass
+        
+        @pytest.mark.parametrize('value', update_param)
+        def test_update(self, value):
+            SubscriptionUpdateSchema(**value)
+
+        @pytest.mark.parametrize('value', update_param)
+        def test_partial_update(self, value):
+            data = deepcopy(value)
+            data.pop('shared')
+            data.pop('currency_id')
+            data.pop('name')
+
+            SubscriptionUpdateSchema(**data)
 
     class TestInvalid:
-        pass
+
+        @pytest.mark.parametrize('value', update_param)
+        def test_update_name_int(self, value):
+            data = deepcopy(value)
+            data['name'] = 10
+
+            with pytest.raises(ValidationError):
+                SubscriptionUpdateSchema(**data)
+            
+        @pytest.mark.parametrize('value', create_param)
+        @pytest.mark.regression
+        @pytest.mark.parametrize('field,data',
+                                 invalid_values,
+                                 ids=lambda f: f'invalid_{f}')
+        def test_create_invalid_data(self, value, field, data):
+            if field in ['id', 'owner_id']:
+                return
+            data = deepcopy(value)
+            data[field] = data
+
+            with pytest.raises(ValidationError):
+                SubscriptionUpdateSchema(**data)
+

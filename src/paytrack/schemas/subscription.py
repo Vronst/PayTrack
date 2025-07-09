@@ -45,4 +45,5 @@ class SubscriptionUpdateSchema(BaseUpdateSchema):
     period: Annotated[str | None, AfterValidator(validator)] = None
     shared: bool | None = None
     active: bool | None = None
-    date: datetime | None = None
+    date: Annotated[datetime | None, AfterValidator(date_validator)] = None
+
