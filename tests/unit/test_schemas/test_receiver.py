@@ -1,145 +1,140 @@
+from copy import deepcopy
 from pydantic import ValidationError
 import pytest
 
+from .conftest import skip_test
 from paytrack.schemas import ReceiverCreateSchema, ReceiverReadSchema, ReceiverUpdateSchema
 
 
-class TestPositiveReceiverSchema:
-    
-    def test_create(self):
-        data: dict = {
-                'owner_id': 1,
-                'name': 'name',
+create_param = [ 
+        {
+        'owner_id': 1,
+        'name': 'name'
         }
-        
-        ReceiverCreateSchema(**data)
-        
-    def test_create_casting(self):
-        data: dict = {
-                'owner_id': '1',
-                'name': 'name',
-        }
-        
-        ReceiverCreateSchema(**data)
+]
 
-    def test_create_extras(self):
-        data: dict = {
-                'owner_id': 1,
-                'name': 'name',
-                'some': 'extras'
-        }
-        
-        ReceiverCreateSchema(**data)
+read_param = deepcopy(create_param)
+read_param[0]['id'] = 1
+read_param[0]['included'] = []
 
-    def test_read_extras(self):
-        data: dict = {
-                'owner_id': 1,
-                'name': 'name',
-                'some': 'extras',
-                'id': 1,
-                'included': []
-        }
-        
-        ReceiverReadSchema(**data)
+update_param = deepcopy(create_param)
+update_param[0].pop('owner_id')
+update_param[0]['included'] = []
 
-    def test_read(self):
-        data: dict = {
-                'owner_id': 1,
-                'name': 'name',
-                'id': 1,
-                'included': []
-        }
-        
-        ReceiverReadSchema(**data)
-    
+missing_field = [ 
+        'owner_id',
+        'name',
+        'included'
+]
 
-    def test_update_extras(self):
-        data: dict = {
-                'name': 'name',
-                'included': [],
-                'some': 'extras'
-        }
+invalid = [ 
+        ('owner_id', 'owner_id'),
+        ('name', 2),
+        ('included', 'included')
+]
+
+
+@pytest.mark.parametrize('value', create_param)
+class TestReceiverCreate:
+
+    class TestValid:
+        def test_create(self, value):
+            
+            ReceiverCreateSchema(**value)
+
+    class TestInvalid:
+
+        @pytest.mark.parametrize(
+            'field',
+            missing_field,
+            ids=lambda f: f"ReceiverCreate_missing_field_{f}"
+        )
+        def test_create_missing_field(self, value, field):
+            skip_test(field, ['included'])
+            data = deepcopy(value)
+            data.pop(field)
+
+            with pytest.raises(ValidationError):
+                ReceiverCreateSchema(**data)
+
+        @pytest.mark.parametrize(
+                'field, invalid_data',
+                invalid,
+            ids=lambda f: f'ReceiverCreate_missing_field_{f}'
+        )
+        def test_create_invalid_data(self, value, field, invalid_data):
+            skip_test(field, ['included'])
+            data = deepcopy(value)
+            data[field] = invalid_data 
+
+            with pytest.raises(ValidationError):
+                ReceiverCreateSchema(**data)
+
+
+@pytest.mark.parametrize('value', read_param)
+class TestReceiverRead:
+
+    class TestValid:
+        def test_read(self, value):
+            
+            ReceiverReadSchema(**value)
+
+    class TestInvalid:
+
+        @pytest.mark.parametrize(
+                'field',
+                missing_field,
+                ids=lambda f: f'ReceiverRead_missing_field_{f}'
+        )
+        def test_read_missing_field(self, value, field):
+            data = deepcopy(value)
+            data.pop(field)
+
+            with pytest.raises(ValidationError):
+                ReceiverReadSchema(**data)
+
+        @pytest.mark.parametrize(
+                'field, invalid_data', 
+                invalid,
+                ids=lambda f: f'ReceiverRead_invalid_{f}'
+        )
+        def test_read_invalid_data(self, value, field, invalid_data):
+            data = deepcopy(value)
+            data[field] = invalid_data 
+
+            with pytest.raises(ValidationError):
+                ReceiverReadSchema(**data)
+
+
+@pytest.mark.parametrize('value', update_param)
+class TestReceiverUpdate:
+
+    class TestValid:
+
+        def test_update(self, value):
+            
+            ReceiverUpdateSchema(**value)
+
+    def test_partial_update(self, value):
+        data = deepcopy(value)
+        data.pop('name')
         
         ReceiverUpdateSchema(**data)
 
-    def test_update(self):
-        data: dict = {
-                'name': 'name',
-                'included': [],
-        }
-        
-        ReceiverUpdateSchema(**data)
 
-    def test_partial_update(self):
-        data: dict = {
-                'name': 'name',
-        }
-        
-        ReceiverUpdateSchema(**data)
+    class TestInvalid:
+
+        @pytest.mark.parametrize(
+                'field, invalid_data',
+                invalid,
+                ids=lambda f: f"ReceiverUpdate_invalid_{f}")
+        def test_update_invalid(self, value, field, invalid_data):
+            skip_test(field, ['id', 'owner_id'])
+            data = deepcopy(value)
+            data[field] = invalid_data
+
+            with pytest.raises(ValidationError):
+                ReceiverUpdateSchema(**data)
 
 
-class TestNegativeReceiverSchema:
-
-    def test_create_missing_owner(self):
-        data: dict = {
-                'name': 'name',
-        }
-        
-        with pytest.raises(ValidationError):
-            ReceiverCreateSchema(**data)
-
-    def test_create_missing_name(self):
-        data: dict = {
-            'owner_id': 1
-        }
-        
-        with pytest.raises(ValidationError):
-            ReceiverCreateSchema(**data)
-
-    def test_read_no_id(self):
-        data: dict = {
-                'owner_id': 1,
-                'name': 'name',
-                'included': []
-        }
-       
-        with pytest.raises(ValidationError):
-            ReceiverReadSchema(**data)
-
-    def test_read_owner_id_str(self):
-        data: dict = {
-                'owner_id': 'should be int',
-                'name': 'name',
-                'included': []
-        }
-       
-        with pytest.raises(ValidationError):
-            ReceiverReadSchema(**data)
-
-    def test_create_owner_id_str(self):
-        data: dict = {
-                'owner_id': 'should be int',
-                'name': 'name',
-        }
-       
-        with pytest.raises(ValidationError):
-            ReceiverCreateSchema(**data)
-
-    def test_update_name_int(self):
-        data: dict = {
-                'name': 11,
-                'included': []
-        }
-       
-        with pytest.raises(ValidationError):
-            ReceiverUpdateSchema(**data)
-
-    def test_update_included_str(self):
-        data: dict = {
-                'name': 'name',
-                'included': '[]'
-        }
-       
-        with pytest.raises(ValidationError):
-            ReceiverUpdateSchema(**data)
 

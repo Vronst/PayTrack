@@ -3,6 +3,7 @@ from datetime import datetime
 import pytest 
 from pydantic import ValidationError 
 
+from .conftest import skip_test
 from paytrack.schemas import SubscriptionCreateSchema, SubscriptionReadSchema, SubscriptionUpdateSchema 
 from paytrack.constants.subscription import PERIOD_CHOICES, MIN_AMOUNT
 
@@ -63,8 +64,7 @@ class TestSubscriptionCreate:
 
         @pytest.mark.parametrize('field', missing_fields, ids=lambda f: f'SubscriptionCreaet_missing_{f}')
         def test_missing_field(self, field, value):
-            if field == 'id':
-                pytest.skip("Field not used in this context")
+            skip_test(field, ['id'])
             data = deepcopy(value)
             data.pop(field)
             
@@ -83,8 +83,7 @@ class TestSubscriptionCreate:
                                  ids=lambda f: f'SubscriptionCreate_invalid_value_{f}')
         def test_create_invalid_data(self, value, field, data):
             data = deepcopy(value)
-            if field == 'id':
-                pytest.skip("Field not used in this context")
+            skip_test(field, ['id'])
             data[field] = data
 
             with pytest.raises(ValidationError):
@@ -125,7 +124,9 @@ class TestSubscriptionUpdate:
     class TestValid:
         
         def test_update(self, value):
-            SubscriptionUpdateSchema(**value)
+            result = SubscriptionUpdateSchema(**value)
+            assert (result.updated_at - datetime.now()).total_seconds() < 5
+
 
         def test_partial_update(self, value):
             data = deepcopy(value)
@@ -133,7 +134,8 @@ class TestSubscriptionUpdate:
             data.pop('currency_id')
             data.pop('name')
 
-            SubscriptionUpdateSchema(**data)
+            result = SubscriptionUpdateSchema(**data)
+            assert (result.updated_at - datetime.now()).total_seconds() < 5
 
     class TestInvalid:
 
@@ -149,8 +151,7 @@ class TestSubscriptionUpdate:
                                  invalid_values,
                                  ids=lambda f: f'SubscriptionUpdate_invalid_value_{f}')
         def test_create_invalid_data(self, value, field, data):
-            if field in ['id', 'owner_id']:
-                pytest.skip("Field not used in this context")
+            skip_test(field, ['id', 'owner_id'])
             data = deepcopy(value)
             data[field] = data
 

@@ -26,8 +26,7 @@ class CategoryCreateSchema(CategorySchema):
 
 
 class CategoryReadSchema(BaseReadSchema, CategorySchema):
-    subcategories: list[Category] = Field(default_factory=list)
-    root_category: int | None = None
+    subcategories: Annotated[list[Category], Field(strict=True)] 
 
 
 class CategoryUpdateSchema(BaseUpdateSchema):

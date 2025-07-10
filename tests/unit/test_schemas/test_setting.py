@@ -1,7 +1,9 @@
-from copy import deepcopy
 import pytest 
+from copy import deepcopy
+from datetime import datetime
 from pydantic import ValidationError 
 
+from .conftest import skip_test
 from paytrack.schemas import SettingCreateSchema, SettingReadSchema, SettingUpdateSchema
 from paytrack.constants.setting import MODE_CHOICES
 
@@ -45,8 +47,7 @@ class TestSettingCreate:
                                  invalid_data, 
                                  ids=lambda f: f'SettingCreate_invalid_value_{f}')
         def test_create_invalid_data(self, value, data, field):
-            if field == 'id':
-                return 
+            skip_test(field, ['id'])
             data = deepcopy(value)
             data[field] = data
 
@@ -99,13 +100,15 @@ class TestSettingUpdate:
 
         def test_update(self, value):
             
-            SettingUpdateSchema(**value)
+            result = SettingUpdateSchema(**value)
+            assert (result.updated_at - datetime.now()).total_seconds() < 5
 
         def test_partial_update(self, value):
             data = deepcopy(value)
             data.pop('language_id')
             
-            SettingUpdateSchema(**data)
+            result = SettingUpdateSchema(**data)
+            assert (result.updated_at - datetime.now()).total_seconds() < 5
 
     class TestInvalid:
 

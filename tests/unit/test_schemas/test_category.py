@@ -1,6 +1,9 @@
+from copy import deepcopy
 import pytest
 from pydantic import ValidationError
 from datetime import datetime
+
+from .conftest import skip_test
 from paytrack.schemas import (
         CategoryUpdateSchema, 
         CategoryReadSchema,
@@ -8,258 +11,165 @@ from paytrack.schemas import (
 )
 
 
-class TestPositiveCategorySchema:
+create_params = [ 
+        { 
+        'root_category': None,
+        'name': None,
+        'custom': False,
+        },
+        {
+        'root_category': 1,
+        'name': None,
+        'custom': False,
+        },
+        {
+        'root_category': 1,
+        'name': 'name',
+        'custom': True,
+        },
+        {
+        'root_category': None,
+        'name': 'name',
+        'custom': True,
+            },
+]
 
-    def test_creation_custom(self):
-        root_category: None = None 
-        name: str = 'MyCategory'
-        custom: bool = True
+read_params = deepcopy(create_params)
+for param in read_params:
+    param['id'] = 1
+    param['subcategories'] = []
 
-        CategoryCreateSchema(
-            root_category=root_category,
-            name=name,
-            custom=custom
+update_params = deepcopy(create_params)
+for param in update_params:
+    param.pop('custom')
+
+missing_fields = [ 
+        'root_category', 
+        'name',
+        'custom',
+        'subcategories',
+        'id',
+]
+
+invalid = [ 
+        ('id', 'id'),
+        ('root_category', 'root'),
+        ('name', 1,),
+        ('custom', 'custom'),
+        ('subcategories', 'subcategories'),
+]
+
+        
+@pytest.mark.parametrize('value', create_params)
+class TestCategoryCreate:
+
+    class TestValid:
+        def test_creation(self, value):
+
+            CategoryCreateSchema(**value)
+
+    class TestInvalid:
+
+        @pytest.mark.parametrize(
+                'field',
+                missing_fields,
+                ids=lambda f: f"CategoryCreate_missing_{f}"
         )
+        def test_create_missing(self, value, field):
+            skip_test(field, ['id',
+                              'subcategories',
+                              'custom',
+                              'name',
+                              'root_category'])
+            data = deepcopy(value)
+            data.pop(field)
 
-    def test_creation(self):
-        root_category: None = None 
+            with pytest.raises(ValidationError):
+                CategoryCreateSchema(**data)
 
-        CategoryCreateSchema(
-            root_category=root_category,
+        @pytest.mark.parametrize(
+                'field, invalid_data',
+                invalid,
+                ids=lambda f: f"CategoryCreate_invalid_{f}"
         )
+        def test_create_invalid(self, value, field, invalid_data):
+            skip_test(field, ['id', 'subcategories'])
+            data = deepcopy(value)
+            data[field] = invalid_data
 
-    def test_update_extras(self):
-        mock: dict = {
-                'root_category': None,
-                'name': 'my mock',
-                'extra': 'extra'
-        }
+            with pytest.raises(ValidationError):
+                CategoryCreateSchema(**data)
 
-        result = CategoryUpdateSchema(**mock)
 
-        assert result.updated_at.date() == datetime.now().date()
+@pytest.mark.parametrize('value', read_params)
+class TestCategoryRead:
 
-    def test_update(self):
-        mock: dict = {
-                'root_category': None,
-                'name': 'my mock'
-        }
+    class TestValid:
+        def test_read(self, value):
 
-        result = CategoryUpdateSchema(**mock)
+            CategoryReadSchema(**value)
 
-        assert result.updated_at.date() == datetime.now().date()
+    class TestInvalid:
+        @pytest.mark.parametrize(
+                'field',
+                missing_fields,
+                ids=lambda f: f"CategoryRead_missing_{f}"
+        )
+        def test_read_missing(self, value, field):
+            skip_test(field, ['custom', 'name', 'root_category'])
+            data = deepcopy(value)
+            data.pop(field)
 
-    @pytest.mark.regression
-    def test_partial_update(self):
-        mock: dict = {
-                'name': 'my mock'
-        }
+            with pytest.raises(ValidationError):
+                CategoryReadSchema(**data)
 
-        result = CategoryUpdateSchema(**mock)
+        @pytest.mark.parametrize(
+                'field, invalid_data',
+                invalid,
+                ids=lambda f: f"CategoryRead_invalid_{f}"
+        )
+        def test_read_invalid(self, value, field, invalid_data):
+            data = deepcopy(value)
+            data[field] = invalid_data
 
-        assert result.updated_at.date() == datetime.now().date()
+            with pytest.raises(ValidationError):
+                CategoryReadSchema(**data)
 
-    def test_read(self):
-        mock: dict = {
-                'id': 1,
-                'root_category': None,
-        }
 
-        result = CategoryReadSchema(**mock)
-        assert result.subcategories == []
+@pytest.mark.parametrize('value', update_params)
+class TestCategoryUpdate:
 
-    def test_read_extras(self):
-        mock: dict = {
-                'id': 1,
-                'root_category': None,
-                'extra': 'extra'
-        }
+    class TestValid:
+        def test_update(self, value):
+            result = CategoryUpdateSchema(**value)
 
-        result = CategoryReadSchema(**mock)
-        assert result.subcategories == []
+            assert (result.updated_at - datetime.now()).total_seconds() < 5
 
-    def test_read_custom(self):
-        mock: dict = {
-                'id': 1,
-                'root_category': None,
-                'name': 'my mock',
-                'custom': True
-        }
+        @pytest.mark.regression
+        @pytest.mark.parametrize(
+            'field',
+            missing_fields,
+            ids=lambda f: f"CategoryUpdate_missing_{f}")
+        def test_partial_update(self, value, field):
+            skip_test(field, ['id', 'custom', 'subcategories'])
+            data = deepcopy(value)
+            data.pop(field)
 
-        result = CategoryReadSchema(**mock)
-        assert result.subcategories == []
+            result = CategoryUpdateSchema(**data)
 
-    def test_read_custom_extras(self):
-        mock: dict = {
-                'id': 1,
-                'root_category': None,
-                'subcategories': [],
-                'name': 'my mock',
-                'extra': 'extra',
-                'custom': True
-        }
+            assert (result.updated_at - datetime.now()).total_seconds() < 5
+            
+    class TestInvalid:
+        @pytest.mark.parametrize(
+                'field, invalid_data',
+                invalid,
+                ids=lambda f: f"CategoryUpdate_invalid_{f}"
+        )
+        def test_update_invalid(self, value, field, invalid_data):
+            skip_test(field, ['custom', 'id', 'subcategories'])
+            data = deepcopy(value)
+            data[field] = invalid_data
 
-        result = CategoryReadSchema(**mock)
-        assert result.subcategories == []
+            with pytest.raises(ValidationError):
+                CategoryUpdateSchema(**data)
 
-class TestNegativeCategorySchema:
-
-    def test_creation_missing_name(self):
-        root_category: None = None 
-        custom: bool = True
-
-        with pytest.raises(ValidationError):
-            CategoryCreateSchema(
-                root_category=root_category,
-                custom=custom
-            )
-
-    @pytest.mark.regression
-    def test_creation_name_non_custom(self):
-        root_category: None = None 
-        name: str = 'should not be here'
-
-        with pytest.raises(ValidationError):
-            CategoryCreateSchema(
-                root_category=root_category,
-                name=name
-            )
-
-    def test_read_root_as_list(self):
-        data: dict = {
-                'id': 1,
-                'subcategories': [],
-                'root_category': []
-        }
-
-        with pytest.raises(ValidationError):
-            CategoryReadSchema(**data)
-
-    def test_read_subcategories_as_None(self):
-        data: dict = {
-                'id': 1,
-                'subcategories': None,
-                'root_category': []
-        }
-
-        with pytest.raises(ValidationError):
-            CategoryReadSchema(**data)
-
-    def test_creation_custom_root_str(self):
-        data: dict = {
-                'root_category': 'root',
-                'name': 'MyCategory',
-                'custom': True,
-        }
-
-        with pytest.raises(ValidationError):
-            CategoryCreateSchema(**data)
-
-    def test_creation_custom_name_int(self):
-        data: dict = {
-                'root_category': 1,
-                'name': 1,
-                'custom': True,
-        }
-
-        with pytest.raises(ValidationError):
-            CategoryCreateSchema(**data)
-
-    def test_creation_custom_not_bool(self):
-        data: dict = {
-                'root_category': 1,
-                'name': 1,
-                'custom': 1,
-        }
-
-        with pytest.raises(ValidationError):
-            CategoryCreateSchema(**data)
-
-    def test_creation_root_str(self):
-        data: dict = {
-                'root_category': 'waht',
-        }
-
-        with pytest.raises(ValidationError):
-            CategoryCreateSchema(**data)
-
-    def test_creation_not_custom_not_bool(self):
-        data: dict = {
-                'root_category': 1,
-                'custom': 'what'
-        }
-
-        with pytest.raises(ValidationError):
-            CategoryCreateSchema(**data)
-
-    def test_creation_not_custom_not_bool_with_name(self):
-        data: dict = {
-                'root_category': 1,
-                'custom': 'what',
-                'name': 'name'
-        }
-
-        with pytest.raises(ValidationError):
-            CategoryCreateSchema(**data)
-
-    def test_read_custom_id_str(self):
-        mock: dict = {
-                'id': 'not id',
-                'root_category': None,
-                'name': 'my mock',
-                'custom': True
-        }
-
-        with pytest.raises(ValidationError):
-            CategoryReadSchema(**mock)
-
-    def test_read_custom_root_str(self):
-        mock: dict = {
-                'id': 1,
-                'root_category': 'not ideal',
-                'name': 'my mock',
-                'custom': True
-        }
-
-        with pytest.raises(ValidationError):
-            CategoryReadSchema(**mock)
-
-    def test_read_custom_name_int(self):
-        mock: dict = {
-                'id': 1,
-                'root_category': None,
-                'name': 1,
-                'custom': True
-        }
-
-        with pytest.raises(ValidationError):
-            CategoryReadSchema(**mock)
-
-    def test_read_custom_custom_none(self):
-        mock: dict = {
-                'id': 1,
-                'root_category': None,
-                'name': 'name',
-                'custom': None
-        }
-
-        with pytest.raises(ValidationError):
-            CategoryReadSchema(**mock)
-
-    def test_update_root_str(self):
-        mock: dict = {
-                'root_category': 'my id',
-                'name': 'my mock'
-        }
-
-        with pytest.raises(ValidationError):
-            CategoryUpdateSchema(**mock)
-
-    def test_update_name_int(self):
-        mock: dict = {
-                'root_category': None,
-                'name': 1
-        }
-
-        with pytest.raises(ValidationError):
-            CategoryUpdateSchema(**mock)

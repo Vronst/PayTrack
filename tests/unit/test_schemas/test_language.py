@@ -1,112 +1,136 @@
+from copy import deepcopy
+from datetime import datetime
 from pydantic import ValidationError
 import pytest
+from .conftest import skip_test
 from paytrack.schemas import LanguageCreateSchema, LanguageReadSchema, LanguageUpdateSchema
 
-
-class TestPositiveLanguageSchema:
-    
-    def test_create(self):
-        data: dict = {
-                'language_code': 'PL',
-                'language_name': 'Polski'
+create_param: list[dict] = [ 
+        {
+        'language_code': 'PL',
+        'language_name': 'Polski'
         }
+]
 
-        LanguageCreateSchema(**data)
+read_param = deepcopy(create_param)
+read_param[0]['id'] = 1
 
-    def test_read(self):
-        data: dict = {
-                'language_code': 'PL',
-                'language_name': 'Polski',
-                'id': 1
-        }
+update_param = deepcopy(create_param)
 
-        LanguageReadSchema(**data)
+missing_fields = [ 
+        'language_name',
+        'language_code',
+        'id',
+]
 
-    def test_update(self):
-        data: dict = {
-                'language_code': 'PL',
-                'language_name': 'Polski'
-        }
-
-        LanguageUpdateSchema(**data)
-
-    def test_partial_update(self):
-        data: dict = {
-                'language_name': 'Polski'
-        }
-
-        LanguageUpdateSchema(**data)
+invalid = [ 
+        ('id', 'id'),
+        ('language_code', 1),
+        ('language_name', 2),
+]
 
 
-class TestNegativeLanguageSchema:
+@pytest.mark.parametrize('value', create_param)
+class TestLangaugeCreate:
 
-    def test_creation_missing_code(self):
-        data: dict = {
-                'language_name': 'Polski'
-        }
+    class TestValid:
+        def test_create(self, value):
 
-        with pytest.raises(ValidationError):
-            LanguageCreateSchema(**data)
+            LanguageCreateSchema(**value)
 
-    def test_creation_missing_name(self):
-        data: dict = {
-                'language_code': 'PL',
-        }
-
-        with pytest.raises(ValidationError):
-            LanguageCreateSchema(**data)
-
-    def test_read_missing_id(self):
-        data: dict = {
-                'language_code': 'PL',
-                'language_name': 'Polski'
-        }
-
-        with pytest.raises(ValidationError):
-            LanguageReadSchema(**data)
-
-    def test_create_name_int(self):
-        data: dict = {
-                'language_code': 'PL',
-                'language_name': 11
-        }
+    class TestInvalid:
         
-        with pytest.raises(ValidationError):
-            LanguageCreateSchema(**data)
+        @pytest.mark.parametrize(
+                'field', 
+                missing_fields,
+                ids=lambda f: f"LanguageCreate_missing_{f}"
+        )
+        def test_create_missing_field(self, value, field):
+            skip_test(field, ['id'])
+            data = deepcopy(value)
+            data.pop(field)
 
-    def test_create_code_int(self):
-        data: dict = {
-                'language_code': 11,
-                'language_name': 'name'
-        }
+            with pytest.raises(ValidationError):
+                LanguageCreateSchema(**data)
 
-        with pytest.raises(ValidationError):
-            LanguageCreateSchema(**data)
+        @pytest.mark.parametrize(
+                'field, invalid_data',
+                invalid,
+                ids=lambda f: f'LanguageCreate_invalid_{f}'
+        )
+        def test_create_invalid_data(self, value, field, invalid_data):
+            skip_test(field, ['id'])
+            data = deepcopy(value)
+            data[field] = invalid_data 
 
-    def test_read_wrong_type_id(self):
-        data: dict = {
-                'language_code': 'PL',
-                'language_name': 'Polski',
-                'id': 'not int'
-        }
+            with pytest.raises(ValidationError):
+                LanguageCreateSchema(**data)
 
-        with pytest.raises(ValidationError):
-            LanguageReadSchema(**data)
 
-    def test_update_code_int(self):
-        data: dict = {
-                'language_code': 11,
-                'language_name': 'Polski'
-        }
+@pytest.mark.parametrize('value', read_param)
+class TestLangaugeRead:
 
-        with pytest.raises(ValidationError):
-            LanguageUpdateSchema(**data)
-        
-    def test_update_name_int(self):
-        data: dict = {
-                'language_code': 'PL',
-                'language_name': 11
-        }
-        
-        with pytest.raises(ValidationError):
-            LanguageUpdateSchema(**data)
+    class TestValid: 
+
+        def test_read(self, value):
+
+            LanguageReadSchema(**value)
+
+    class TestInvalid:
+
+        @pytest.mark.parametrize(
+                'field', 
+                missing_fields,
+                ids=lambda f: f"LanguageRead_missing_{f}"
+        )
+        def test_read_missing_field(self, value, field):
+            data = deepcopy(value)
+            data.pop(field)
+
+            with pytest.raises(ValidationError):
+                LanguageReadSchema(**data)
+
+        @pytest.mark.parametrize(
+                'field, invalid_data',
+                invalid,
+                ids=lambda f: f'LanguageRead_invalid_{f}'
+        )
+        def test_read_invalid_data(self, value, field, invalid_data):
+            data = deepcopy(value)
+            data[field] = invalid_data 
+
+            with pytest.raises(ValidationError):
+                LanguageReadSchema(**data)
+
+
+@pytest.mark.parametrize('value', update_param)
+class TestLangaugeUpdate:
+
+    class TestValid:
+        def test_update(self, value):
+
+            result = LanguageUpdateSchema(**value)
+            assert (result.updated_at - datetime.now()).total_seconds() < 5
+
+        def test_partial_update(self, value):
+            data = deepcopy(value)
+            data.pop('language_code')
+
+            result = LanguageUpdateSchema(**data)
+            assert (result.updated_at - datetime.now()).total_seconds() < 5
+
+    class TestInvalid:
+        @pytest.mark.parametrize(
+                'field, invalid_data',
+                invalid,
+                ids=lambda f: f'LanguageRead_invalid_{f}'
+        )
+        def test_update_invalid_data(self, value, field, invalid_data):
+            skip_test(field, ['id'])
+            data = deepcopy(value)
+            data[field] = invalid_data 
+
+            with pytest.raises(ValidationError):
+                LanguageUpdateSchema(**data)
+
+

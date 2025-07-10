@@ -1,9 +1,10 @@
 from copy import deepcopy
+from datetime import datetime
 from pydantic import ValidationError
 import pytest
+from .conftest import skip_test
 from paytrack.schemas import SavingsCreateSchema, SavingsReadSchema, SavingsUpdateSchema
 
-# FIXME: fix this and DRY tests files above
 create_param = [{
         'amount': 11.5,
         'currency_id': 1,
@@ -17,6 +18,7 @@ read_param[0]['included'] = []
 update_param = deepcopy(create_param)
 
 missing_fields = [ 
+    'id',
     'owner_id',
     'currency_id',
     'amount',
@@ -53,9 +55,8 @@ class TestSavingsCreate:
             missing_fields,
             ids=lambda f: f"SavingsCreate_missing_{f}",
         )
-        def test_missing_field(self, value, field):
-            if field == 'included':
-                pytest.skip("Field not used in this context")
+        def test_create_missing_field(self, value, field):
+            skip_test(field, ['included', 'id'])
             data = deepcopy(value)
             data.pop(field)
 
@@ -68,8 +69,7 @@ class TestSavingsCreate:
             ids=lambda f: f"SavingsCreate_invalid_value_{f}",
         )
         def test_invalid_values(self, value, field, invalid_value):
-            if field == 'id':
-                pytest.skip('Field not used in this context')
+            skip_test(field, ['id', 'included'])
             data = deepcopy(value)
             data[field] = invalid_value
 
@@ -89,8 +89,7 @@ class TestSavingsRead:
             ids=lambda f: f"SavingsRead_missing_{f}",
         )
         def test_missing_field(self, value, field):
-            if field == 'included':
-                pytest.skip("Included has default factory, therefore is skipped")
+            skip_test(field, ['included'])
             data = deepcopy(value)
             data.pop(field)
 
@@ -119,11 +118,13 @@ class TestSavingsUpdate:
             data = deepcopy(value)
             data['budget'] = 15.5
 
-            SavingsUpdateSchema(**data)
+            result = SavingsUpdateSchema(**data)
+            assert (result.updated_at - datetime.now()).total_seconds() < 5
 
         def test_partial_update(self, value):
 
-            SavingsUpdateSchema(**value)
+            result = SavingsUpdateSchema(**value)
+            assert (result.updated_at - datetime.now()).total_seconds() < 5
 
 
     class TestInvalid:
@@ -135,8 +136,7 @@ class TestSavingsUpdate:
         )
 
         def test_invalid_values(self, value, field, invalid_value):
-            if field in ['id', 'owner_id']:
-                pytest.skip(f"Field {field} not used in this context")
+            skip_test(field, ['id', 'owner_id'])
             data = deepcopy(value)
             data[field] = invalid_value
 

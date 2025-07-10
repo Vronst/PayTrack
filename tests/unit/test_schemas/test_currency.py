@@ -1,195 +1,142 @@
+from copy import deepcopy
+from datetime import datetime
 from pydantic import ValidationError
 import pytest
+from .conftest import skip_test
 from paytrack.schemas import CurrencyCreateSchema, CurrencyReadSchema, CurrencyUpdateSchema 
 
 
-class TestPositiveCurrencySchema:
 
-    def test_creation(self):
-        data: dict = {
-                'code': 'PLN',
-                'name': 'Złoty',
-                'value': 12.5
+
+create_param = [ 
+        {
+        'code': 'PLN',
+        'name': 'Złoty',
+        'value': 12.5
         }
+]
 
-        CurrencyCreateSchema(**data)
+read_param = deepcopy(create_param)
+read_param[0]['id'] = 1 
 
-    def test_creation_extras(self):
-        data: dict = {
-                'code': 'PLN',
-                'name': 'Złoty',
-                'value': 12.5,
-                'some': 'extras'
-        }
+update_param = deepcopy(create_param)
 
-        CurrencyCreateSchema(**data)
+missing_fields = [ 
+        'code',
+        'id',
+        'name',
+        'value',
+]
 
-    def test_update(self):
-        data: dict = {
-                'name': 'Złocisz',
-                'code': 'ZŁC',
-                'value': 999
-        }
-
-        CurrencyUpdateSchema(**data)
-
-    def test_partial_update(self):
-        data: dict = {
-                'name': 'Złocisz',
-        }
-
-        CurrencyUpdateSchema(**data)
-
-    def test_read(self):
-        data: dict = {
-                'id': 1,
-                'code': 'PLN',
-                'name': "złoty",
-                'value': 1
-        }
-
-        CurrencyReadSchema(**data)
+invalid = [ 
+        ('code', 1),
+        ('name', 2),
+        ('value', 'value'),
+        ('id', 'id'),
+]
 
 
-class TestNegativeCurrencySchema:
+@pytest.mark.parametrize('value', create_param)
+class TestCurrencyCreate:
 
-    def test_create_missing_code(self):
-        data: dict = {
-                'name': 'złoty',
-                'value': 11
-        }
+    class TestValid:
+        def test_creation(self, value):
 
-        with pytest.raises(ValidationError):
-            CurrencyCreateSchema(**data)
+            CurrencyCreateSchema(**value)
 
-    def test_create_missing_name(self):
-        data: dict = {
-                'value': 11,
-                'code': 'PLN'
-        }
+    class TestInvalid:
 
-        with pytest.raises(ValidationError):
-            CurrencyCreateSchema(**data)
+        @pytest.mark.parametrize(
+                'field',
+                missing_fields,
+                ids=lambda f: f"CurrencyCreate_missing_{f}")
+        def test_create_missing(self, value, field):
+            skip_test(field, ['id'])
 
-    def test_create_missing_value(self):
-        data: dict = {
-                'name': 'złoty',
-                'code': 'PLN'
-        }
+            data = deepcopy(value)
+            data.pop(field)
 
-        with pytest.raises(ValidationError):
-            CurrencyCreateSchema(**data)
+            with pytest.raises(ValidationError):
+                CurrencyCreateSchema(**data)
 
-    def test_read_missing_id(self):
-        data: dict = {
-                'code': 'PLN',
-                'name': "złoty",
-                'value': 1
-        }
+        @pytest.mark.parametrize(
+                'field, invalid_data',
+                invalid,
+                ids=lambda f: f'CurrencyCreate_invalid_{f}')
+        def test_create_invalid_data(self, value, field, invalid_data):
+            skip_test(field, ['id'])
 
-        with pytest.raises(ValidationError):
-            CurrencyReadSchema(**data)
-            
-    def test_creation_code_int(self):
-        data: dict = {
-                'code': 11,
-                'name': 'Złoty',
-                'value': 12.5,
-        }
+            data = deepcopy(value)
+            data[field] = invalid_data 
 
-        with pytest.raises(ValidationError):
-            CurrencyCreateSchema(**data)
+            with pytest.raises(ValidationError):
+                CurrencyCreateSchema(**data)
 
-    def test_creation_name_int(self):
-        data: dict = {
-                'code': 'PLN',
-                'name': 11,
-                'value': 12.5,
-        }
 
-        with pytest.raises(ValidationError):
-            CurrencyCreateSchema(**data)
+@pytest.mark.parametrize('value', read_param)
+class TestCurrencyRead:
 
-    def test_creation_value_str(self):
-        data: dict = {
-                'code': 'PLN',
-                'name': 'Złoty',
-                'value': 'some value'
-        }
+    class TestValid:
+        def test_read(self, value):
 
-        with pytest.raises(ValidationError):
-            CurrencyCreateSchema(**data)
+            CurrencyReadSchema(**value)
 
-    def test_read_id_str(self):
-        data: dict = {
-                'id': 'id',
-                'code': 'PLN',
-                'name': "złoty",
-                'value': 1
-        }
+    class TestInvalid:
+        @pytest.mark.parametrize(
+                'field',
+                missing_fields,
+                ids=lambda f: f"CurrencyRead_missing_{f}")
+        def test_read_missing(self, value, field):
+            data = deepcopy(value)
+            data.pop(field)
 
-        with pytest.raises(ValidationError):
-            CurrencyReadSchema(**data)
-            
-    def test_read_code_int(self):
-        data: dict = {
-                'id': 1,
-                'code': 1,
-                'name': "złoty",
-                'value': 1
-        }
+            with pytest.raises(ValidationError):
+                CurrencyReadSchema(**data)
 
-        with pytest.raises(ValidationError):
-            CurrencyReadSchema(**data)
+        @pytest.mark.parametrize(
+                'field, invalid_data',
+                invalid,
+                ids=lambda f: f'CurrencyRead_invalid_{f}')
+        def test_read_invalid_data(self, value, field, invalid_data):
+            data = deepcopy(value)
+            data[field] = invalid_data 
 
-    def test_read_name_int(self):
-        data: dict = {
-                'id': 1,
-                'code': 'PLN',
-                'name': 1,
-                'value': 1
-        }
+            with pytest.raises(ValidationError):
+                CurrencyReadSchema(**data)
 
-        with pytest.raises(ValidationError):
-            CurrencyReadSchema(**data)
 
-    def test_read_value_str(self):
-        data: dict = {
-                'id': 1,
-                'code': 'PLN',
-                'name': "złoty",
-                'value': 'some value'
-        }
+@pytest.mark.parametrize('value', update_param)
+class TestCurrencyUpdate:
 
-        with pytest.raises(ValidationError):
-            CurrencyReadSchema(**data)
+    class TestValid:
+        def test_update(self, value):
 
-    def test_update_name_int(self):
-        data: dict = {
-                'name': 1,
-                'code': 'ZŁC',
-                'value': 999
-        }
+            result = CurrencyUpdateSchema(**value)
+            assert (result.updated_at - datetime.now()).total_seconds() < 5
 
-        with pytest.raises(ValidationError):
-            CurrencyUpdateSchema(**data)
+        @pytest.mark.parametrize(
+                'field',
+                missing_fields,
+                ids=lambda f: f"CurrencyUpdate_missing_{f}")
+        def test_partial_update(self, value, field):
+            skip_test(field, ['id'])
+            data = deepcopy(value)
+            data.pop(field)
 
-    def test_update_code_int(self):
-        data: dict = {
-                'name': 'Złocisz',
-                'code': 1,
-                'value': 999
-        }
+            result = CurrencyUpdateSchema(**data)
+            assert (result.updated_at - datetime.now()).total_seconds() < 5
 
-        with pytest.raises(ValidationError):
-            CurrencyUpdateSchema(**data)
+    class TestInvalid:
+        @pytest.mark.parametrize(
+                'field, invalid_data',
+                invalid,
+                ids=lambda f: f'CurrencyUpdate_invalid_{f}')
+        def test_update_invalid_data(self, value, field, invalid_data):
+            skip_test(field, ['id'])
+            data = deepcopy(value)
+            data[field] = invalid_data 
 
-    def test_update_value_str(self):
-        data: dict = {
-                'name': 'Złocisz',
-                'code': 'ZŁC',
-                'value': 'value'
-        }
+            with pytest.raises(ValidationError):
+                CurrencyUpdateSchema(**data)
 
-        with pytest.raises(ValidationError):
-            CurrencyUpdateSchema(**data)
+

@@ -16,7 +16,7 @@ class ReceiverCreateSchema(ReceiverSchema):
 
 
 class ReceiverReadSchema(BaseReadSchema, ReceiverSchema):
-    included: list[User] | None = None
+    included: list[User]
 
 
 class ReceiverUpdateSchema(BaseUpdateSchema):
