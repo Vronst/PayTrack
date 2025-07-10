@@ -30,21 +30,20 @@ missing_fields = [
 ]
 
 
+@pytest.mark.parametrize('value', create_params)
 class TestSettingCreate:
 
     class TestValid:
 
-        @pytest.mark.parametrize('value', create_params)
         def test_create(self, value):
 
             SettingCreateSchema(**value)
 
     class TestInvalid:
 
-        @pytest.mark.parametrize('value', create_params)
         @pytest.mark.parametrize('field,data', 
                                  invalid_data, 
-                                 ids=lambda f: f'missing_{f}')
+                                 ids=lambda f: f'SettingCreate_invalid_value_{f}')
         def test_create_invalid_data(self, value, data, field):
             if field == 'id':
                 return 
@@ -54,8 +53,7 @@ class TestSettingCreate:
             with pytest.raises(ValidationError):
                 SettingCreateSchema(**data)
 
-        @pytest.mark.parametrize('value', create_params)
-        @pytest.mark.parametrize('field', missing_fields, ids=lambda f: f'missing_{f}')
+        @pytest.mark.parametrize('field', missing_fields, ids=lambda f: f'SettingCreate_missing_{f}')
         def test_create_missing(self, value, field):
             data = deepcopy(value)
             data.pop(field)
@@ -64,21 +62,20 @@ class TestSettingCreate:
                 SettingCreateSchema(**data)
 
 
+@pytest.mark.parametrize('value', read_params)
 class TestSettingRead:
 
     class TestValid:
 
-        @pytest.mark.parametrize('value', read_params)
         def test_read(self, value):
             
             SettingReadSchema(**value)
 
     class TestInvalid:
 
-        @pytest.mark.parametrize('value', create_params)
         @pytest.mark.parametrize('field,data', 
                                  invalid_data, 
-                                 ids=lambda f: f'missing_{f}')
+                                 ids=lambda f: f'SettingRead_invalid_value_{f}')
         def test_create_invalid_data(self, value, data, field):
             data = deepcopy(value)
             data[field] = data
@@ -86,8 +83,7 @@ class TestSettingRead:
             with pytest.raises(ValidationError):
                 SettingReadSchema(**data)
 
-        @pytest.mark.parametrize('value', create_params)
-        @pytest.mark.parametrize('field', missing_fields, ids=lambda f: f'missing_{f}')
+        @pytest.mark.parametrize('field', missing_fields, ids=lambda f: f'SettingRead_missing_{f}')
         def test_create_missing(self, value, field):
             data = deepcopy(value)
             data.pop(field)
@@ -96,16 +92,15 @@ class TestSettingRead:
                 SettingReadSchema(**data)
 
 
+@pytest.mark.parametrize('value', update_params)
 class TestSettingUpdate:
 
     class TestValid:
 
-        @pytest.mark.parametrize('value', update_params)
         def test_update(self, value):
             
             SettingUpdateSchema(**value)
 
-        @pytest.mark.parametrize('value', update_params)
         def test_partial_update(self, value):
             data = deepcopy(value)
             data.pop('language_id')
@@ -114,7 +109,6 @@ class TestSettingUpdate:
 
     class TestInvalid:
 
-        @pytest.mark.parametrize('value', update_params)
         def test_update_invalid_mode(self, value):
             data = deepcopy(value)
             data['mode'] = 'invalid mode'
@@ -122,7 +116,6 @@ class TestSettingUpdate:
             with pytest.raises(ValidationError):
                 SettingUpdateSchema(**data)
 
-        @pytest.mark.parametrize('value', update_params)
         def test_update_language_str(self, value):
             data = deepcopy(value)
             data['language_id'] = 'str'

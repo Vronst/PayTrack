@@ -1,240 +1,145 @@
+from copy import deepcopy
 from pydantic import ValidationError
 import pytest
 from paytrack.schemas import SavingsCreateSchema, SavingsReadSchema, SavingsUpdateSchema
 
 # FIXME: fix this and DRY tests files above
+create_param = [{
+        'amount': 11.5,
+        'currency_id': 1,
+        'owner_id': 1,
+}]
 
+read_param = deepcopy(create_param)
+read_param[0]['id'] = 1
+read_param[0]['included'] = []
+
+update_param = deepcopy(create_param)
+
+missing_fields = [ 
+    'owner_id',
+    'currency_id',
+    'amount',
+    'included',
+]
+
+invalid_values = [
+          ('id', 'id'),
+          ('amount', 'amount'),
+          ('currency_id', 'currency_id'),
+          ('owner_id', 'owner_id'),
+          ('budget', 'budget')
+]
+
+
+@pytest.mark.parametrize('value', create_param)
 class TestSavingsCreate:
 
     class TestValid:
-        def test_create(self):
-            data: dict = {
-                    'amount': 11.5,
-                    'currency_id': 1,
-                    'owner_id': 1,
-            }
+        def test_create(self, value):
 
-            SavingsCreateSchema(**data)
+            SavingsCreateSchema(**value)
 
-        def test_create_with_budget(self):
-            data: dict = {
-                    'amount': 11.5,
-                    'currency_id': 1,
-                    'budget': 12.5,
-                    'owner_id': 1,
-            }
+        def test_create_with_budget(self, value):
+            data = deepcopy(value)
+            data['budget'] = 12.5
 
             SavingsCreateSchema(**data)
 
     class TestInvalid:
-
-
-
-class TestPositiveSavingsSchema:
-
-    def test_read(self):
-        data: dict = {
-                'id': 1,
-                'amount': 11.5,
-                'currency_id': 1,
-                'owner_id': 1,
-                'included': []
-        }
-
-        SavingsReadSchema(**data)
-
-    def test_update(self):
-        data: dict = {
-                'amount': 11.5,
-                'currency_id': 1,
-                'owner_id': 1,
-                'included': []
-        }
-
-        SavingsUpdateSchema(**data)
-
-    def test_partial_update(self):
-        data: dict = {
-                'amount': 11.5,
-                'included': []
-        }
-
-        SavingsUpdateSchema(**data)
-
-
-class TestNegativeSavingsSchema:
-    
-    def test_create_missing_owner(self):
-        data: dict = {
-                'amount': 11.5,
-                'currency_id': 1,
-                'budget': 12.5,
-        }
-
-        with pytest.raises(ValidationError):
-            SavingsCreateSchema(**data)
-
-    def test_create_amount_str(self):
-        data: dict = {
-                'amount': 'amount',
-                'currency_id': 1,
-                'budget': 12.5,
-                'owner_id': 1,
-        }
-
-        with pytest.raises(ValidationError):
-            SavingsCreateSchema(**data)
         
+        @pytest.mark.parametrize(
+            'field',
+            missing_fields,
+            ids=lambda f: f"SavingsCreate_missing_{f}",
+        )
+        def test_missing_field(self, value, field):
+            if field == 'included':
+                pytest.skip("Field not used in this context")
+            data = deepcopy(value)
+            data.pop(field)
 
-    def test_create_currency_id_str(self):
-        data: dict = {
-                'amount': 11.5,
-                'currency_id': 'id',
-                'budget': 12.5,
-                'owner_id': 1,
-        }
+            with pytest.raises(ValidationError):
+                SavingsCreateSchema(**data)
 
-        with pytest.raises(ValidationError):
-            SavingsCreateSchema(**data)
-        
+        @pytest.mark.parametrize(
+            'field, invalid_value',
+            invalid_values,
+            ids=lambda f: f"SavingsCreate_invalid_value_{f}",
+        )
+        def test_invalid_values(self, value, field, invalid_value):
+            if field == 'id':
+                pytest.skip('Field not used in this context')
+            data = deepcopy(value)
+            data[field] = invalid_value
 
-    def test_create_budget_str(self):
-        data: dict = {
-                'amount': 11.5,
-                'currency_id': 1,
-                'budget': 'no',
-                'owner_id': 1,
-        }
 
-        with pytest.raises(ValidationError):
-            SavingsCreateSchema(**data)
-        
+@pytest.mark.parametrize('value', read_param)
+class TestSavingsRead:
 
-    def test_create_owner_id_str(self):
-        data: dict = {
-                'amount': 11.5,
-                'currency_id': 1,
-                'budget': 12.5,
-                'owner_id': 'uh',
-        }
+    class TestValid:
+        def test_read(self, value):
 
-        with pytest.raises(ValidationError):
-            SavingsCreateSchema(**data)
-        
+            SavingsReadSchema(**value)
 
-    def test_read_missing_id(self):
-        data: dict = {
-                'amount': 11.5,
-                'currency_id': 1,
-                'owner_id': 1,
-                'included': []
-        }
+    class TestInvalid:
+        @pytest.mark.parametrize(
+            'field',
+            missing_fields,
+            ids=lambda f: f"SavingsRead_missing_{f}",
+        )
+        def test_missing_field(self, value, field):
+            if field == 'included':
+                pytest.skip("Included has default factory, therefore is skipped")
+            data = deepcopy(value)
+            data.pop(field)
 
-        with pytest.raises(ValidationError):
-            SavingsReadSchema(**data)
+            with pytest.raises(ValidationError):
+                SavingsReadSchema(**data)
 
-    def test_read_amount_str(self):
-        data: dict = {
-                'id': 1,
-                'amount': 'amount',
-                'currency_id': 1,
-                'owner_id': 1,
-                'included': []
-        }
+        @pytest.mark.parametrize(
+            'field, invalid_value',
+            invalid_values,
+            ids=lambda f: f"SavingsRead_invalid_value_{f}",
+        )
+        def test_invalid_values(self, value, field, invalid_value):
+            data = deepcopy(value)
+            data[field] = invalid_value
 
-        with pytest.raises(ValidationError):
-            SavingsReadSchema(**data)
+            with pytest.raises(ValidationError):
+                SavingsReadSchema(**data)
 
-    def test_read_currency_str(self):
-        data: dict = {
-                'id': 1,
-                'amount': 11.5,
-                'currency_id': 'id',
-                'owner_id': 1,
-                'included': []
-        }
 
-        with pytest.raises(ValidationError):
-            SavingsReadSchema(**data)
+@pytest.mark.parametrize('value', update_param)
+class TestSavingsUpdate:
 
-    def test_read_budget_str(self):
-        data: dict = {
-                'id': 1,
-                'amount': 11.5,
-                'currency_id': 1,
-                'budget': 'string',
-                'owner_id': 1,
-                'included': []
-        }
+    class TestValid:
 
-        with pytest.raises(ValidationError):
-            SavingsReadSchema(**data)
+        def test_update(self, value):
+            data = deepcopy(value)
+            data['budget'] = 15.5
 
-    def test_read_owner_id_str(self):
-        data: dict = {
-                'id': 1,
-                'amount': 11.5,
-                'currency_id': 1,
-                'owner_id': 'id',
-                'included': []
-        }
-
-        with pytest.raises(ValidationError):
-            SavingsReadSchema(**data)
-
-    def test_read_included_str(self):
-        data: dict = {
-                'id': 1,
-                'amount': 11.5,
-                'currency_id': 1,
-                'owner_id': 1,
-                'included': '[]'
-        }
-
-        with pytest.raises(ValidationError):
-            SavingsReadSchema(**data)
-
-    def test_update_amount_str(self):
-        data: dict = {
-                'amount': 'amount',
-                'currency_id': 1,
-                'owner_id': 1,
-                'included': []
-        }
-
-        with pytest.raises(ValidationError):
             SavingsUpdateSchema(**data)
 
-    def test_currency_id_str(self):
-        data: dict = {
-                'amount': 11.5,
-                'currency_id': 'id',
-                'owner_id': 1,
-                'included': []
-        }
+        def test_partial_update(self, value):
 
-        with pytest.raises(ValidationError):
-            SavingsUpdateSchema(**data)
+            SavingsUpdateSchema(**value)
 
-    def test_update_budget_str(self):
-        data: dict = {
-                'amount': 11.5,
-                'currency_id': 1,
-                'budget': 'string',
-                'owner_id': 1,
-                'included': []
-        }
 
-        with pytest.raises(ValidationError):
-            SavingsUpdateSchema(**data)
+    class TestInvalid:
 
-    def test_update_included_str(self):
-        data: dict = {
-                'amount': 11.5,
-                'currency_id': 1,
-                'owner_id': 1,
-                'included': '[]'
-        }
+        @pytest.mark.parametrize(
+            'field, invalid_value',
+            invalid_values,
+            ids=lambda f: f"SavingsUpdate_invalid_value_{f}",
+        )
 
-        with pytest.raises(ValidationError):
-            SavingsUpdateSchema(**data)
+        def test_invalid_values(self, value, field, invalid_value):
+            if field in ['id', 'owner_id']:
+                pytest.skip(f"Field {field} not used in this context")
+            data = deepcopy(value)
+            data[field] = invalid_value
+
+            with pytest.raises(ValidationError):
+                SavingsUpdateSchema(**data)
+
