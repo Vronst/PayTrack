@@ -1,4 +1,5 @@
 from copy import deepcopy
+from datetime import datetime
 from pydantic import ValidationError
 import pytest
 
@@ -113,13 +114,15 @@ class TestReceiverUpdate:
 
         def test_update(self, value):
             
-            ReceiverUpdateSchema(**value)
+            result = ReceiverUpdateSchema(**value)
+            assert (result.updated_at - datetime.now()).total_seconds() < 5
 
-    def test_partial_update(self, value):
-        data = deepcopy(value)
-        data.pop('name')
-        
-        ReceiverUpdateSchema(**data)
+        def test_partial_update(self, value):
+            data = deepcopy(value)
+            data.pop('name')
+            
+            result = ReceiverUpdateSchema(**data)
+            assert (result.updated_at - datetime.now()).total_seconds() < 5
 
 
     class TestInvalid:

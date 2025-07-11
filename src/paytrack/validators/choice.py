@@ -9,8 +9,6 @@ class ChoiceValidator(Validator):
 
     def __call__(self, key: str, value: Any) -> Any:
         if value not in self.choice:
-            raise ValueError(f"{key.capitalize()} must be one of {self.choice}")
+            raise ValueError(f"{key} must be one of {self.choice}")
         return value
 
-    # def validate(self, value: Any) -> Any:
-        # return self('Value', value)

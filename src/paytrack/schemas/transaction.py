@@ -1,13 +1,14 @@
 from datetime import datetime
 from typing import Annotated, Callable
-from pydantic import AfterValidator, Field
+from pydantic import AfterValidator, Field, model_validator
 
 from ..validators.choice import ChoiceValidator
 from ..schemas.base import BaseReadSchema, BaseSchema, BaseUpdateSchema
 from ..constants.transaction import MIN_AMOUNT, TYPE_CHOICE
+from ..validators.schema_validators import validate_receiver
 
 
-validator: Callable = ChoiceValidator(TYPE_CHOICE)
+validator: Callable = ChoiceValidator(TYPE_CHOICE).validate
 
 
 class TransactionSchema(BaseSchema):
@@ -19,8 +20,12 @@ class TransactionSchema(BaseSchema):
     type: Annotated[str, AfterValidator(validator)]
     amount: float = Field(gt=MIN_AMOUNT)
     currency_id: int 
-    receiver_name: str
+    receiver_name: str | None = None
 
+    @model_validator(mode='after')
+    def _validate_receiver(self) -> 'TransactionSchema':
+        validate_receiver(self.receiver_name, self.receiver_id)
+        return self
 
 class TransactionCreateSchema(TransactionSchema):
     pass 
@@ -40,3 +45,7 @@ class TransactionUpdateSchema(BaseUpdateSchema):
     currency_id: int | None = None 
     receiver_name: str | None = None
 
+    @model_validator(mode='after')
+    def _validate_receiver(self) -> 'TransactionUpdateSchema':
+        validate_receiver(self.receiver_name, self.receiver_id)
+        return self

@@ -4,6 +4,7 @@ from pydantic import StringConstraints, Field, model_validator
 from ..constants.category import NAME_LENGTH
 from .base import BaseSchema, BaseReadSchema, BaseUpdateSchema
 from ..models import Category
+from ..validators.schema_validators import validate_name_if_custom
 
 
 class CategorySchema(BaseSchema):
@@ -12,13 +13,9 @@ class CategorySchema(BaseSchema):
     custom: bool = False
 
     @model_validator(mode='after')
-    def validate_name_if_custom(self) -> 'CategorySchema':
-        if self.custom and not self.name:
-            raise ValueError('Name for custom categories must be provided')
-        elif not self.custom and self.name:
-            raise ValueError('Name for non custom categories cannot be edited')
-        else:
-            return self
+    def _validate_name_if_custom(self) -> 'CategorySchema':
+        validate_name_if_custom(self.name, self.custom)
+        return self
 
 
 class CategoryCreateSchema(CategorySchema):
@@ -32,7 +29,6 @@ class CategoryReadSchema(BaseReadSchema, CategorySchema):
 class CategoryUpdateSchema(BaseUpdateSchema):
     root_category: int | None = None
     name: str | None = None
-
 
 
 CategoryReadSchema.model_rebuild()
