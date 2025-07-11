@@ -12,6 +12,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 from .base import Base
 from .associations import association_transaction
 from ..validators import AmountValidator, ChoiceValidator, DateValidator
+from ..constants.transaction import MIN_AMOUNT, TYPE_CHOICE
 
 
 if TYPE_CHECKING:
@@ -24,10 +25,8 @@ if TYPE_CHECKING:
 
 class Transaction(Base):
     __tablename__ = 'transactions'
-    __amount_min: float = 0
-    __type_choice: list[str] = ['income', 'payment']
-    _amount_validator: 'Validator' = AmountValidator(min_amount=__amount_min)
-    _type_validator: 'Validator' = ChoiceValidator(__type_choice)
+    _amount_validator: 'Validator' = AmountValidator(min_amount=MIN_AMOUNT)
+    _type_validator: 'Validator' = ChoiceValidator(TYPE_CHOICE)
     _date_validator: 'Validator' = DateValidator()
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -35,7 +34,7 @@ class Transaction(Base):
     done: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     owner_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
     category_id: Mapped[int] = mapped_column(ForeignKey('categories.id'), nullable=False)
-    receiver_id: Mapped[int] = mapped_column(ForeignKey('receivers.id'), nullable=True)
+    receiver_id: Mapped[int | None] = mapped_column(ForeignKey('receivers.id'), nullable=True)
     type: Mapped[str] = mapped_column(String(30), nullable=False)
     amount: Mapped[float] = mapped_column(Float, nullable=False)
     currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id'), nullable=False)
