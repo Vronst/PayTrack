@@ -1,18 +1,16 @@
-from typing import TYPE_CHECKING, Annotated, Callable
+from typing import Annotated, Callable
 
 from pydantic import AfterValidator, StringConstraints
 
 from ..validators import EmailValidator, PhoneValidator, PinValidator
 from .base import BaseReadSchema, BaseUpdateSchema, BaseSchema
-from ..constants.user import EMAIL_LENGTH, PHONE_LENGTH, NAME_LENGTH
+from ..constants.user import EMAIL_LENGTH, NAME_LENGTH, PIN_LENGTH
+from ..models import User
 
 
-pin_validator: Callable = PinValidator().validate
+pin_validator: Callable = PinValidator(PIN_LENGTH).validate
 phone_validator: Callable = PhoneValidator().validate
 email_validator: Callable = EmailValidator().validate
-
-if TYPE_CHECKING:
-    from ..models import User
 
 
 class UserSchema(BaseSchema):
@@ -24,9 +22,9 @@ class UserSchema(BaseSchema):
     AfterValidator(email_validator),
     StringConstraints(max_length=EMAIL_LENGTH)
 ]
-    phone: Annotated[str | None, StringConstraints(max_length=PHONE_LENGTH), AfterValidator(phone_validator)]
+    phone: Annotated[str | None, AfterValidator(phone_validator)]
     premium: bool
-    parent_id: int
+    parent_id: int | None = None
 
 
 class UserCreateSchema(UserSchema):
@@ -34,8 +32,8 @@ class UserCreateSchema(UserSchema):
 
 
 class UserReadSchema(BaseReadSchema, UserSchema):
-    subaccounts: list['User']
-    included: list['User']
+    subaccounts: list[User]
+    included: list[User]
 
 
 class UserUpdateSchema(BaseUpdateSchema):
@@ -46,9 +44,12 @@ class UserUpdateSchema(BaseUpdateSchema):
     str | None,
     AfterValidator(email_validator),
     StringConstraints(max_length=EMAIL_LENGTH)
-]
-    phone: Annotated[str | None, StringConstraints(max_length=PHONE_LENGTH), AfterValidator(phone_validator)] = None
+    ] = None
+    phone: Annotated[str | None, AfterValidator(phone_validator)] = None
     premium: bool | None = None
     parent_id: int | None = None
     password: str | None = None
     pin: Annotated[str | None, AfterValidator(pin_validator)] = None
+    subaccounts: list[User] | None = None
+    included: list[User] | None = None
+

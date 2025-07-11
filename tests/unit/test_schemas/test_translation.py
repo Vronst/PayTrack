@@ -9,7 +9,6 @@ from paytrack.schemas import (
 )
 from .conftest import skip_test 
 from paytrack.constants.translation import WORD_LENGTH 
-# FIXME: replace ... with tests
 
 
 create_param = [ 
@@ -43,28 +42,106 @@ invalid = [
 class TestTranslationCreate:
 
     class TestValid:
-        ...
+        
+        def test_create(self, value):
+            TranslationCreateSchema(**value)
 
     class TestInvalid:
-        ...
+        
+        @pytest.mark.parametrize(
+            'field',
+            missing_fields,
+            ids=lambda f: f'TranslationCreate_missing_{f}'
+        )
+        def test_create_missing(self, value, field):
+            skip_test(field, ['id'])
+            data = deepcopy(value)
+            data.pop(field)
+
+            with pytest.raises(ValidationError):
+                TranslationCreateSchema(**data)
+
+        @pytest.mark.parametrize(
+                'field, invalid_data',
+                invalid,
+                ids=lambda f: f'TranslationCreate_invalid_{f}'
+        )
+        def test_create_invalid(self, value, field, invalid_data):
+            skip_test(field, ['id'])
+            data = deepcopy(value)
+            data[field] = invalid_data
+
+            with pytest.raises(ValidationError):
+                TranslationCreateSchema(**data)
 
 
 @pytest.mark.parametrize('value', read_param)
 class TestTranslationRead:
 
     class TestValid: 
-        ...
+        
+        def test_read(self, value):
+            TranslationReadSchema(**value)
 
     class TestInvalid: 
-        ...
+        
+        @pytest.mark.parametrize(
+                'field',
+                missing_fields,
+                ids=lambda f: f'TranslationRead_missing_{f}'
+        )
+        def test_read_missing(self, value, field):
+            data = deepcopy(value)
+            data.pop(field)
+
+            with pytest.raises(ValidationError):
+                TranslationReadSchema(**data)
+
+        @pytest.mark.parametrize(
+                'field, invalid_data',
+                invalid,
+                ids=lambda f: f'TranslationRead_invalid_{f}'
+        )
+        def test_read_invalid(self, value, field, invalid_data):
+            data = deepcopy(value)
+            data[field] = invalid_data 
+
+            with pytest.raises(ValidationError):
+                TranslationReadSchema(**data)
 
 
 @pytest.mark.parametrize('value', update_param)
 class TestTranslationUpdate:
 
     class TestValid:
-        ...
+        
+        def test_update(self, value):
+            TranslationUpdateSchema(**value)
+
+        @pytest.mark.parametrize(
+                'field',
+                missing_fields,
+                ids=lambda f: f'TranslationUpdate_partial_missing_{f}'
+        )
+        def test_partial_update(self, value, field):
+            skip_test(field, ['id'])
+            data = deepcopy(value)
+            data.pop(field)
+
+            TranslationUpdateSchema(**data)
+
 
     class TestInvalid:
-        ...
+        @pytest.mark.parametrize(
+                'field, invalid_data',
+                invalid,
+                ids=lambda f: f'TranslationRead_invalid_{f}'
+        )
+        def test_update_invalid(self, value, field, invalid_data):
+            skip_test(field, ['id'])
+            data = deepcopy(value)
+            data[field] = invalid_data 
+
+            with pytest.raises(ValidationError):
+                TranslationUpdateSchema(**data)
 
