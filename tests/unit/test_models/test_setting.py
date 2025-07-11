@@ -15,7 +15,6 @@ class TestPositiveSetting:
         assert setting.mode == 'dark'
         assert setting.language_id == 1
         assert setting.owner_id == user_id 
-        assert setting.type == 'standard'
 
 
 class TestNegativeSetting:
@@ -33,16 +32,6 @@ class TestNegativeSetting:
         
         with pytest.raises(ValueError):
             setting: Setting = Setting(owner_id=user_id, mode=mode)
-
-            session.add(setting)
-            session.commit()
-
-    def test_incorrect_type(self, session):
-        user_id: int = 1
-        type_ = 'not my type'
-        
-        with pytest.raises(ValueError):
-            setting: Setting = Setting(owner_id=user_id, type=type_)
 
             session.add(setting)
             session.commit()

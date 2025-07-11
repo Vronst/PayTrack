@@ -19,6 +19,7 @@ from ..validators import (
         EmailValidator,
         PinValidator
 )
+from ..constants.user import EMAIL_LENGTH, PHONE_LENGTH, PIN_LENGTH, NAME_LENGTH
 
 
 if TYPE_CHECKING:
@@ -34,22 +35,20 @@ if TYPE_CHECKING:
 
 class User(Base):
     __tablename__ = 'users'
-    __name_length: int = 30
-    __pin_length: int = 6
-    _name_validator: 'Validator' = MaxLengthValidator(__name_length)
-    _pin_validator: 'Validator' = PinValidator(__pin_length)
+    _name_validator: 'Validator' = MaxLengthValidator(NAME_LENGTH)
+    _pin_validator: 'Validator' = PinValidator(PIN_LENGTH)
     _email_validator: 'Validator' = EmailValidator()
     _phone_validator: 'Validator' = PhoneValidator()
 
     id: Mapped[int] = mapped_column(primary_key=True)
     company: Mapped[bool] = mapped_column(Boolean, default=False)
-    name: Mapped[str] = mapped_column(String(30), nullable=False)
-    surname: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    name: Mapped[str] = mapped_column(String(NAME_LENGTH), nullable=False)
+    surname: Mapped[str | None] = mapped_column(String(NAME_LENGTH), nullable=True)
     admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    email: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
-    phone: Mapped[str | None] = mapped_column(String(12), nullable=True)
+    email: Mapped[str] = mapped_column(String(EMAIL_LENGTH), unique=True, nullable=False)
+    phone: Mapped[str | None] = mapped_column(String(PHONE_LENGTH), nullable=True)
     password: Mapped[str] = mapped_column(String, nullable=False)
-    pin: Mapped[str | None] = mapped_column(String(6), nullable=True)
+    pin: Mapped[str | None] = mapped_column(String, nullable=True)
     premium: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     parent_id: Mapped[int | None] = mapped_column(ForeignKey('users.id'), nullable=True)
 

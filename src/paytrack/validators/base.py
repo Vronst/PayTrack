@@ -1,13 +1,13 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic
 
 
-T = TypeVar("T")
-
-
-class Validator(ABC, Generic[T]):
+class Validator[T](ABC):
 
     @abstractmethod
     def __call__(self, key: str, value: T) -> T:
         pass
+
+    def validate(self, value: T) -> T:
+        return self('Value', value)
+
 

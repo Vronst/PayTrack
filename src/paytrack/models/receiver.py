@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 from ..validators import MaxLengthValidator
 from .base import Base
 from .associations import association_receivers
+from ..constants.receiver import NAME_LENGTH
 
 
 if TYPE_CHECKING:
@@ -16,8 +17,7 @@ if TYPE_CHECKING:
 
 class Receiver(Base):
     __tablename__ = 'receivers'
-    __name_length: int = 50
-    _name_validator: 'Validator' = MaxLengthValidator(__name_length)
+    _name_validator: 'Validator' = MaxLengthValidator(NAME_LENGTH)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     owner_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
@@ -29,9 +29,6 @@ class Receiver(Base):
         primaryjoin="User.id == association_receivers.c.user_id",
         secondaryjoin=id == association_receivers.c.receiver_shared_with
     )
-
-
-    # transactions: Mapped[list['Transaction']] = relationship(back_populates='receiver')
 
     @validates("name")
     def validate_name(self, key, value):

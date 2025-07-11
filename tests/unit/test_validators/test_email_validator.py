@@ -4,6 +4,7 @@ from paytrack.validators import EmailValidator
 
 class TestPositiveEmailValidator:
 
+    @pytest.mark.regression
     def test_email_com(self):
         validator: EmailValidator = EmailValidator()
         key: str = 'test'
@@ -11,6 +12,7 @@ class TestPositiveEmailValidator:
 
         validator(key, email)
 
+    @pytest.mark.regression
     def test_email_pl(self):
         validator: EmailValidator = EmailValidator()
         key: str = 'test'
@@ -62,6 +64,7 @@ class TestNegativeEmailValidator:
         with pytest.raises(ValueError):
             validator(key, email)
 
+    @pytest.mark.regression
     def test_at_and_com(self):
         validator: EmailValidator = EmailValidator()
         key: str = 'test'

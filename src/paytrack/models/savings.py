@@ -4,6 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 from .base import Base
 from .associations import association_savings
 from ..validators import AmountValidator 
+from ..constants.savings import MIN_BUDGET
 
 
 if TYPE_CHECKING:
@@ -14,8 +15,7 @@ if TYPE_CHECKING:
 
 class Savings(Base):
     __tablename__ = 'savings'
-    __budget_min: float = 0
-    _budget_validator: 'Validator' = AmountValidator(min_amount=__budget_min)
+    _budget_validator: 'Validator' = AmountValidator(min_amount=MIN_BUDGET)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     amount: Mapped[float] = mapped_column(Float, nullable=False, default=0)

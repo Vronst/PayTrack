@@ -5,6 +5,7 @@ from paytrack.validators import MaxLengthValidator
 
 class TestPositiveMaxLengthValidator:
 
+    @pytest.mark.regression
     def test_limit(self):
         validator: MaxLengthValidator = MaxLengthValidator(
                 max_length=2
@@ -23,6 +24,7 @@ class TestPositiveMaxLengthValidator:
 
 class TestNegativeMaxLengthValidator:
 
+    @pytest.mark.regression
     def test_over_limit(self):
         validator: MaxLengthValidator = MaxLengthValidator(
                 max_length=0

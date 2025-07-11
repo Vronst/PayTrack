@@ -4,12 +4,14 @@ from paytrack.validators import PinValidator
 
 class TestPositivePinValidator:
 
+    @pytest.mark.regression
     def test_default(self):
         validator: PinValidator = PinValidator()
         key, value = 'test', '0134'
 
         validator(key, value)
 
+    @pytest.mark.regression
     def test_length_10(self):
         validator: PinValidator = PinValidator(length=10)
         key, value = 'test', '1'*10
@@ -39,6 +41,7 @@ class TestNegativePinValidator:
         with pytest.raises(ValueError):
             validator(key, value)
 
+    @pytest.mark.regression
     def test_too_short(self):
         validator: PinValidator = PinValidator(length=4)
         key, value = 'test', '1'*3
