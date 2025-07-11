@@ -1,0 +1,1 @@
+WORD_LENGTH: int = 30

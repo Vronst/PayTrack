@@ -4,6 +4,7 @@ from paytrack.validators.choice import ChoiceValidator
 
 class TestPositiveChoiceValidator:
 
+    @pytest.mark.regression
     def test_signle_choice(self):
         key: str = 'test'
         choice: str = 'single'
@@ -20,6 +21,7 @@ class TestPositiveChoiceValidator:
 
         validator(key, choice)
 
+    @pytest.mark.regression
     def test_multiple_choice(self):
         key: str = 'test'
         choice: str = 'single'
@@ -52,6 +54,7 @@ class TestNegativeChoiceValidator:
         with pytest.raises(ValueError):
             validator(key, '1' + choice)
 
+    @pytest.mark.regression
     def test_multiple_choice(self):
         key: str = 'test'
         choice: str = 'single'

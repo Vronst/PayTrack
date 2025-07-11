@@ -5,12 +5,14 @@ from paytrack.validators.date import DateValidator
 
 class TestPositiveDateValidator:
     
+    @pytest.mark.regression
     def test_date_dd_mm_yyyy(self):
         validator: DateValidator = DateValidator()
         key, value = 'test', '20-10-2000'
 
         validator(key, value)
 
+    @pytest.mark.regression
     def test_date_dd_mm_yy(self):
         validator: DateValidator = DateValidator()
         key, value = 'test', '20-10-20'
@@ -23,6 +25,7 @@ class TestPositiveDateValidator:
 
         validator(key, value)
 
+    @pytest.mark.regression
     def test_date_yyyy_m_d(self):
         validator: DateValidator = DateValidator()
         key, value = 'test', '2000-1-2'
@@ -85,6 +88,7 @@ class TestNegativeDateValidator:
         with pytest.raises(ValueError):
             validator(key, value)
 
+    @pytest.mark.regression
     def test_past_date_set(self):
         validator: DateValidator = DateValidator(
             past_date=True
@@ -104,6 +108,7 @@ class TestNegativeDateValidator:
 
         validator(key, value)
 
+    @pytest.mark.regression
     def test_future_date_set(self):
         validator: DateValidator = DateValidator(
             past_date=True

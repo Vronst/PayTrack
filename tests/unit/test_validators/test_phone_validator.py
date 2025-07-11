@@ -4,6 +4,7 @@ from paytrack.validators import PhoneValidator
 
 class TestPositivePhoneValidator:
 
+    @pytest.mark.regression
     def test_phone_no_space(self):
         validator: PhoneValidator = PhoneValidator()
         phone: str = '9'*9
@@ -27,6 +28,7 @@ class TestPositivePhoneValidator:
 
         validator(key, phone)
 
+    @pytest.mark.regression
     def test_phone_spaces_and_prefix(self):
         validator: PhoneValidator = PhoneValidator()
         phone: str = '+48 ' + '9'*3 + ' ' + '9'*3 + ' ' + '9'*3
@@ -52,6 +54,7 @@ class TestPositivePhoneValidator:
 
 class TestNegativePhoneValidator:
 
+    @pytest.mark.regression
     def test_letter(self):
         validator: PhoneValidator = PhoneValidator()
         phone: str = '+4a ' + '9'*9
@@ -76,6 +79,7 @@ class TestNegativePhoneValidator:
         with pytest.raises(ValueError):
             validator(key, phone)
 
+    @pytest.mark.regression
     def test_missing_digit(self):
         validator: PhoneValidator = PhoneValidator()
         phone: str = '9'*8

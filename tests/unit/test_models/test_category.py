@@ -17,6 +17,7 @@ class TestPositiveCategory:
         # assert category.created_at.month == now.month
         # assert category.created_at.year == now.year
         assert category.created_at.date() == now.date()
+        assert category.translations == []
 
     @pytest.mark.regression
     def test_updated_at(self, session):
@@ -26,6 +27,7 @@ class TestPositiveCategory:
         
         assert category.updated_at is None
 
+        category.custom = True
         category.name = 'new name'
         session.add(category)
         session.commit()
