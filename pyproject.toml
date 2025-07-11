@@ -1,6 +1,6 @@
 [project]
 name = "paytrack"
-version = "0.6.2"
+version = "0.7.0"
 description = "Simple app to track your taxes."
 readme = "README.md"
 requires-python = ">=3.12"

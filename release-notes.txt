@@ -1,3 +1,5 @@
 ## About
 
 ## Changes:
+	- Updated README.md
+	- Added Pydantic schemas and corelated tests (not mentioned in release before)
