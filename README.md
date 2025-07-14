@@ -42,11 +42,11 @@ For it to work without docker compose, be sure to have POSTGRESQL.
 
 4. Set up the environment variables in the [.env]() file:
     ```env
-    POSTGRES_USER='your_postgres_user'
-    POSTGRES_PASSWORD='your_postgres_password'
-    POSTGRES_HOST='localhost'
-    POSTGRES_PORT='5432'
-    DataBase='your_database_name'
+    DB_USER='your_postgres_user'
+    DB_PASSWORD='your_postgres_password'
+    HOST='localhost'
+    PORT='5432'
+    DATABASE ='your_database_name'
     ```
 
 ## Usage

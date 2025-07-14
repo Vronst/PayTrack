@@ -6,20 +6,20 @@ from paytrack.core.engine import Engine
 class TestPositiveEngine:
 
     def setup_method(self) -> None:
-        os.environ["POSTGRES_USER"] = 'testuser'
-        os.environ['POSTGRES_PASSWORD'] = 'testpass'
-        os.environ['POSTGRES_HOST'] = 'localhost'
-        os.environ['POSTGRES_PORT'] = '5432'
-        os.environ['DataBase'] = 'test_db'
+        os.environ["DB_USER"] = 'testuser'
+        os.environ['DB_PASSWORD'] = 'testpass'
+        os.environ['HOST'] = 'localhost'
+        os.environ['PORT'] = '5432'
+        os.environ['DATABASE'] = 'test_db'
 
-        self.engine = Engine(test=True, test_db='sqlite:///:memory:')
+        self.engine = Engine(test=True, test_db_url='sqlite:///:memory:')
 
     def test_database_variable(self):
         database: str = 'sqlite:///:memory:'
 
-        assert self.engine.DataBase == database
+        assert self.engine.DB == database
         new_engine = Engine(test=True)
-        assert new_engine.DataBase == database
+        assert new_engine.DB == database
 
     def test_create_session(self):
         session = self.engine.create_session()
