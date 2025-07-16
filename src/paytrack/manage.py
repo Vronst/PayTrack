@@ -1,8 +1,7 @@
 def main(*args) -> None:
-    print('TODO')
+    print("TODO")
     ...
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
-

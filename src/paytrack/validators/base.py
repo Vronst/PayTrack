@@ -8,6 +8,4 @@ class Validator[T](ABC):
         pass
 
     def validate(self, value: T) -> T:
-        return self('Value', value)
-
-
+        return self("Value", value)

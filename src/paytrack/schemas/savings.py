@@ -1,13 +1,13 @@
 from pydantic import Field
 
 from ..constants.savings import MIN_BUDGET
-from .base import BaseReadSchema, BaseSchema, BaseUpdateSchema
 from ..models import User
+from .base import BaseReadSchema, BaseSchema, BaseUpdateSchema
 
 
 class SavingsSchema(BaseSchema):
     amount: float = Field(ge=MIN_BUDGET)
-    currency_id: int 
+    currency_id: int
     budget: float | None = Field(ge=MIN_BUDGET, default=None)
     owner_id: int
 
@@ -25,4 +25,3 @@ class SavingsUpdateSchema(BaseUpdateSchema):
     currency_id: int | None = None
     budget: float | None = Field(ge=MIN_BUDGET, default=None)
     included: list[User] | None = None
-

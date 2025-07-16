@@ -1,5 +1,7 @@
 from datetime import datetime
+
 import pytest
+
 from paytrack.models import Transaction
 
 
@@ -9,4 +11,3 @@ class TestPositiveTransaction:
         pass
         # user = users.pop(0)
         # t1 = Transaction(owner_id=user.id)
-

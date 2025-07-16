@@ -1,5 +1,6 @@
 from typing import Any
-from . import Validator 
+
+from . import Validator
 
 
 class ChoiceValidator(Validator):
@@ -11,4 +12,3 @@ class ChoiceValidator(Validator):
         if value not in self.choice:
             raise ValueError(f"{key} must be one of {self.choice}")
         return value
-

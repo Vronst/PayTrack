@@ -1,12 +1,13 @@
 from pydantic import Field
-from ..schemas.base import BaseSchema, BaseUpdateSchema, BaseReadSchema
+
 from ..constants.subscription_share import MIN_AMOUNT
+from ..schemas.base import BaseReadSchema, BaseSchema, BaseUpdateSchema
 
 
 class SubscriptionShareSchema(BaseSchema):
     amount: float = Field(gt=MIN_AMOUNT)
-    owner_id: int 
-    subscription_id: int 
+    owner_id: int
+    subscription_id: int
 
 
 class SubscriptionShareCreateSchema(SubscriptionShareSchema):

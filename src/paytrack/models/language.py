@@ -1,12 +1,11 @@
 from typing import TYPE_CHECKING
-from sqlalchemy import (
-    String,
-)
-from sqlalchemy.orm import Mapped, mapped_column, validates
-from .base import Base
-from ..validators import MaxLengthValidator
-from ..constants.language import NAME_LENGTH, CODE_LENGTH
 
+from sqlalchemy import String
+from sqlalchemy.orm import Mapped, mapped_column, validates
+
+from ..constants.language import CODE_LENGTH, NAME_LENGTH
+from ..validators import MaxLengthValidator
+from .base import Base
 
 if TYPE_CHECKING:
     from ..validators import Validator
@@ -14,13 +13,16 @@ if TYPE_CHECKING:
 
 class Language(Base):
     __tablename__ = "languages"
-    _code_validator: 'Validator' = MaxLengthValidator(CODE_LENGTH)
-    _name_validator: 'Validator' = MaxLengthValidator(NAME_LENGTH)
+    _code_validator: "Validator" = MaxLengthValidator(CODE_LENGTH)
+    _name_validator: "Validator" = MaxLengthValidator(NAME_LENGTH)
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    language_code: Mapped[str] = mapped_column(String(CODE_LENGTH), unique=True, nullable=False)
-    language_name: Mapped[str] = mapped_column(String(NAME_LENGTH), unique=True, nullable=False)
-    
+    language_code: Mapped[str] = mapped_column(
+        String(CODE_LENGTH), unique=True, nullable=False
+    )
+    language_name: Mapped[str] = mapped_column(
+        String(NAME_LENGTH), unique=True, nullable=False
+    )
 
     @validates("language_name")
     def validate_name(self, key, value):

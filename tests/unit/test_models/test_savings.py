@@ -1,5 +1,6 @@
 import pytest
 from sqlalchemy.exc import IntegrityError
+
 from paytrack.models.savings import Savings
 
 
@@ -16,32 +17,29 @@ class TestPositiveSavings:
         session.commit()
 
         assert savings.amount == 0.0
-        assert savings.budget is None 
-        assert savings.owner_id == owner_id 
+        assert savings.budget is None
+        assert savings.owner_id == owner_id
         assert savings.currency_id == currency_id
 
     def test_full_creation(self, session):
         currency_id: int = 1
         owner_id: int = 1
-        amount: float = .5
+        amount: float = 0.5
         budget: float = 1.0
 
         savings: Savings = Savings(
-            amount=amount,
-            budget=budget,
-            currency_id=currency_id,
-            owner_id=owner_id
+            amount=amount, budget=budget, currency_id=currency_id, owner_id=owner_id
         )
 
         session.add(savings)
         session.commit()
 
         assert savings.amount == amount
-        assert savings.owner_id == owner_id 
+        assert savings.owner_id == owner_id
         assert savings.currency_id == currency_id
         assert savings.budget == budget
 
-        
+
 class TestNegativeSavings:
 
     def test_creation_no_owner(self, session):
@@ -77,9 +75,7 @@ class TestNegativeSavings:
 
         with pytest.raises(ValueError):
             savings: Savings = Savings(
-                budget=budget,
-                currency_id=currency_id,
-                owner_id=owner_id
+                budget=budget, currency_id=currency_id, owner_id=owner_id
             )
 
             session.add(savings)
@@ -92,11 +88,8 @@ class TestNegativeSavings:
 
         with pytest.raises(ValueError):
             savings: Savings = Savings(
-                budget=budget,
-                currency_id=currency_id,
-                owner_id=owner_id
+                budget=budget, currency_id=currency_id, owner_id=owner_id
             )
 
             session.add(savings)
             session.commit()
-

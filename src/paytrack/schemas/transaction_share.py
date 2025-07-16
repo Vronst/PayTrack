@@ -1,10 +1,11 @@
 from pydantic import Field
-from ..schemas.base import BaseSchema, BaseUpdateSchema, BaseReadSchema
+
 from ..constants.transaction_share import MIN_AMOUNT
+from ..schemas.base import BaseReadSchema, BaseSchema, BaseUpdateSchema
 
 
 class TransactionShareSchema(BaseSchema):
-    owner_id: int 
+    owner_id: int
     amount: float = Field(gt=MIN_AMOUNT)
     transaction_id: int
 

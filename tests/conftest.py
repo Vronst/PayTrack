@@ -1,28 +1,34 @@
+from typing import Generator
+
 import pytest
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from paytrack.models import (
-    User,
-    Base,
-)
+from sqlalchemy.orm import Session, sessionmaker
+
+from paytrack.models import Base, User
 
 
-@pytest.fixture(scope='function')
-def session():
-    engine = create_engine('sqlite:///:memory:', echo=False)
+@pytest.fixture(scope="function")
+def session() -> Generator[Session, None, None]:
+    engine = create_engine("sqlite:///:memory:", echo=False)
+
     Base.metadata.create_all(bind=engine)
-    Session = sessionmaker(bind=engine)
-    session = Session()
+
+    LocalSession = sessionmaker(bind=engine)
+    session = LocalSession()
+
     yield session
+
     session.close()
+
     Base.metadata.drop_all(bind=engine)
+
     engine.dispose()
 
 
-@pytest.fixture(scope='function')
-def users():
+@pytest.fixture(scope="function")
+def users() -> tuple[User, User, User]:
     u1 = User(name="John", surname="Smith", email="john@example.com", password="pw")
     u2 = User(name="Jane", surname="Doe", email="jane@example.com", password="pw")
     u3 = User(name="Mark", surname="Twain", email="mark@example.com", password="pw")
-    return u1, u2, u3
 
+    return u1, u2, u3

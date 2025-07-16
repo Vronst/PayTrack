@@ -22,6 +22,10 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
+    "black>=25.1.0",
+    "flake8>=7.3.0",
+    "flake8-pytest-style>=2.1.0",
+    "isort>=6.0.1",
     "pytest>=8.3.4",
     "python-dotenv>=1.1.0",
 ]
@@ -37,4 +41,8 @@ release = { git = "https://github.com/Vronst/release_script.git" }
 markers = [
 	"regression: Tests that ensure previous bugs stay fixed"
 	]
-pythonpath = "src"
+testpaths = "tests/"
+pythonpath = "src/"
+
+[tool.black]
+line-length = "78"

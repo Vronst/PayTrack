@@ -1,13 +1,14 @@
 from typing import Annotated
 
 from pydantic import StringConstraints
-from ..schemas.base import BaseSchema, BaseUpdateSchema, BaseReadSchema
+
 from ..constants.translation import WORD_LENGTH
+from ..schemas.base import BaseReadSchema, BaseSchema, BaseUpdateSchema
 
 
 class TranslationSchema(BaseSchema):
-    category_id: int 
-    language_id: int 
+    category_id: int
+    language_id: int
     word: Annotated[str, StringConstraints(max_length=WORD_LENGTH)]
 
 
@@ -22,4 +23,6 @@ class TranslationReadSchema(BaseReadSchema, TranslationSchema):
 class TranslationUpdateSchema(BaseUpdateSchema):
     category_id: int | None = None
     language_id: int | None = None
-    word: Annotated[str | None, StringConstraints(max_length=WORD_LENGTH)] = None
+    word: Annotated[str | None, StringConstraints(max_length=WORD_LENGTH)] = (
+        None
+    )

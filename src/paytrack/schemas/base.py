@@ -1,14 +1,13 @@
 from datetime import datetime
-from typing import TYPE_CHECKING
+
 from pydantic import BaseModel, ConfigDict
 
+CONFIG: ConfigDict = ConfigDict(
+    from_attributes=True,
+    revalidate_instances="always",
+    arbitrary_types_allowed=True,
+)
 
-if TYPE_CHECKING:
-    from datetime import datetime
-
-
-CONFIG: ConfigDict = ConfigDict(from_attributes=True, revalidate_instances='always', arbitrary_types_allowed=True)
- 
 
 class BaseSchema(BaseModel):
     model_config = CONFIG
@@ -25,6 +24,5 @@ class BaseUpdateSchema(BaseModel):
     model_config = CONFIG
 
     id: int | None = None
-    updated_at: 'datetime' = datetime.now()
-    delete_at: 'datetime | None' = None
-
+    updated_at: "datetime" = datetime.now()
+    delete_at: "datetime | None" = None

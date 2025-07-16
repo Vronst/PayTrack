@@ -1,44 +1,25 @@
-import os
-from sqlalchemy.orm import Session, scoped_session
-from paytrack.core.engine import Engine
+import pytest
+from sqlalchemy.orm import Session
 
 
 class TestPositiveEngine:
 
-    def setup_method(self) -> None:
-        os.environ["DB_USER"] = 'testuser'
-        os.environ['DB_PASSWORD'] = 'testpass'
-        os.environ['HOST'] = 'localhost'
-        os.environ['PORT'] = '5432'
-        os.environ['DATABASE'] = 'test_db'
+    def test_database_variable(self, test_engine):
+        database_url: str = "sqlite:///:memory:"
 
-        self.engine = Engine(test=True, test_db_url='sqlite:///:memory:')
+        assert test_engine._DB_URL == database_url
 
-    def test_database_variable(self):
-        database: str = 'sqlite:///:memory:'
+    def test_create_session(self, test_engine):
+        session = next(test_engine.get_session())
 
-        assert self.engine.DB == database
-        new_engine = Engine(test=True)
-        assert new_engine.DB == database
+        assert session is not None
+        assert isinstance(session, Session)
 
-    def test_create_session(self):
-        session = self.engine.create_session()
+    def test_close_session(self, test_manual_close_engine):
+        test_manual_close_engine.close()
 
-        assert session is not None 
-        assert isinstance(session(), Session)
+    def test_close_session_check_session(self, test_manual_close_engine):
+        test_manual_close_engine.close()
 
-    def test_session_property(self):
-        assert isinstance(self.engine.session(), Session)
-
-    def test_close_session(self):
-        self.engine.create_session()
-        assert isinstance(self.engine.session, scoped_session)
-        self.engine.close_session()
-
-    def test_close_session_check_session(self):
-        session = self.engine.create_session()()
-        self.engine.close_session()
-        session_after = self.engine.create_session()()
-        assert session is not session_after
-
-
+        with pytest.raises(RuntimeError):
+            next(test_manual_close_engine.get_session())
