@@ -119,9 +119,7 @@ class Engine:
 
     def get_session(self) -> Generator[Session, None, None]:
         if not self.active:
-            raise RuntimeError(
-                "Cannot create session after enngine was close"
-            )
+            raise RuntimeError("Cannot create session after enngine was close")
 
         session = self._session_maker()
         try:

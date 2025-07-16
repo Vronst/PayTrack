@@ -54,9 +54,7 @@ class User(Base):
     surname: Mapped[str | None] = mapped_column(
         String(NAME_LENGTH), nullable=True
     )
-    admin: Mapped[bool] = mapped_column(
-        Boolean, default=False, nullable=False
-    )
+    admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     email: Mapped[str] = mapped_column(
         String(EMAIL_LENGTH), unique=True, nullable=False
     )

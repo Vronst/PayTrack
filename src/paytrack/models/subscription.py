@@ -48,9 +48,7 @@ class Subscription(Base):
     shared: Mapped[bool] = mapped_column(
         Boolean, default=False, nullable=False
     )
-    active: Mapped[bool] = mapped_column(
-        Boolean, default=True, nullable=False
-    )
+    active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     owner_id: Mapped[int] = mapped_column(
         ForeignKey("users.id"), nullable=False
     )

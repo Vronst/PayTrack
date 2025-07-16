@@ -7,7 +7,6 @@ from .length import MaxLengthValidator
 from .phone import PhoneValidator
 from .pin import PinValidator
 
-
 __all__ = [
     "AmountValidator",
     "Validator",

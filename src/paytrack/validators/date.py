@@ -46,9 +46,7 @@ class DateValidator(Validator):
             Invalid datetime string format: {value}"
             )
 
-        now = (
-            datetime.now(tz=value.tzinfo) if value.tzinfo else datetime.now()
-        )
+        now = datetime.now(tz=value.tzinfo) if value.tzinfo else datetime.now()
         absolute = abs(value - now).days
 
         if self.future and value < now and absolute != 0:

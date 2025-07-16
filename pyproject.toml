@@ -45,4 +45,13 @@ testpaths = "tests/"
 pythonpath = "src/"
 
 [tool.black]
-line-length = "78"
+line-length = "79"
+target-version = ["py311"]
+
+[tool.flake8]
+line-length = "79"
+
+[tool.isort]
+profile = "black"
+line_length = "79"
+known_first_party = ["paytrack"]
