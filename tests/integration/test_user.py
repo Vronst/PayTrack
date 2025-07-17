@@ -1,10 +1,10 @@
-import pytest
+import pytest  # noqa: D100
 
 from paytrack.models import User
 
 
-class TestPositiveUser:
-    def test_name_validation_special(self, session):
+class TestPositiveUser:  # noqa: D101
+    def test_name_validation_special(self, session):  # noqa: D102
         name: str = "test@ser"
         company: bool = True
         email: str = "test@test.com"
@@ -24,7 +24,7 @@ class TestPositiveUser:
 
         assert user.name == name
 
-    def test_name_validation_digits(self, session):
+    def test_name_validation_digits(self, session):  # noqa: D102
         name: str = "test2se1"
         company: bool = True
         email: str = "test@test.com"
@@ -44,7 +44,7 @@ class TestPositiveUser:
 
         assert user.name == name
 
-    def test_name_validation(self, session):
+    def test_name_validation(self, session):  # noqa: D102
         name: str = "testuser"
         company: bool = True
         email: str = "test@test.com"
@@ -64,7 +64,7 @@ class TestPositiveUser:
 
         assert user.name == name
 
-    def test_pin_validation(self, session):
+    def test_pin_validation(self, session):  # noqa: D102
         name: str = "testuser"
         company: bool = True
         email: str = "test@test.com"
@@ -84,7 +84,7 @@ class TestPositiveUser:
 
         assert user.pin == pin
 
-    def test_phone_validation(self, session):
+    def test_phone_validation(self, session):  # noqa: D102
         name: str = "testuser"
         company: bool = True
         phone: str = "999999999"
@@ -92,7 +92,11 @@ class TestPositiveUser:
         password: str = "testpass"
 
         user: User = User(
-            name=name, company=company, email=email, password=password, phone=phone
+            name=name,
+            company=company,
+            email=email,
+            password=password,
+            phone=phone,
         )
 
         session.add(user)
@@ -100,7 +104,7 @@ class TestPositiveUser:
 
         assert user.phone == phone.replace(" ", "")
 
-    def test_phone_validation_with_prefix(self, session):
+    def test_phone_validation_with_prefix(self, session):  # noqa: D102
         name: str = "testuser"
         company: bool = True
         phone: str = "+48999999999"
@@ -108,7 +112,11 @@ class TestPositiveUser:
         password: str = "testpass"
 
         user: User = User(
-            name=name, company=company, email=email, password=password, phone=phone
+            name=name,
+            company=company,
+            email=email,
+            password=password,
+            phone=phone,
         )
 
         session.add(user)
@@ -116,7 +124,7 @@ class TestPositiveUser:
 
         assert user.phone == phone.replace(" ", "")
 
-    def test_phone_validation_with_spaces_and_prefix(self, session):
+    def test_phone_validation_with_spaces_and_prefix(self, session):  # noqa: D102
         name: str = "testuser"
         company: bool = True
         phone: str = "+48 999 999 999"
@@ -124,7 +132,11 @@ class TestPositiveUser:
         password: str = "testpass"
 
         user: User = User(
-            name=name, company=company, email=email, password=password, phone=phone
+            name=name,
+            company=company,
+            email=email,
+            password=password,
+            phone=phone,
         )
 
         session.add(user)
@@ -133,7 +145,7 @@ class TestPositiveUser:
         assert user.phone == phone.replace(" ", "")
 
     @pytest.mark.regression
-    def test_email_validation(self, session):
+    def test_email_validation(self, session):  # noqa: D102
         name: str = "testuser"
         company: bool = True
         email: str = "test@test.com"
@@ -150,7 +162,7 @@ class TestPositiveUser:
         session.commit()
 
     @pytest.mark.regression
-    def test_email_validator_with_numbers(self, session):
+    def test_email_validator_with_numbers(self, session):  # noqa: D102
         name: str = "testuser"
         company: bool = True
         email: str = "test1@test2.com"
@@ -167,7 +179,7 @@ class TestPositiveUser:
         session.commit()
 
     @pytest.mark.regression
-    def test_creation_company_True(self, session):
+    def test_creation_company_True(self, session):  # noqa: D102
         name: str = "testuser"
         company: bool = True
         email: str = "test@test.com"
@@ -206,13 +218,15 @@ class TestPositiveUser:
         assert user.transactions_shares == []
 
     @pytest.mark.regression
-    def test_creation_company_false(self, session):
+    def test_creation_company_false(self, session):  # noqa: D102
         name: str = "testuser"
         surname: str = "testsurname"
         email: str = "test@test.com"
         password: str = "testpass"
 
-        user: User = User(name=name, surname=surname, email=email, password=password)
+        user: User = User(
+            name=name, surname=surname, email=email, password=password
+        )
 
         session.add(user)
         session.commit()
@@ -240,10 +254,9 @@ class TestPositiveUser:
         assert user.transactions_shares == []
 
 
-class TestNegativeUser:
-
+class TestNegativeUser:  # noqa: D101
     @pytest.mark.regression
-    def test_email_validator_no_dot(self, session):
+    def test_email_validator_no_dot(self, session):  # noqa: D102
         name: str = "testuser"
         company: bool = True
         email: str = "test@testcom"
@@ -261,7 +274,7 @@ class TestNegativeUser:
             session.commit()
 
     @pytest.mark.regression
-    def test_email_validator_no_end(self, session):
+    def test_email_validator_no_end(self, session):  # noqa: D102
         name: str = "testuser"
         company: bool = True
         email: str = "test@test"
@@ -279,7 +292,7 @@ class TestNegativeUser:
             session.commit()
 
     @pytest.mark.regression
-    def test_email_validator_no_at(self, session):
+    def test_email_validator_no_at(self, session):  # noqa: D102
         name: str = "testuser"
         company: bool = True
         email: str = "testtest.com"
@@ -297,7 +310,7 @@ class TestNegativeUser:
             session.commit()
 
     @pytest.mark.regression
-    def test_email_validator_invalid_space(self, session):
+    def test_email_validator_invalid_space(self, session):  # noqa: D102
         name: str = "testuser"
         company: bool = True
         email: str = "test @test.com"
@@ -314,7 +327,7 @@ class TestNegativeUser:
             session.add(user)
             session.commit()
 
-    def test_phone_validation_wrong_prefix(self, session):
+    def test_phone_validation_wrong_prefix(self, session):  # noqa: D102
         name: str = "testuser"
         company: bool = True
         phone: str = "+ 999999999"
@@ -323,13 +336,17 @@ class TestNegativeUser:
 
         with pytest.raises(ValueError):
             user: User = User(
-                name=name, company=company, email=email, password=password, phone=phone
+                name=name,
+                company=company,
+                email=email,
+                password=password,
+                phone=phone,
             )
 
             session.add(user)
             session.commit()
 
-    def test_phone_validation_empty(self, session):
+    def test_phone_validation_empty(self, session):  # noqa: D102
         name: str = "testuser"
         company: bool = True
         phone: str = ""
@@ -338,13 +355,17 @@ class TestNegativeUser:
 
         with pytest.raises(ValueError):
             user: User = User(
-                name=name, company=company, email=email, password=password, phone=phone
+                name=name,
+                company=company,
+                email=email,
+                password=password,
+                phone=phone,
             )
 
             session.add(user)
             session.commit()
 
-    def test_phone_validation_with_letters(self, session):
+    def test_phone_validation_with_letters(self, session):  # noqa: D102
         name: str = "testuser"
         company: bool = True
         phone: str = "9a9999999"
@@ -353,13 +374,17 @@ class TestNegativeUser:
 
         with pytest.raises(ValueError):
             user: User = User(
-                name=name, company=company, email=email, password=password, phone=phone
+                name=name,
+                company=company,
+                email=email,
+                password=password,
+                phone=phone,
             )
 
             session.add(user)
             session.commit()
 
-    def test_phone_validation_too_many_digits(self, session):
+    def test_phone_validation_too_many_digits(self, session):  # noqa: D102
         name: str = "testuser"
         company: bool = True
         phone: str = "9999999999"
@@ -368,13 +393,17 @@ class TestNegativeUser:
 
         with pytest.raises(ValueError):
             user: User = User(
-                name=name, company=company, email=email, password=password, phone=phone
+                name=name,
+                company=company,
+                email=email,
+                password=password,
+                phone=phone,
             )
 
             session.add(user)
             session.commit()
 
-    def test_pin_validation_special_sign(self, session):
+    def test_pin_validation_special_sign(self, session):  # noqa: D102
         name: str = "testuser"
         company: bool = True
         email: str = "test@test.com"
@@ -393,7 +422,7 @@ class TestNegativeUser:
             session.add(user)
             session.commit()
 
-    def test_pin_validation_spaces(self, session):
+    def test_pin_validation_spaces(self, session):  # noqa: D102
         name: str = "testuser"
         company: bool = True
         email: str = "test@test.com"
@@ -412,7 +441,7 @@ class TestNegativeUser:
             session.add(user)
             session.commit()
 
-    def test_pin_validation_letters(self, session):
+    def test_pin_validation_letters(self, session):  # noqa: D102
         name: str = "testuser"
         company: bool = True
         email: str = "test@test.com"
@@ -431,7 +460,7 @@ class TestNegativeUser:
             session.add(user)
             session.commit()
 
-    def test_pin_validation_too_short(self, session):
+    def test_pin_validation_too_short(self, session):  # noqa: D102
         name: str = "testuser"
         company: bool = True
         email: str = "test@test.com"
@@ -450,7 +479,7 @@ class TestNegativeUser:
             session.add(user)
             session.commit()
 
-    def test_pin_validation_too_long(self, session):
+    def test_pin_validation_too_long(self, session):  # noqa: D102
         name: str = "testuser"
         company: bool = True
         email: str = "test@test.com"
@@ -469,7 +498,7 @@ class TestNegativeUser:
             session.add(user)
             session.commit()
 
-    def test_name_validation_too_long(self, session):
+    def test_name_validation_too_long(self, session):  # noqa: D102
         name: str = "t" * 31
         company: bool = True
         email: str = "test@test.com"

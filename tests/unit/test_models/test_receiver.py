@@ -1,12 +1,11 @@
-import pytest
+import pytest  # noqa: D100
 from sqlalchemy.exc import IntegrityError
 
 from paytrack.models.receiver import Receiver
 
 
-class TestPositiveReceiver:
-
-    def test_creation(self, session):
+class TestPositiveReceiver:  # noqa: D101
+    def test_creation(self, session):  # noqa: D102
         user_id: int = 1
         name: str = "testname"
         receiver: Receiver = Receiver(owner_id=user_id, name=name)
@@ -18,9 +17,8 @@ class TestPositiveReceiver:
         assert receiver.owner_id == user_id
 
 
-class TestNegativeReceiver:
-
-    def test_creation_no_name(self, session):
+class TestNegativeReceiver:  # noqa: D101
+    def test_creation_no_name(self, session):  # noqa: D102
         user_id: int = 1
         with pytest.raises(IntegrityError):
             receiver: Receiver = Receiver(owner_id=user_id)
@@ -28,7 +26,7 @@ class TestNegativeReceiver:
             session.add(receiver)
             session.commit()
 
-    def test_creation_no_owner_id(self, session):
+    def test_creation_no_owner_id(self, session):  # noqa: D102
         name: str = "testname"
         with pytest.raises(IntegrityError):
             receiver: Receiver = Receiver(name=name)
@@ -36,14 +34,14 @@ class TestNegativeReceiver:
             session.add(receiver)
             session.commit()
 
-    def test_creation_nothing(self, session):
+    def test_creation_nothing(self, session):  # noqa: D102
         with pytest.raises(IntegrityError):
             receiver: Receiver = Receiver()
 
             session.add(receiver)
             session.commit()
 
-    def test_creation_too_long_name(self, session):
+    def test_creation_too_long_name(self, session):  # noqa: D102
         name: str = "t" * 51
         user_id: int = 1
         with pytest.raises(ValueError):

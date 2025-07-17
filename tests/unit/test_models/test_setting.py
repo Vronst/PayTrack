@@ -1,12 +1,11 @@
-import pytest
+import pytest  # noqa: D100
 from sqlalchemy.exc import IntegrityError
 
 from paytrack.models.setting import Setting
 
 
-class TestPositiveSetting:
-
-    def test_creation(self, session):
+class TestPositiveSetting:  # noqa: D101
+    def test_creation(self, session):  # noqa: D102
         user_id: int = 1
         setting: Setting = Setting(owner_id=user_id)
 
@@ -18,16 +17,15 @@ class TestPositiveSetting:
         assert setting.owner_id == user_id
 
 
-class TestNegativeSetting:
-
-    def test_creation_no_owner(self, session):
+class TestNegativeSetting:  # noqa: D101
+    def test_creation_no_owner(self, session):  # noqa: D102
         with pytest.raises(IntegrityError):
             setting: Setting = Setting()
 
             session.add(setting)
             session.commit()
 
-    def test_incorrect_mode(self, session):
+    def test_incorrect_mode(self, session):  # noqa: D102
         user_id: int = 1
         mode = "not my type"
 

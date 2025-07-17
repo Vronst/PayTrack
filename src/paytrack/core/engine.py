@@ -1,5 +1,5 @@
 import os
-from typing import Generator
+from collections.abc import Generator
 from warnings import warn
 
 from sqlalchemy import Engine as EN
@@ -10,8 +10,7 @@ from ..models.base import Base
 
 
 class Engine:
-    """
-    Creates, closes and manages:
+    """Creates, closes and manages:
     - engine (postgresql and sqlite for tests
     if other url is not provided)
     - session
@@ -22,7 +21,6 @@ class Engine:
     If some but not all database params are provided, will raise error.
 
     Args:
-
     test (bool): if True swaps targeted database
     to one provided in test_db arg.
 
@@ -128,9 +126,7 @@ class Engine:
             session.close()
 
     def close(self) -> None:
-        """
-        Closes session and disposes of engine
-        """
+        """Closes session and disposes of engine"""
         self.active = False
 
         if self._test:

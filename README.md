@@ -1,6 +1,6 @@
-# Rachunki
+# PayTrack
 
-Rachunki is a Python application for managing user taxes, subscriptions, income and payments.
+PayTrack is a Python application for managing user taxes, subscriptions, income and payments.
 
 ## Features (not yet implemented)
 

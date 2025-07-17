@@ -4,8 +4,7 @@ from . import Validator
 
 
 class DateValidator(Validator):
-    """
-    Check if passed value is correct date.
+    """Check if passed value is correct date.
     Takse to params, future_date and past_date.
 
     Params:

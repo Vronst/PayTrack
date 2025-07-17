@@ -1,4 +1,4 @@
-from copy import deepcopy
+from copy import deepcopy  # noqa: D100
 
 import pytest
 from pydantic import ValidationError
@@ -66,19 +66,16 @@ invalid = [
 
 
 @pytest.mark.parametrize("value", create_params)
-class TestUserCreate:
-
-    class TestValid:
-
-        def test_create(self, value):
+class TestUserCreate:  # noqa: D101
+    class TestValid:  # noqa: D106
+        def test_create(self, value):  # noqa: D102
             UserCreateSchema(**value)
 
-    class TestInvalid:
-
+    class TestInvalid:  # noqa: D106
         @pytest.mark.parametrize(
             "field", missing_fields, ids=lambda f: f"UserCreate_missing_{f}"
         )
-        def test_create_missing(self, value, field):
+        def test_create_missing(self, value, field):  # noqa: D102
             skip_test(field, ["id", "subaccounts", "included"])
             data = deepcopy(value)
             data.pop(field)
@@ -87,9 +84,11 @@ class TestUserCreate:
                 UserCreateSchema(**data)
 
         @pytest.mark.parametrize(
-            "field, invalid_data", invalid, ids=lambda f: f"UserCreate_invalid_{f}"
+            "field, invalid_data",
+            invalid,
+            ids=lambda f: f"UserCreate_invalid_{f}",
         )
-        def test_create_invalid(self, value, field, invalid_data):
+        def test_create_invalid(self, value, field, invalid_data):  # noqa: D102
             skip_test(field, ["id", "subaccounts", "included"])
             data = deepcopy(value)
             data[field] = invalid_data
@@ -99,19 +98,16 @@ class TestUserCreate:
 
 
 @pytest.mark.parametrize("value", read_params)
-class TestUserRead:
-
-    class TestValid:
-
-        def test_read(self, value):
+class TestUserRead:  # noqa: D101
+    class TestValid:  # noqa: D106
+        def test_read(self, value):  # noqa: D102
             UserReadSchema(**value)
 
-    class TestInvalid:
-
+    class TestInvalid:  # noqa: D106
         @pytest.mark.parametrize(
             "field", missing_fields, ids=lambda f: f"UserRead_missing_{f}"
         )
-        def test_read_missing(self, value, field):
+        def test_read_missing(self, value, field):  # noqa: D102
             data = deepcopy(value)
             data.pop(field)
 
@@ -119,9 +115,11 @@ class TestUserRead:
                 UserReadSchema(**data)
 
         @pytest.mark.parametrize(
-            "field, invalid_data", invalid, ids=lambda f: f"UserRead_invalid_{f}"
+            "field, invalid_data",
+            invalid,
+            ids=lambda f: f"UserRead_invalid_{f}",
         )
-        def test_read_invalid(self, value, field, invalid_data):
+        def test_read_invalid(self, value, field, invalid_data):  # noqa: D102
             data = deepcopy(value)
             data[field] = invalid_data
 
@@ -130,29 +128,30 @@ class TestUserRead:
 
 
 @pytest.mark.parametrize("value", update_params)
-class TestUserUpdate:
-
-    class TestValid:
-
-        def test_update(self, value):
+class TestUserUpdate:  # noqa: D101
+    class TestValid:  # noqa: D106
+        def test_update(self, value):  # noqa: D102
             UserUpdateSchema(**value)
 
         @pytest.mark.parametrize(
-            "field", missing_fields, ids=lambda f: f"UserUpdate_partial_missing_{f}"
+            "field",
+            missing_fields,
+            ids=lambda f: f"UserUpdate_partial_missing_{f}",
         )
-        def test_partial_update_missing(self, value, field):
+        def test_partial_update_missing(self, value, field):  # noqa: D102
             skip_test(field, ["id"])
             data = deepcopy(value)
             data.pop(field)
 
             UserUpdateSchema(**data)
 
-    class TestInvalid:
-
+    class TestInvalid:  # noqa: D106
         @pytest.mark.parametrize(
-            "field, invalid_data", invalid, ids=lambda f: f"UserUpdate_invalid_{f}"
+            "field, invalid_data",
+            invalid,
+            ids=lambda f: f"UserUpdate_invalid_{f}",
         )
-        def test_update_invalid(self, value, field, invalid_data):
+        def test_update_invalid(self, value, field, invalid_data):  # noqa: D102
             skip_test(field, ["id"])
             data = deepcopy(value)
             data[field] = invalid_data

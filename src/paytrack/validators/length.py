@@ -2,8 +2,7 @@ from .base import Validator
 
 
 class MaxLengthValidator(Validator):
-    """
-    Validates when called if length of passed value is lower then specified.
+    """Validates when called if length of passed value is lower then specified.
 
     Params:
         max_length (int): Maximum value length (exclusive).

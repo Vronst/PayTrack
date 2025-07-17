@@ -1,11 +1,14 @@
-from copy import deepcopy
+from copy import deepcopy  # noqa: D100
 
 import pytest
 from pydantic import ValidationError
 
 from paytrack.constants.translation import WORD_LENGTH
-from paytrack.schemas import (TranslationCreateSchema, TranslationReadSchema,
-                              TranslationUpdateSchema)
+from paytrack.schemas import (
+    TranslationCreateSchema,
+    TranslationReadSchema,
+    TranslationUpdateSchema,
+)
 
 from .conftest import skip_test
 
@@ -37,19 +40,18 @@ invalid = [
 
 
 @pytest.mark.parametrize("value", create_param)
-class TestTranslationCreate:
-
-    class TestValid:
-
-        def test_create(self, value):
+class TestTranslationCreate:  # noqa: D101
+    class TestValid:  # noqa: D106
+        def test_create(self, value):  # noqa: D102
             TranslationCreateSchema(**value)
 
-    class TestInvalid:
-
+    class TestInvalid:  # noqa: D106
         @pytest.mark.parametrize(
-            "field", missing_fields, ids=lambda f: f"TranslationCreate_missing_{f}"
+            "field",
+            missing_fields,
+            ids=lambda f: f"TranslationCreate_missing_{f}",
         )
-        def test_create_missing(self, value, field):
+        def test_create_missing(self, value, field):  # noqa: D102
             skip_test(field, ["id"])
             data = deepcopy(value)
             data.pop(field)
@@ -62,7 +64,7 @@ class TestTranslationCreate:
             invalid,
             ids=lambda f: f"TranslationCreate_invalid_{f}",
         )
-        def test_create_invalid(self, value, field, invalid_data):
+        def test_create_invalid(self, value, field, invalid_data):  # noqa: D102
             skip_test(field, ["id"])
             data = deepcopy(value)
             data[field] = invalid_data
@@ -72,19 +74,18 @@ class TestTranslationCreate:
 
 
 @pytest.mark.parametrize("value", read_param)
-class TestTranslationRead:
-
-    class TestValid:
-
-        def test_read(self, value):
+class TestTranslationRead:  # noqa: D101
+    class TestValid:  # noqa: D106
+        def test_read(self, value):  # noqa: D102
             TranslationReadSchema(**value)
 
-    class TestInvalid:
-
+    class TestInvalid:  # noqa: D106
         @pytest.mark.parametrize(
-            "field", missing_fields, ids=lambda f: f"TranslationRead_missing_{f}"
+            "field",
+            missing_fields,
+            ids=lambda f: f"TranslationRead_missing_{f}",
         )
-        def test_read_missing(self, value, field):
+        def test_read_missing(self, value, field):  # noqa: D102
             data = deepcopy(value)
             data.pop(field)
 
@@ -92,9 +93,11 @@ class TestTranslationRead:
                 TranslationReadSchema(**data)
 
         @pytest.mark.parametrize(
-            "field, invalid_data", invalid, ids=lambda f: f"TranslationRead_invalid_{f}"
+            "field, invalid_data",
+            invalid,
+            ids=lambda f: f"TranslationRead_invalid_{f}",
         )
-        def test_read_invalid(self, value, field, invalid_data):
+        def test_read_invalid(self, value, field, invalid_data):  # noqa: D102
             data = deepcopy(value)
             data[field] = invalid_data
 
@@ -103,11 +106,9 @@ class TestTranslationRead:
 
 
 @pytest.mark.parametrize("value", update_param)
-class TestTranslationUpdate:
-
-    class TestValid:
-
-        def test_update(self, value):
+class TestTranslationUpdate:  # noqa: D101
+    class TestValid:  # noqa: D106
+        def test_update(self, value):  # noqa: D102
             TranslationUpdateSchema(**value)
 
         @pytest.mark.parametrize(
@@ -115,18 +116,20 @@ class TestTranslationUpdate:
             missing_fields,
             ids=lambda f: f"TranslationUpdate_partial_missing_{f}",
         )
-        def test_partial_update(self, value, field):
+        def test_partial_update(self, value, field):  # noqa: D102
             skip_test(field, ["id"])
             data = deepcopy(value)
             data.pop(field)
 
             TranslationUpdateSchema(**data)
 
-    class TestInvalid:
+    class TestInvalid:  # noqa: D106
         @pytest.mark.parametrize(
-            "field, invalid_data", invalid, ids=lambda f: f"TranslationRead_invalid_{f}"
+            "field, invalid_data",
+            invalid,
+            ids=lambda f: f"TranslationRead_invalid_{f}",
         )
-        def test_update_invalid(self, value, field, invalid_data):
+        def test_update_invalid(self, value, field, invalid_data):  # noqa: D102
             skip_test(field, ["id"])
             data = deepcopy(value)
             data[field] = invalid_data

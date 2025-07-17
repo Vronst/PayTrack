@@ -1,13 +1,12 @@
-import pytest
+import pytest  # noqa: D100
 from sqlalchemy.exc import IntegrityError
 
 from paytrack.models.savings import Savings
 
 
-class TestPositiveSavings:
-
+class TestPositiveSavings:  # noqa: D101
     @pytest.mark.regression
-    def test_creation(self, session):
+    def test_creation(self, session):  # noqa: D102
         currency_id: int = 1
         owner_id: int = 1
 
@@ -21,14 +20,17 @@ class TestPositiveSavings:
         assert savings.owner_id == owner_id
         assert savings.currency_id == currency_id
 
-    def test_full_creation(self, session):
+    def test_full_creation(self, session):  # noqa: D102
         currency_id: int = 1
         owner_id: int = 1
         amount: float = 0.5
         budget: float = 1.0
 
         savings: Savings = Savings(
-            amount=amount, budget=budget, currency_id=currency_id, owner_id=owner_id
+            amount=amount,
+            budget=budget,
+            currency_id=currency_id,
+            owner_id=owner_id,
         )
 
         session.add(savings)
@@ -40,9 +42,8 @@ class TestPositiveSavings:
         assert savings.budget == budget
 
 
-class TestNegativeSavings:
-
-    def test_creation_no_owner(self, session):
+class TestNegativeSavings:  # noqa: D101
+    def test_creation_no_owner(self, session):  # noqa: D102
         currency_id: int = 1
 
         with pytest.raises(IntegrityError):
@@ -51,7 +52,7 @@ class TestNegativeSavings:
             session.add(savings)
             session.commit()
 
-    def test_creation_no_currency(self, session):
+    def test_creation_no_currency(self, session):  # noqa: D102
         owner_id: int = 1
 
         with pytest.raises(IntegrityError):
@@ -60,7 +61,7 @@ class TestNegativeSavings:
             session.add(savings)
             session.commit()
 
-    def test_creation_nothing(self, session):
+    def test_creation_nothing(self, session):  # noqa: D102
         with pytest.raises(IntegrityError):
             savings: Savings = Savings()
 
@@ -68,7 +69,7 @@ class TestNegativeSavings:
             session.commit()
 
     @pytest.mark.regression
-    def test_budget_equal_zero(self, session):
+    def test_budget_equal_zero(self, session):  # noqa: D102
         currency_id: int = 1
         owner_id: int = 1
         budget: float = 0.0
@@ -81,7 +82,7 @@ class TestNegativeSavings:
             session.add(savings)
             session.commit()
 
-    def test_budget_below_zero(self, session):
+    def test_budget_below_zero(self, session):  # noqa: D102
         currency_id: int = 1
         owner_id: int = 1
         budget: float = -1.0

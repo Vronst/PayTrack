@@ -1,12 +1,14 @@
-from copy import deepcopy
+from copy import deepcopy  # noqa: D100
 
 import pytest
 from pydantic import ValidationError
 
 from paytrack.constants.transaction_share import MIN_AMOUNT
-from paytrack.schemas import (TransactionShareCreateSchema,
-                              TransactionShareReadSchema,
-                              TransactionShareUpdateSchema)
+from paytrack.schemas import (
+    TransactionShareCreateSchema,
+    TransactionShareReadSchema,
+    TransactionShareUpdateSchema,
+)
 
 from .conftest import skip_test
 
@@ -40,19 +42,18 @@ invalid = [
 
 
 @pytest.mark.parametrize("value", create_param)
-class TestTransactionCreateShare:
-
-    class TestValid:
-
-        def test_create(self, value):
+class TestTransactionCreateShare:  # noqa: D101
+    class TestValid:  # noqa: D106
+        def test_create(self, value):  # noqa: D102
             TransactionShareCreateSchema(**value)
 
-    class TestInvalid:
-
+    class TestInvalid:  # noqa: D106
         @pytest.mark.parametrize(
-            "field", missing_fields, ids=lambda f: f"TransactionShareCreate_missing_{f}"
+            "field",
+            missing_fields,
+            ids=lambda f: f"TransactionShareCreate_missing_{f}",
         )
-        def test_create_missing(self, value, field):
+        def test_create_missing(self, value, field):  # noqa: D102
             skip_test(field, ["id"])
             data = deepcopy(value)
             data.pop(field)
@@ -65,7 +66,7 @@ class TestTransactionCreateShare:
             invalid,
             ids=lambda f: f"TransactionShareCreate_invalid_{f}",
         )
-        def test_create_invalid(self, value, field, invalid_data):
+        def test_create_invalid(self, value, field, invalid_data):  # noqa: D102
             skip_test(field, ["id"])
             data = deepcopy(value)
             data[field] = invalid_data
@@ -75,18 +76,18 @@ class TestTransactionCreateShare:
 
 
 @pytest.mark.parametrize("value", read_param)
-class TestTransactionReadShare:
-
-    class TestValid:
-
-        def test_read(self, value):
+class TestTransactionReadShare:  # noqa: D101
+    class TestValid:  # noqa: D106
+        def test_read(self, value):  # noqa: D102
             TransactionShareReadSchema(**value)
 
-    class TestInvalid:
+    class TestInvalid:  # noqa: D106
         @pytest.mark.parametrize(
-            "field", missing_fields, ids=lambda f: f"TransactionShareRead_missing_{f}"
+            "field",
+            missing_fields,
+            ids=lambda f: f"TransactionShareRead_missing_{f}",
         )
-        def test_read_missing(self, value, field):
+        def test_read_missing(self, value, field):  # noqa: D102
             data = deepcopy(value)
             data.pop(field)
 
@@ -98,7 +99,7 @@ class TestTransactionReadShare:
             invalid,
             ids=lambda f: f"TransactionShareRead_invalid_{f}",
         )
-        def test_read_invalid(self, value, field, invalid_data):
+        def test_read_invalid(self, value, field, invalid_data):  # noqa: D102
             data = deepcopy(value)
             data[field] = invalid_data
 
@@ -107,11 +108,9 @@ class TestTransactionReadShare:
 
 
 @pytest.mark.parametrize("value", update_param)
-class TestTransactionUpdateShare:
-
-    class TestValid:
-
-        def test_update(self, value):
+class TestTransactionUpdateShare:  # noqa: D101
+    class TestValid:  # noqa: D106
+        def test_update(self, value):  # noqa: D102
             TransactionShareUpdateSchema(**value)
 
         @pytest.mark.parametrize(
@@ -119,21 +118,20 @@ class TestTransactionUpdateShare:
             missing_fields,
             ids=lambda f: f"TransactionShareUpdate_partial_missing_{f}",
         )
-        def test_partial_update(self, value, field):
+        def test_partial_update(self, value, field):  # noqa: D102
             skip_test(field, ["id", "owner_id"])
             data = deepcopy(value)
             data.pop(field)
 
             TransactionShareUpdateSchema(**data)
 
-    class TestInvalid:
-
+    class TestInvalid:  # noqa: D106
         @pytest.mark.parametrize(
             "field, invalid_data",
             invalid,
             ids=lambda f: f"TransactionShareUpdate_invalid_{f}",
         )
-        def test_update_invalid(self, value, field, invalid_data):
+        def test_update_invalid(self, value, field, invalid_data):  # noqa: D102
             skip_test(field, ["id", "owner_id"])
             data = deepcopy(value)
             data[field] = invalid_data

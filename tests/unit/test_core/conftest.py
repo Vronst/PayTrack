@@ -1,4 +1,4 @@
-from typing import Generator
+from collections.abc import Generator  # noqa: D100
 
 import pytest
 

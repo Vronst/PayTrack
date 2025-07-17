@@ -28,7 +28,7 @@ jobs:
     needs: 
       - tests 
       - release 
-    uses: Vronst/documentation_workflow/.github/workflows/doc_workflow.yml@1.0.1
+    uses: Vronst/documentation_workflow/.github/workflows/doc_workflow.yml@1.0.2
     with: 
       python-version: '3.13'
 

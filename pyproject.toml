@@ -28,6 +28,7 @@ dev = [
     "isort>=6.0.1",
     "pytest>=8.3.4",
     "python-dotenv>=1.1.0",
+    "ruff>=0.12.4",
 ]
 doc = [
     "sphinx>=8.2.3",
@@ -44,14 +45,31 @@ markers = [
 testpaths = "tests/"
 pythonpath = "src/"
 
-[tool.black]
-line-length = "79"
-target-version = ["py311"]
+[tool.ruff]
+line-length = 79
+indent-width = 4
 
-[tool.flake8]
-line-length = "79"
+[tool.ruff.lint]
+extend-select = [
+	"UP",  # pyupgrade
+	"D",  # pydocstyle
+	"F",  # flake8 
+	"E",  # pycodestyle
+	"B",  # flake8-bugbear
+	"SIM",  # flake8-simplify
+	"I",  # isort
+]
+ignore = []
+fixable = ["ALL"]
+unfixable = []
+dummy-variable-rgx = ""
 
-[tool.isort]
-profile = "black"
-line_length = "79"
-known_first_party = ["paytrack"]
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"

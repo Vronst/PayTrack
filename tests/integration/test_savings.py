@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING  # noqa: D100
 
 import pytest
 
@@ -8,10 +8,9 @@ if TYPE_CHECKING:
     from paytrack.models.user import User
 
 
-class TestPositiveSavings:
-
+class TestPositiveSavings:  # noqa: D101
     @pytest.mark.regression
-    def test_included(self, session, users):
+    def test_included(self, session, users):  # noqa: D102
         currency_id: int = 1
         owner_id: int = 1
 

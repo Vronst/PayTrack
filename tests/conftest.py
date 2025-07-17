@@ -1,4 +1,4 @@
-from typing import Generator
+from collections.abc import Generator  # noqa: D100
 
 import pytest
 from sqlalchemy import create_engine
@@ -27,8 +27,14 @@ def session() -> Generator[Session, None, None]:
 
 @pytest.fixture(scope="function")
 def users() -> tuple[User, User, User]:
-    u1 = User(name="John", surname="Smith", email="john@example.com", password="pw")
-    u2 = User(name="Jane", surname="Doe", email="jane@example.com", password="pw")
-    u3 = User(name="Mark", surname="Twain", email="mark@example.com", password="pw")
+    u1 = User(
+        name="John", surname="Smith", email="john@example.com", password="pw"
+    )
+    u2 = User(
+        name="Jane", surname="Doe", email="jane@example.com", password="pw"
+    )
+    u3 = User(
+        name="Mark", surname="Twain", email="mark@example.com", password="pw"
+    )
 
     return u1, u2, u3

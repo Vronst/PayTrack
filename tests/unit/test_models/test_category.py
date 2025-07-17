@@ -1,14 +1,13 @@
-from datetime import datetime
+from datetime import datetime  # noqa: D100
 
 import pytest
 
 from paytrack.models.category import Category
 
 
-class TestPositiveCategory:
-
+class TestPositiveCategory:  # noqa: D101
     @pytest.mark.regression
-    def test_created_at(self, session):
+    def test_created_at(self, session):  # noqa: D102
         category: Category = Category()
         session.add(category)
         session.commit()
@@ -22,7 +21,7 @@ class TestPositiveCategory:
         assert category.translations == []
 
     @pytest.mark.regression
-    def test_updated_at(self, session):
+    def test_updated_at(self, session):  # noqa: D102
         category: Category = Category()
         session.add(category)
         session.commit()
@@ -37,14 +36,14 @@ class TestPositiveCategory:
         assert category.updated_at is not None
 
     @pytest.mark.regression
-    def test_deleted_at(self, session):
+    def test_deleted_at(self, session):  # noqa: D102
         category: Category = Category()
         session.add(category)
         session.commit()
 
         assert category.deleted_at is None
 
-    def test_parent_and_subcategories(self, session):
+    def test_parent_and_subcategories(self, session):  # noqa: D102
         parent: Category = Category()
         child: Category = Category()
         grandparent: Category = Category()
@@ -71,9 +70,8 @@ class TestPositiveCategory:
         assert grandparent.subcategories == [parent]
 
 
-class TestNegativeCategory:
-
-    def test_too_long_name(self, session):
+class TestNegativeCategory:  # noqa: D101
+    def test_too_long_name(self, session):  # noqa: D102
         name: str = "x" * 20
         with pytest.raises(ValueError):
             category: Category = Category(name=name)

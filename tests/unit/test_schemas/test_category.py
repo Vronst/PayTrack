@@ -1,11 +1,14 @@
-from copy import deepcopy
+from copy import deepcopy  # noqa: D100
 from datetime import datetime
 
 import pytest
 from pydantic import ValidationError
 
-from paytrack.schemas import (CategoryCreateSchema, CategoryReadSchema,
-                              CategoryUpdateSchema)
+from paytrack.schemas import (
+    CategoryCreateSchema,
+    CategoryReadSchema,
+    CategoryUpdateSchema,
+)
 
 from .conftest import skip_test
 
@@ -62,20 +65,22 @@ invalid = [
 
 
 @pytest.mark.parametrize("value", create_params)
-class TestCategoryCreate:
-
-    class TestValid:
-        def test_creation(self, value):
-
+class TestCategoryCreate:  # noqa: D101
+    class TestValid:  # noqa: D106
+        def test_creation(self, value):  # noqa: D102
             CategoryCreateSchema(**value)
 
-    class TestInvalid:
-
+    class TestInvalid:  # noqa: D106
         @pytest.mark.parametrize(
-            "field", missing_fields, ids=lambda f: f"CategoryCreate_missing_{f}"
+            "field",
+            missing_fields,
+            ids=lambda f: f"CategoryCreate_missing_{f}",
         )
-        def test_create_missing(self, value, field):
-            skip_test(field, ["id", "subcategories", "custom", "name", "root_category"])
+        def test_create_missing(self, value, field):  # noqa: D102
+            skip_test(
+                field,
+                ["id", "subcategories", "custom", "name", "root_category"],
+            )
             data = deepcopy(value)
             data.pop(field)
 
@@ -83,9 +88,11 @@ class TestCategoryCreate:
                 CategoryCreateSchema(**data)
 
         @pytest.mark.parametrize(
-            "field, invalid_data", invalid, ids=lambda f: f"CategoryCreate_invalid_{f}"
+            "field, invalid_data",
+            invalid,
+            ids=lambda f: f"CategoryCreate_invalid_{f}",
         )
-        def test_create_invalid(self, value, field, invalid_data):
+        def test_create_invalid(self, value, field, invalid_data):  # noqa: D102
             skip_test(field, ["id", "subcategories"])
             data = deepcopy(value)
             data[field] = invalid_data
@@ -95,18 +102,16 @@ class TestCategoryCreate:
 
 
 @pytest.mark.parametrize("value", read_params)
-class TestCategoryRead:
-
-    class TestValid:
-        def test_read(self, value):
-
+class TestCategoryRead:  # noqa: D101
+    class TestValid:  # noqa: D106
+        def test_read(self, value):  # noqa: D102
             CategoryReadSchema(**value)
 
-    class TestInvalid:
+    class TestInvalid:  # noqa: D106
         @pytest.mark.parametrize(
             "field", missing_fields, ids=lambda f: f"CategoryRead_missing_{f}"
         )
-        def test_read_missing(self, value, field):
+        def test_read_missing(self, value, field):  # noqa: D102
             skip_test(field, ["custom", "name", "root_category"])
             data = deepcopy(value)
             data.pop(field)
@@ -115,9 +120,11 @@ class TestCategoryRead:
                 CategoryReadSchema(**data)
 
         @pytest.mark.parametrize(
-            "field, invalid_data", invalid, ids=lambda f: f"CategoryRead_invalid_{f}"
+            "field, invalid_data",
+            invalid,
+            ids=lambda f: f"CategoryRead_invalid_{f}",
         )
-        def test_read_invalid(self, value, field, invalid_data):
+        def test_read_invalid(self, value, field, invalid_data):  # noqa: D102
             data = deepcopy(value)
             data[field] = invalid_data
 
@@ -126,19 +133,20 @@ class TestCategoryRead:
 
 
 @pytest.mark.parametrize("value", update_params)
-class TestCategoryUpdate:
-
-    class TestValid:
-        def test_update(self, value):
+class TestCategoryUpdate:  # noqa: D101
+    class TestValid:  # noqa: D106
+        def test_update(self, value):  # noqa: D102
             result = CategoryUpdateSchema(**value)
 
             assert (result.updated_at - datetime.now()).total_seconds() < 5
 
         @pytest.mark.regression
         @pytest.mark.parametrize(
-            "field", missing_fields, ids=lambda f: f"CategoryUpdate_missing_{f}"
+            "field",
+            missing_fields,
+            ids=lambda f: f"CategoryUpdate_missing_{f}",
         )
-        def test_partial_update(self, value, field):
+        def test_partial_update(self, value, field):  # noqa: D102
             skip_test(field, ["id", "custom", "subcategories"])
             data = deepcopy(value)
             data.pop(field)
@@ -147,11 +155,13 @@ class TestCategoryUpdate:
 
             assert (result.updated_at - datetime.now()).total_seconds() < 5
 
-    class TestInvalid:
+    class TestInvalid:  # noqa: D106
         @pytest.mark.parametrize(
-            "field, invalid_data", invalid, ids=lambda f: f"CategoryUpdate_invalid_{f}"
+            "field, invalid_data",
+            invalid,
+            ids=lambda f: f"CategoryUpdate_invalid_{f}",
         )
-        def test_update_invalid(self, value, field, invalid_data):
+        def test_update_invalid(self, value, field, invalid_data):  # noqa: D102
             skip_test(field, ["custom", "id", "subcategories"])
             data = deepcopy(value)
             data[field] = invalid_data

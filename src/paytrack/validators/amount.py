@@ -2,8 +2,7 @@ from .base import Validator
 
 
 class AmountValidator(Validator):
-    """
-    Validates when called if amount is between set minimum and maximum.
+    """Validates when called if amount is between set minimum and maximum.
 
     Params:
         min_amount (float): Minimum allowable value - default -inf.

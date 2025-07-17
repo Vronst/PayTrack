@@ -1,12 +1,9 @@
-import pytest
-
-from paytrack.models import User
+import pytest  # noqa: D100
 
 
-class TestPositiveUser:
-
+class TestPositiveUser:  # noqa: D101
     @pytest.mark.regression
-    def test_included_relationship(self, session, users) -> None:
+    def test_included_relationship(self, session, users) -> None:  # noqa: D102
         u1, u2, u3 = users
 
         u1.included.extend([u2, u3])
@@ -24,7 +21,7 @@ class TestPositiveUser:
         assert u3.included == []
 
     @pytest.mark.regression
-    def test_parent_and_child(self, session, users) -> None:
+    def test_parent_and_child(self, session, users) -> None:  # noqa: D102
         u1, u2, u3 = users
 
         session.add_all([u1, u2, u3])
@@ -45,5 +42,5 @@ class TestPositiveUser:
         assert u3.parent == u2
 
 
-class TestNegativeUser:
+class TestNegativeUser:  # noqa: D101
     pass

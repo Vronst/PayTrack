@@ -4,7 +4,6 @@ from . import Validator
 
 
 class ChoiceValidator(Validator):
-
     def __init__(self, choice: list) -> None:
         self.choice = choice
 

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime  # noqa: D100
 
 import pytest
 from sqlalchemy.exc import IntegrityError
@@ -6,16 +6,18 @@ from sqlalchemy.exc import IntegrityError
 from paytrack.models.subscription import Subscription
 
 
-class TestPositiveSubscription:
-
-    def test_creation(self, session):
+class TestPositiveSubscription:  # noqa: D101
+    def test_creation(self, session):  # noqa: D102
         name: str = "testname"
         amount: float = 10.5
         currency_id: int = 1
         owner_id: int = 1
 
         subscription: Subscription = Subscription(
-            name=name, amount=amount, currency_id=currency_id, owner_id=owner_id
+            name=name,
+            amount=amount,
+            currency_id=currency_id,
+            owner_id=owner_id,
         )
 
         session.add(subscription)
@@ -30,7 +32,7 @@ class TestPositiveSubscription:
         assert subscription.active == True
         assert subscription.shared == False
 
-    def test_full_creation(self, session):
+    def test_full_creation(self, session):  # noqa: D102
         name: str = "testname"
         amount: float = 10.5
         currency_id: int = 1
@@ -64,9 +66,8 @@ class TestPositiveSubscription:
         assert subscription.shared == shared
 
 
-class TestNegativeSubscription:
-
-    def test_creation_no_name(self, session):
+class TestNegativeSubscription:  # noqa: D101
+    def test_creation_no_name(self, session):  # noqa: D102
         amount: float = 10.5
         currency_id: int = 1
         owner_id: int = 1
@@ -79,7 +80,7 @@ class TestNegativeSubscription:
             session.add(subscription)
             session.commit()
 
-    def test_creation_no_amount(self, session):
+    def test_creation_no_amount(self, session):  # noqa: D102
         name: str = "testname"
         currency_id: int = 1
         owner_id: int = 1
@@ -92,7 +93,7 @@ class TestNegativeSubscription:
             session.add(subscription)
             session.commit()
 
-    def test_creation_no_currency_id(self, session):
+    def test_creation_no_currency_id(self, session):  # noqa: D102
         name: str = "testname"
         amount: float = 10.5
         owner_id: int = 1
@@ -105,7 +106,7 @@ class TestNegativeSubscription:
             session.add(subscription)
             session.commit()
 
-    def test_creation_no_owner(self, session):
+    def test_creation_no_owner(self, session):  # noqa: D102
         name: str = "testname"
         amount: float = 10.5
         currency_id: int = 1
@@ -120,15 +121,14 @@ class TestNegativeSubscription:
             session.add(subscription)
             session.commit()
 
-    def test_creation_nothing(self, session):
-
+    def test_creation_nothing(self, session):  # noqa: D102
         with pytest.raises(IntegrityError):
             subscription: Subscription = Subscription()
 
             session.add(subscription)
             session.commit()
 
-    def test_amount_equal_zero(self, session):
+    def test_amount_equal_zero(self, session):  # noqa: D102
         name: str = "testname"
         amount: float = 0.0
         currency_id: int = 1
@@ -136,13 +136,16 @@ class TestNegativeSubscription:
 
         with pytest.raises(ValueError):
             subscription: Subscription = Subscription(
-                name=name, amount=amount, currency_id=currency_id, owner_id=owner_id
+                name=name,
+                amount=amount,
+                currency_id=currency_id,
+                owner_id=owner_id,
             )
 
             session.add(subscription)
             session.commit()
 
-    def test_incorrect_period(self, session):
+    def test_incorrect_period(self, session):  # noqa: D102
         name: str = "testname"
         amount: float = 10.5
         currency_id: int = 1
@@ -161,7 +164,7 @@ class TestNegativeSubscription:
             session.add(subscription)
             session.commit()
 
-    def test_too_long_name(self, session):
+    def test_too_long_name(self, session):  # noqa: D102
         name: str = "t" * 31
         amount: float = 10.5
         currency_id: int = 1
@@ -169,13 +172,16 @@ class TestNegativeSubscription:
 
         with pytest.raises(ValueError):
             subscription: Subscription = Subscription(
-                name=name, amount=amount, currency_id=currency_id, owner_id=owner_id
+                name=name,
+                amount=amount,
+                currency_id=currency_id,
+                owner_id=owner_id,
             )
 
             session.add(subscription)
             session.commit()
 
-    def test_too_long_period_name(self, session):
+    def test_too_long_period_name(self, session):  # noqa: D102
         name: str = "testname"
         amount: float = 10.5
         currency_id: int = 1

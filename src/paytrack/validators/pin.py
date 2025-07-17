@@ -4,7 +4,6 @@ from .base import Validator
 
 
 class PinValidator(Validator):
-
     def __init__(self, length: int = 4) -> None:
         self.length = length
         self.pattern = re.compile(r"^\d{" + str(length) + r"}$")

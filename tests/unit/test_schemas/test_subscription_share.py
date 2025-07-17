@@ -1,12 +1,14 @@
-from copy import deepcopy
+from copy import deepcopy  # noqa: D100
 
 import pytest
 from pydantic import ValidationError
 
 from paytrack.constants.subscription_share import MIN_AMOUNT
-from paytrack.schemas import (SubscriptionShareCreateSchema,
-                              SubscriptionShareReadSchema,
-                              SubscriptionShareUpdateSchema)
+from paytrack.schemas import (
+    SubscriptionShareCreateSchema,
+    SubscriptionShareReadSchema,
+    SubscriptionShareUpdateSchema,
+)
 
 from .conftest import skip_test
 
@@ -40,21 +42,18 @@ invalid = [
 
 
 @pytest.mark.parametrize("value", create_param)
-class TestSubscriptionShareCreate:
-
-    class TestValid:
-
-        def test_create(self, value):
+class TestSubscriptionShareCreate:  # noqa: D101
+    class TestValid:  # noqa: D106
+        def test_create(self, value):  # noqa: D102
             SubscriptionShareCreateSchema(**value)
 
-    class TestInvalid:
-
+    class TestInvalid:  # noqa: D106
         @pytest.mark.parametrize(
             "field",
             missing_fields,
             ids=lambda f: f"SubscriptionShareCreate_missing_{f}",
         )
-        def test_create_missing(self, value, field):
+        def test_create_missing(self, value, field):  # noqa: D102
             skip_test(field, ["id"])
             data = deepcopy(value)
             data.pop(field)
@@ -67,7 +66,7 @@ class TestSubscriptionShareCreate:
             invalid,
             ids=lambda f: f"SubscriptionShareCreate_invalid_{f}",
         )
-        def test_create_invalid(self, value, field, invalid_data):
+        def test_create_invalid(self, value, field, invalid_data):  # noqa: D102
             skip_test(field, ["id"])
             data = deepcopy(value)
             data[field] = invalid_data
@@ -75,7 +74,7 @@ class TestSubscriptionShareCreate:
             with pytest.raises(ValidationError):
                 SubscriptionShareCreateSchema(**data)
 
-        def test_create_amount_lower_than_min(self, value):
+        def test_create_amount_lower_than_min(self, value):  # noqa: D102
             data = deepcopy(value)
             data["amount"] = MIN_AMOUNT - 0.1
 
@@ -84,18 +83,18 @@ class TestSubscriptionShareCreate:
 
 
 @pytest.mark.parametrize("value", read_param)
-class TestSubscriptionShareRead:
-
-    class TestValid:
-
-        def test_read(self, value):
+class TestSubscriptionShareRead:  # noqa: D101
+    class TestValid:  # noqa: D106
+        def test_read(self, value):  # noqa: D102
             SubscriptionShareReadSchema(**value)
 
-    class TestInvalid:
+    class TestInvalid:  # noqa: D106
         @pytest.mark.parametrize(
-            "field", missing_fields, ids=lambda f: f"SubscriptionShareRead_missing_{f}"
+            "field",
+            missing_fields,
+            ids=lambda f: f"SubscriptionShareRead_missing_{f}",
         )
-        def test_read_missing(self, value, field):
+        def test_read_missing(self, value, field):  # noqa: D102
             data = deepcopy(value)
             data.pop(field)
 
@@ -107,14 +106,14 @@ class TestSubscriptionShareRead:
             invalid,
             ids=lambda f: f"SubscriptionShareRead_invalid_{f}",
         )
-        def test_read_invalid(self, value, field, invalid_data):
+        def test_read_invalid(self, value, field, invalid_data):  # noqa: D102
             data = deepcopy(value)
             data[field] = invalid_data
 
             with pytest.raises(ValidationError):
                 SubscriptionShareReadSchema(**data)
 
-        def test_read_amount_lower_than_min(self, value):
+        def test_read_amount_lower_than_min(self, value):  # noqa: D102
             data = deepcopy(value)
             data["amount"] = MIN_AMOUNT - 0.1
 
@@ -123,11 +122,9 @@ class TestSubscriptionShareRead:
 
 
 @pytest.mark.parametrize("value", update_param)
-class TestSubscriptionShareUpdate:
-
-    class TestValid:
-
-        def test_update(self, value):
+class TestSubscriptionShareUpdate:  # noqa: D101
+    class TestValid:  # noqa: D106
+        def test_update(self, value):  # noqa: D102
             SubscriptionShareUpdateSchema(**value)
 
         @pytest.mark.parametrize(
@@ -135,16 +132,15 @@ class TestSubscriptionShareUpdate:
             missing_fields,
             ids=lambda f: f"SubscriptionShareUpdate_partial_{f}",
         )
-        def test_partial_update(self, value, field):
+        def test_partial_update(self, value, field):  # noqa: D102
             skip_test(field, ["id", "owner_id"])
             data = deepcopy(value)
             data.pop(field)
 
             SubscriptionShareUpdateSchema(**data)
 
-    class TestInvalid:
-
-        def test_update_amount_lower_than_min(self, value):
+    class TestInvalid:  # noqa: D106
+        def test_update_amount_lower_than_min(self, value):  # noqa: D102
             data = deepcopy(value)
             data["amount"] = MIN_AMOUNT - 0.1
 
@@ -156,7 +152,7 @@ class TestSubscriptionShareUpdate:
             invalid,
             ids=lambda f: f"SubscriptionShareUpdate_invalid_{f}",
         )
-        def test_update_invalid(self, value, field, invalid_data):
+        def test_update_invalid(self, value, field, invalid_data):  # noqa: D102
             skip_test(field, ["id", "owner_id"])
             data = deepcopy(value)
             data[field] = invalid_data

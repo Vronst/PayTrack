@@ -21,7 +21,6 @@ class CurrencyReadSchema(BaseReadSchema, CurrencySchema):
 
 
 class CurrencyUpdateSchema(BaseUpdateSchema):
-
     code: Annotated[str | None, StringConstraints(max_length=CODE_LENGTH)] = (
         None
     )
