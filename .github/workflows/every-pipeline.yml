@@ -1,24 +1,27 @@
-name: Tests and Pull Request Pipeline
+name: Lint and format then tests and PR pipeline 
 
-on:
+on: 
   push:
-    branches:
-      - lap
+    branches-ignore:
+      - 'lap'
+      - 'stage'
+      - 'main'
 
-# needed permissions
 permissions:
   contents: write
   packages: write
 
 jobs:
-  tests:
-    uses: Vronst/testing_workflow/.github/workflows/testing_workflow.yml@2.0.0
-
   lint_and_format:
     uses: Vronst/Vronst/Vronst/lint-check/.github/workflows/lint.yaml@1.0.0
     # (optional)
     with:
       python-version: '3.13'
+
+
+  tests:
+    uses: Vronst/testing_workflow/.github/workflows/testing_workflow.yml@2.0.0
+
 
   create_PR:
     needs: 
@@ -26,12 +29,10 @@ jobs:
       - lint_and_format
     uses: Vronst/pull_request_workflow/.github/workflows/pull_request.yml@1.1.0
     with:
-      head: 'lap'
-      base: 'stage'
-      title: 'Tests passed'
-      body: 'Tests on lap branch has passed.'
+      head: ${{ github.even.workflow_run.head_branch }}
+      base: 'lap'
+      title: 'Tests and style formatting have passed'
+      body: 'Minimal requirements for pr to "lap" have been met'
       extra_flags: '--draft'
     secrets:
       TOKEN: ${{ secrets.PRO_TOKEN }}
-
-

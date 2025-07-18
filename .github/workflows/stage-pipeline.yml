@@ -14,8 +14,16 @@ jobs:
   tests:
     uses: Vronst/testing_workflow/.github/workflows/testing_workflow.yml@2.0.0
 
+  lint_and_format:
+    uses: Vronst/Vronst/Vronst/lint-check/.github/workflows/lint.yaml@1.0.0
+    # (optional)
+    with:
+      python-version: '3.13'
+
   create_PR:
-    needs: tests
+    needs: 
+      - tests
+      - lint_and_format
     uses: Vronst/pull_request_workflow/.github/workflows/pull_request.yml@1.1.0
     with:
       head: 'stage'
