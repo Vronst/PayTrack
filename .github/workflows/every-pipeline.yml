@@ -33,6 +33,6 @@ jobs:
       base: 'lap'
       title: 'Tests and style formatting have passed'
       body: 'Minimal requirements for pr to "lap" have been met'
-      extra_flags: '--draft'
+      flag: '--draft'
     secrets:
       TOKEN: ${{ secrets.PRO_TOKEN }}

@@ -30,7 +30,7 @@ jobs:
       base: 'stage'
       title: 'Tests passed'
       body: 'Tests on lap branch has passed.'
-      extra_flags: '--draft'
+      flag: '--draft'
     secrets:
       TOKEN: ${{ secrets.PRO_TOKEN }}
 
