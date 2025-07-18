@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   lint_and_format:
-    uses: Vronst/Vronst/Vronst/lint-check/.github/workflows/lint.yaml@1.0.0
+    uses: Vronst/lint-check/.github/workflows/lint.yaml@1.0.0
     # (optional)
     with:
       python-version: '3.13'
