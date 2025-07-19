@@ -8,7 +8,7 @@ from paytrack.models import Base, User
 
 
 @pytest.fixture(scope="function")
-def session() -> Generator[Session, None, None]:
+def session() -> Generator[Session, None, None]:  # noqa: D103
     engine = create_engine("sqlite:///:memory:", echo=False)
 
     Base.metadata.create_all(bind=engine)
@@ -26,7 +26,7 @@ def session() -> Generator[Session, None, None]:
 
 
 @pytest.fixture(scope="function")
-def users() -> tuple[User, User, User]:
+def users() -> tuple[User, User, User]:  # noqa: D103
     u1 = User(
         name="John", surname="Smith", email="john@example.com", password="pw"
     )

@@ -36,7 +36,7 @@ class TestPositiveUser:  # noqa: D101
         session.add(u3)
         session.commit()
 
-        assert u1.parent == None
+        assert u1.parent is None
         assert len(u1.subaccounts) == 1
         assert u2.subaccounts == [u3]
         assert u3.parent == u2

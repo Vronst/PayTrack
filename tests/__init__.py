@@ -1,1 +1,1 @@
-# TODO: make tests fit flake8 standard  # noqa: D104
+# noqa: D104

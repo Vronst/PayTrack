@@ -29,8 +29,8 @@ class TestPositiveSubscription:  # noqa: D101
         assert subscription.name == name
         assert subscription.date.date() == datetime.now().date()
         assert subscription.period == "monthly"
-        assert subscription.active == True
-        assert subscription.shared == False
+        assert subscription.active
+        assert not subscription.shared
 
     def test_full_creation(self, session):  # noqa: D102
         name: str = "testname"

@@ -6,7 +6,7 @@ from paytrack.core import Engine
 
 
 @pytest.fixture(scope="module")
-def test_engine() -> Generator[Engine, None, None]:
+def test_engine() -> Generator[Engine, None, None]:  # noqa: D103
     engine: Engine = Engine(test=True)
 
     yield engine
@@ -15,7 +15,7 @@ def test_engine() -> Generator[Engine, None, None]:
 
 
 @pytest.fixture(scope="module")
-def test_manual_close_engine() -> Engine:
+def test_manual_close_engine() -> Engine:  # noqa: D103
     engine: Engine = Engine(test=True)
 
     return engine

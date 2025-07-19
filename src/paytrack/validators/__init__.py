@@ -1,5 +1,6 @@
+"""Helper validators for pydantic schemas."""
+
 from .amount import AmountValidator
-from .base import Validator
 from .choice import ChoiceValidator
 from .date import DateValidator
 from .email import EmailValidator
@@ -9,7 +10,6 @@ from .pin import PinValidator
 
 __all__ = [
     "AmountValidator",
-    "Validator",
     "ChoiceValidator",
     "DateValidator",
     "EmailValidator",

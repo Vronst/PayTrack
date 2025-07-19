@@ -200,11 +200,11 @@ class TestPositiveUser:  # noqa: D101
         assert user.email == email
         assert user.password == password
         assert user.company == company
-        assert user.premium == False
+        assert not user.premium
         assert user.parent_id is None
         assert user.parent is None
         assert user.phone is None
-        assert user.admin == False
+        assert not user.admin
         assert user.included == []
         assert user.subaccounts == []
         assert user.settings is None
@@ -235,12 +235,12 @@ class TestPositiveUser:  # noqa: D101
         assert user.surname == surname
         assert user.email == email
         assert user.password == password
-        assert user.company == False
-        assert user.premium == False
+        assert not user.company
+        assert not user.premium
         assert user.parent_id is None
         assert user.parent is None
         assert user.phone is None
-        assert user.admin == False
+        assert not user.admin
         assert user.included == []
         assert user.subaccounts == []
         assert user.settings is None
