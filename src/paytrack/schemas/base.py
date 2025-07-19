@@ -1,3 +1,11 @@
+"""Base for all schemas.
+
+Contains base classes for:
+- update,
+- read,
+- create
+"""
+
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
@@ -10,6 +18,13 @@ CONFIG: ConfigDict = ConfigDict(
 
 
 class BaseSchema(BaseModel):
+    """Default schema with shared CONFIG.
+
+    Params:
+        model_config (ConfigDict): shared config,
+        set with module variable CONFIG.
+    """
+
     model_config = CONFIG
     # created_at: 'datetime' = datetime.now()
     # updated_at: 'datetime | None' = None
@@ -17,10 +32,22 @@ class BaseSchema(BaseModel):
 
 
 class BaseReadSchema(BaseSchema):
+    """BaseSchema extended with id (int) param."""
+
     id: int
 
 
 class BaseUpdateSchema(BaseModel):
+    """Base class for updateing schemas.
+        
+    Params:
+        model_config (ConfigDict): shared config,
+    set with module variable CONFIG.
+        id (int | None): default None.
+        updated_at (datetime): default datetime.now().
+        deleted_at (datetime | None): default None.
+    """
+            
     model_config = CONFIG
 
     id: int | None = None

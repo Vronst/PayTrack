@@ -1,3 +1,6 @@
+""" """
+
+# TODO: continue from here
 from typing import Annotated
 
 from pydantic import StringConstraints
@@ -7,20 +10,28 @@ from .base import BaseReadSchema, BaseSchema, BaseUpdateSchema
 
 
 class CurrencySchema(BaseSchema):
+    """ """
+
     code: Annotated[str, StringConstraints(max_length=CODE_LENGTH)]
     name: Annotated[str, StringConstraints(max_length=NAME_LENGTH)]
     value: float
 
 
 class CurrencyCreateSchema(CurrencySchema):
+    """ """
+
     pass
 
 
 class CurrencyReadSchema(BaseReadSchema, CurrencySchema):
+    """ """
+
     pass
 
 
 class CurrencyUpdateSchema(BaseUpdateSchema):
+    """ """
+
     code: Annotated[str | None, StringConstraints(max_length=CODE_LENGTH)] = (
         None
     )

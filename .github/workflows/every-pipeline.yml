@@ -22,7 +22,7 @@ jobs:
   tests:
     uses: Vronst/testing_workflow/.github/workflows/testing_workflow.yml@2.1.0
     with:
-      containter_name: 'paytrack'
+      container_name: 'paytrack'
 
 
   create_PR:

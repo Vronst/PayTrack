@@ -14,7 +14,7 @@ date_validator: Callable = DateValidator().validate
 
 
 class SubscriptionSchema(BaseSchema):
-    # FIXME: date can be 10, which creates problems
+    # FIXME: date can be 10, which creates problems (Field(strict=True)) should help
     name: Annotated[str, StringConstraints(max_length=NAME_LENGTH)]
     amount: float = Field(gt=MIN_AMOUNT)
     currency_id: int
