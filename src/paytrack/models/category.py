@@ -1,21 +1,25 @@
+"""SQLAlchemy's based model for storing Categories."""
+
 from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from ..constants.category import NAME_LENGTH
-from ..validators import MaxLengthValidator
+from ..validators import LengthValidator
 from .base import Base
 
 if TYPE_CHECKING:
-    from ..validators import Validator
+    from ..validators.base import Validator
     from .transaction import Transaction
     from .translation import Translation
 
 
 class Category(Base):
+    """Category model."""
+
     __tablename__ = "categories"
-    _name_validator: "Validator" = MaxLengthValidator(NAME_LENGTH)
+    _name_validator: "Validator" = LengthValidator(max_length=NAME_LENGTH)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     root_category: Mapped[int] = mapped_column(
@@ -43,7 +47,16 @@ class Category(Base):
     )
 
     @validates("name")
-    def validate_name(self, key, value):
+    def validate_name(self, key: str, value: str):
+        """Validates name.
+
+        Uses LengthValidator to check if name
+        length is acceptable.
+
+        Args:
+            key (str): Name used for error messege.
+            value (str): Value to be verified.
+        """
         if not self.custom:
             raise ValueError(
                 f"{key.capitalize()} cannot be set in non custom categories"

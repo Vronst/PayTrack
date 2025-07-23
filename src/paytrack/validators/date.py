@@ -11,7 +11,7 @@ class DateValidator(Validator):
     Takes two params, future_date and past_date.
     That ensures the date is either past or furute.
 
-    Params:
+    Attributes:
         future_date (bool): if True, date must be later than datetime.now()
         (unless its the same day), defaults to False.
 

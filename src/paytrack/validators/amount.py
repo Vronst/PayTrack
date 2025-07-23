@@ -6,7 +6,7 @@ from .base import Validator
 class AmountValidator(Validator):
     """Validator that ensures a numeric amount is within defined range.
 
-    Params:
+    Attributes:
         min_amount (float): Minimum allowable value - default -inf.
         max_amount (float): Maximum allowable value - default inf.
         exclusive (bool): Decides if range is exclusive or not - default True.

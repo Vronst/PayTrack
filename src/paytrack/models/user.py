@@ -11,7 +11,7 @@ from ..constants.user import (
 )
 from ..validators import (
     EmailValidator,
-    MaxLengthValidator,
+    LengthValidator,
     PhoneValidator,
     PinValidator,
 )
@@ -25,7 +25,7 @@ from .associations import (
 from .base import Base
 
 if TYPE_CHECKING:
-    from ..validators import Validator
+    from ..validators.base import Validator
     from .receiver import Receiver
     from .savings import Savings
     from .setting import Setting
@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 
 class User(Base):
     __tablename__ = "users"
-    _name_validator: "Validator" = MaxLengthValidator(NAME_LENGTH)
+    _name_validator: "Validator" = LengthValidator(max_length=NAME_LENGTH)
     _pin_validator: "Validator" = PinValidator(PIN_LENGTH)
     _email_validator: "Validator" = EmailValidator()
     _phone_validator: "Validator" = PhoneValidator()

@@ -4,7 +4,7 @@ from .amount import AmountValidator
 from .choice import ChoiceValidator
 from .date import DateValidator
 from .email import EmailValidator
-from .length import MaxLengthValidator
+from .length import LengthValidator
 from .phone import PhoneValidator
 from .pin import PinValidator
 
@@ -13,7 +13,7 @@ __all__ = [
     "ChoiceValidator",
     "DateValidator",
     "EmailValidator",
-    "MaxLengthValidator",
+    "LengthValidator",
     "PhoneValidator",
     "PinValidator",
 ]

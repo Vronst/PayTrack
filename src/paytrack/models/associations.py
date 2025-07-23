@@ -1,3 +1,5 @@
+"""Association tables for models relationships."""
+
 from sqlalchemy import Column, ForeignKey, Table
 
 from . import Base

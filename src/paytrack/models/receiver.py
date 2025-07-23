@@ -4,18 +4,18 @@ from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from ..constants.receiver import NAME_LENGTH
-from ..validators import MaxLengthValidator
+from ..validators import LengthValidator
 from .associations import association_receivers
 from .base import Base
 
 if TYPE_CHECKING:
-    from ..validators import Validator
+    from ..validators.base import Validator
     from .user import User
 
 
 class Receiver(Base):
     __tablename__ = "receivers"
-    _name_validator: "Validator" = MaxLengthValidator(NAME_LENGTH)
+    _name_validator: "Validator" = LengthValidator(max_length=NAME_LENGTH)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     owner_id: Mapped[int] = mapped_column(

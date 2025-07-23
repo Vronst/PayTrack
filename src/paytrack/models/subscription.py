@@ -14,13 +14,13 @@ from ..validators import (
     AmountValidator,
     ChoiceValidator,
     DateValidator,
-    MaxLengthValidator,
+    LengthValidator,
 )
 from .associations import association_subscription
 from .base import Base
 
 if TYPE_CHECKING:
-    from ..validators import Validator
+    from ..validators.base import Validator
     from .currency import Currency
     from .subscription_share import SubscriptionShare
     from .user import User
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
 class Subscription(Base):
     __tablename__ = "subscriptions"
-    _name_validator: "Validator" = MaxLengthValidator(NAME_LENGTH)
+    _name_validator: "Validator" = LengthValidator(max_length=NAME_LENGTH)
     _amount_validator: "Validator" = AmountValidator(min_amount=MIN_AMOUNT)
     _period_validator: "Validator" = ChoiceValidator(PERIOD_CHOICES)
     _date_validator: "Validator" = DateValidator(future_date=True)

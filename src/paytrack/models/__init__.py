@@ -1,3 +1,11 @@
+"""Paytracks models.
+
+Can be imported with:
+```
+    from paytrack.models import <model>
+```
+"""
+
 from sqlalchemy.orm import configure_mappers
 
 from .base import Base

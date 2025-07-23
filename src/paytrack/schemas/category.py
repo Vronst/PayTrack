@@ -1,4 +1,4 @@
-"""Base classes for CategorySchema."""
+"""Base classes schemas for Category."""
 
 from typing import Annotated
 
@@ -15,7 +15,7 @@ class CategorySchema(BaseSchema):
 
     Contains shared fields and inherits from BaseSchema.
 
-    Params:
+    Attributes:
         root_category (int | None): default None.
         name (str | None): validated with StringConstraints, defualt None.
     """
@@ -44,7 +44,7 @@ class CategoryCreateSchema(CategorySchema):
 class CategoryReadSchema(BaseReadSchema, CategorySchema):
     """Extends Base schemas for Category with subcategories.
 
-    Params:
+    Attributes:
         subcategories (list[Category]): made strict,
         so no conversion will happen.
     """
@@ -55,7 +55,7 @@ class CategoryReadSchema(BaseReadSchema, CategorySchema):
 class CategoryUpdateSchema(BaseUpdateSchema):
     """Base for Category - update.
 
-    Params:
+    Attributes:
         root_category (int | None): default None.
         name (str | None): default None.
     """

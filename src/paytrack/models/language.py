@@ -1,20 +1,23 @@
+"""SQLAlchemy's based model for storing Currencies."""
+# TODO: Continue from here
+
 from typing import TYPE_CHECKING
 
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, validates
 
 from ..constants.language import CODE_LENGTH, NAME_LENGTH
-from ..validators import MaxLengthValidator
+from ..validators import LengthValidator
 from .base import Base
 
 if TYPE_CHECKING:
-    from ..validators import Validator
+    from ..validators.base import Validator
 
 
 class Language(Base):
     __tablename__ = "languages"
-    _code_validator: "Validator" = MaxLengthValidator(CODE_LENGTH)
-    _name_validator: "Validator" = MaxLengthValidator(NAME_LENGTH)
+    _code_validator: "Validator" = LengthValidator(max_length=CODE_LENGTH)
+    _name_validator: "Validator" = LengthValidator(max_length=NAME_LENGTH)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     language_code: Mapped[str] = mapped_column(

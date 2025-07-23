@@ -10,7 +10,7 @@ class PhoneValidator(Validator):
 
     Phone number can be provided either with or without prefix.
 
-    Params:
+    Attributes:
         PHONE_REGEX (re.Pattern): regex patter to verify phone numbers.
         THAT SHOULD NOT BE CHANGED.
     """

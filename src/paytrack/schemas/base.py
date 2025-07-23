@@ -20,7 +20,7 @@ CONFIG: ConfigDict = ConfigDict(
 class BaseSchema(BaseModel):
     """Default schema with shared CONFIG.
 
-    Params:
+    Attributes:
         model_config (ConfigDict): shared config,
         set with module variable CONFIG.
     """
@@ -39,15 +39,15 @@ class BaseReadSchema(BaseSchema):
 
 class BaseUpdateSchema(BaseModel):
     """Base class for updateing schemas.
-        
-    Params:
+
+    Attributes:
         model_config (ConfigDict): shared config,
     set with module variable CONFIG.
         id (int | None): default None.
         updated_at (datetime): default datetime.now().
         deleted_at (datetime | None): default None.
     """
-            
+
     model_config = CONFIG
 
     id: int | None = None

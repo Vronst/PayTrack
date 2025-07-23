@@ -8,7 +8,7 @@ from .base import Validator
 class EmailValidator(Validator):
     """Validator that ensures a string is a valid email address.
 
-    Params:
+    Attributes:
         EMAIL_REGEX (re.Pattern): pattern used for checking if email is valid.
         Should not be changed.
     """
