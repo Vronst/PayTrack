@@ -30,6 +30,7 @@ class CurrencyCreateSchema(CurrencySchema):
     """Schema for validating new currency entries.
 
     Inherites after base CurrencySchema.
+    Created for consinstency.
     """
 
     pass

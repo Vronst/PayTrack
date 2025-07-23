@@ -31,6 +31,7 @@ class SavingsCreateSchema(SavingsSchema):
     """Schema for validating new savings entries.
 
     Inherites after SavingsSchema.
+    Created for consinstency.
     """
 
     pass

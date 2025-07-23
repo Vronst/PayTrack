@@ -27,6 +27,7 @@ class LanguageCreateSchema(LanguageSchema):
     """Schema for validating new language entries.
 
     Inherites after base LanguageSchema.
+    Created for consinstency.
     """
 
     pass

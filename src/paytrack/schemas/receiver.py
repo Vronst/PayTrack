@@ -14,7 +14,7 @@ class ReceiverSchema(BaseSchema):
 
     Attributes:
         owner_id (int): Id of related user.
-    name (str): Name of receiver.
+        name (str): Name of receiver.
     """
 
     owner_id: int
@@ -25,6 +25,7 @@ class ReceiverCreateSchema(ReceiverSchema):
     """Schema for validating new receiver entries.
 
     Inherites after ReceiverSchema.
+    Created for consinstency.
     """
 
     pass
@@ -34,6 +35,9 @@ class ReceiverReadSchema(BaseReadSchema, ReceiverSchema):
     """Schema for reading receiver data from the database.
 
     Inherites after BaseReadSchema, ReceiverSchema.
+
+    Attributes:
+        included (list[User]): List of users that can use this receiver too.
     """
 
     included: list[User]
@@ -45,7 +49,7 @@ class ReceiverUpdateSchema(BaseUpdateSchema):
     Attributes:
         name (str | None): Name of receiver. Default None.
 
-    included (list[User] | None): List of users that can see this receiver.
+        included (list[User] | None): List of users that can see this receiver.
         Default None.
     """
 
