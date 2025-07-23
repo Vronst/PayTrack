@@ -63,6 +63,7 @@ class TransactionCreateSchema(TransactionSchema):
     Same as TransactionSchema.
     Created for consinstency.
     """
+
     pass
 
 
@@ -71,6 +72,7 @@ class TransactionReadSchema(BaseReadSchema, TransactionSchema):
 
     Inherites after BaseReadSchema, TransactionSchema.
     """
+
     pass
 
 
@@ -97,6 +99,7 @@ class TransactionUpdateSchema(BaseUpdateSchema):
     receiver_name (str | None): Should not be None,
     only if receiver_id is None. Default None.
     """
+
     date: Annotated[datetime | None, AfterValidator(date_validator)]
     done: bool | None = None
     category_id: int | None = None

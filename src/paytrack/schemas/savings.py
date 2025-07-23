@@ -54,7 +54,8 @@ class SavingsUpdateSchema(BaseUpdateSchema):
 
     currency_id (int | None): Default None.
 
-    budget (float | None): Float greater than `paytrack.constants.savings.MIN_BUDGET`.
+    budget (float | None): Float greater than
+    `paytrack.constants.savings.MIN_BUDGET`.
     Default None.
 
     included (list[User] | None): List of user that can see this entry.

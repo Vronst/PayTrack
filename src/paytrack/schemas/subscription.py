@@ -40,7 +40,8 @@ class SubscriptionSchema(BaseSchema):
         owner_id (int): Id of related user.
     """
 
-    # FIXME: date can be 10, which creates problems (Field(strict=True)) should help
+    # FIXME: date can be 10,
+    # FIXME: which creates problems (Field(strict=True)) should help
     name: Annotated[str, StringConstraints(max_length=NAME_LENGTH)]
     amount: float = Field(gt=MIN_AMOUNT)
     currency_id: int
@@ -62,7 +63,7 @@ class SubscriptionCreateSchema(SubscriptionSchema):
 
 
 class SubscriptionReadSchema(BaseReadSchema, SubscriptionSchema):
-    """Schema for reading subccription data from database.
+    """Schema for reading subscription data from database.
 
     Inherites after BaseReadSchema, SubscriptionSchema.
 

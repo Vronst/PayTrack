@@ -1,3 +1,5 @@
+"""Base schemas for User."""
+
 from collections.abc import Callable
 from typing import Annotated
 
@@ -14,8 +16,33 @@ email_validator: Callable = EmailValidator().validate
 
 
 class UserSchema(BaseSchema):
+    """Base schema for user data (excluding updates).
+
+    Attributes:
+        name (str): User name.
+
+        surname (str | None): User surname,
+        only valid if company is set to False.
+        Default None.
+
+        admin (bool): If True, user has admin privilages.
+
+        email (str): String verified with `paytrack.validators.EmailValidator`.
+        Should be a valid email.
+
+        phone (str | None): String verified with
+        `paytrack.validators.PhoneValidator`.
+        Should be a valid phone.
+
+        premium (bool): If True, user has premium account.
+
+        parent_id (int | None): Id of parent account. Default None.
+    """
+
     name: Annotated[str, StringConstraints(max_length=NAME_LENGTH)]
-    surname: Annotated[str | None, StringConstraints(max_length=NAME_LENGTH)]
+    surname: Annotated[
+        str | None, StringConstraints(max_length=NAME_LENGTH)
+    ] = None
     admin: bool
     email: Annotated[
         str,
@@ -28,15 +55,69 @@ class UserSchema(BaseSchema):
 
 
 class UserCreateSchema(UserSchema):
-    pass
+    """Schema validating data in new user entries.
+
+    Attributes:
+        password (str): String.
+        pin (str): String.
+    """
+
+    # TODO: maybe some checks if password is strong?
+
+    password: str | None = None
+    pin: Annotated[str | None, AfterValidator(pin_validator)] = None
 
 
 class UserReadSchema(BaseReadSchema, UserSchema):
+    """Schema for reading user data from database.
+
+        Inherites after BaseReadSchema, UserSchema.
+
+    Attributes:
+            subaccounts (list[User]): List of other accounts,
+            which has this account id,
+            as parent id.
+
+            included (list[User]): List of users,
+            that can see every transaction of this account.
+    """
+
     subaccounts: list[User]
     included: list[User]
 
 
 class UserUpdateSchema(BaseUpdateSchema):
+    """Schema for validating updates to user data.
+
+    Attributes:
+        name (str | None): User name. Default None.
+
+        surname (str | None): User surname,
+        only valid if company is set to False.
+        Default None.
+
+        admin (bool | None): If True, user has admin privilages. Default None.
+
+        email (str | None): String verified with
+        `paytrack.validators.EmailValidator`.
+        Should be a valid email. Default None.
+
+        phone (str | None): String verified with
+        `paytrack.validators.PhoneValidator`.
+        Should be a valid phone. Default None.
+
+        premium (bool | None): If True, user has premium account.
+
+        password (str | None): password of user. Default None.
+
+        pin (str | None): Default None.
+
+        subaccounts (list[User]): List of subaccounts. Default None.
+
+        included (list[User]): List of user to share account with.
+        Default None.
+    """
+
     name: Annotated[str | None, StringConstraints(max_length=NAME_LENGTH)] = (
         None
     )

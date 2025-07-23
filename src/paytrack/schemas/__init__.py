@@ -1,3 +1,5 @@
+"""All schemas in one place."""
+
 from .category import (
     CategoryCreateSchema,
     CategoryReadSchema,
