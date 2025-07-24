@@ -16,13 +16,37 @@ if TYPE_CHECKING:
 
 
 class Category(Base):
-    """Category model."""
+    """Category model.
+
+    Attributes:
+        id (int): Can be skipped, due to automatically assigned.
+
+        root_category (int | None): Id of parent category. Default None.
+
+        custom (bool): True if made by user.
+
+        name (str | None): If custom is set to True,
+            name of category must be provided.
+
+        translation (list[Translation]): List of available translations.
+            Only applicable to non-custom categories.
+
+        transactions (list[Transaction]): List of transactions
+            using this category.
+
+        root (Category | None): Parent category.
+
+        subcategories (list[Category]): Children categories.
+
+    Methods:
+        validate_name: Used for validating name.
+    """
 
     __tablename__ = "categories"
     _name_validator: "Validator" = LengthValidator(max_length=NAME_LENGTH)
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    root_category: Mapped[int] = mapped_column(
+    root_category: Mapped[int | None] = mapped_column(
         ForeignKey("categories.id"), nullable=True
     )
     custom: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -31,7 +55,7 @@ class Category(Base):
     )
 
     translations: Mapped[list["Translation"]] = relationship(
-        back_populates="categories"
+        back_populates="category"
     )
 
     transactions: Mapped[list["Transaction"]] = relationship(
@@ -51,7 +75,7 @@ class Category(Base):
         """Validates name.
 
         Uses LengthValidator to check if name
-        length is acceptable.
+            length is acceptable.
 
         Args:
             key (str): Name used for error messege.

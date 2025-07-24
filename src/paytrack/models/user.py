@@ -1,3 +1,5 @@
+"""SQLAlchemy's based model for storing Users."""
+
 from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, ForeignKey, String
@@ -36,6 +38,70 @@ if TYPE_CHECKING:
 
 
 class User(Base):
+    """User model.
+
+    Attributes:
+        id (int): Can be skipped, due to automatically assigned.
+
+        company (bool): If True, surname is not needed.
+
+        name (str): User's name. Cannot be longer than
+            `paytrack.constants.user.NAME_LENGTH`.
+
+        surname (str | None): User's surname. Omit if company is True.
+
+        admin (bool): If True, user has admin privilages.
+
+        email (str): String that contains valid email.
+
+        phone (str | None): String containing valid phone number.
+            Default None.
+
+        password (str): User password, stored as hash.
+
+        pin (str): User pin, stored as hash.
+
+        premium (bool): If user bought premium.
+
+        parent_id (int | None): User's main account id.
+
+        parent (User): Parent account.
+
+        subaccounts (list[User]): List of users that has this user as parent.
+
+        included (list[User]): List of users sharing this account.
+
+        included_in (list[User]): List of users that shared their
+            acount to this one.
+
+        settings (Setting): Related settings.
+
+        transaction (list[Transaction]): List of transaction created by
+            this user.
+
+        included_in_transactions (list[Transaction]): List of transaction of
+            other users that this user can see.
+
+        other_receivers (list[Receiver]): List of receivers that
+            this user can see and use in its transactions.
+
+        savings (Savings): Related savings.
+
+        shared_savings (list[Savings]): List of other users savings that
+            this user can see.
+
+        subscriptions (list[Subscription]): List of user's subscriptions.
+
+        subscription_share (list[SubscriptionShare]): List of subscription
+            shares, that this user is part of.
+
+        included_in_subscriptions (list[Subscription]): List of subscriptions,
+            shared to this user.
+
+        transactions_shares (list[TransactionShare]): List of transaction
+            shares, that this user is part of.
+    """
+
     __tablename__ = "users"
     _name_validator: "Validator" = LengthValidator(max_length=NAME_LENGTH)
     _pin_validator: "Validator" = PinValidator(PIN_LENGTH)
@@ -144,21 +210,62 @@ class User(Base):
 
     @validates("name", "surname")
     def validate_name(self, key: str, value: str) -> str:
+        """Validates name and surname.
+
+        Uses LengthValidator to check if value
+            length is acceptable.
+
+        Args:
+            key (str): Name used for error messege.
+            value (str): Value to be verified.
+        """
         return self._name_validator(key, value)
 
     @validates("pin")
     def validate_pin(self, key: str, value: str) -> str:
+        """Validates pin.
+
+        Uses PinValidator to check if value
+            length is as precised and contains only digits.
+
+        Args:
+            key (str): Name used for error messege.
+            value (str): Value to be verified.
+        """
         return self._pin_validator(key, value)
 
     @validates("email")
     def validate_email(self, key: str, value: str) -> str:
+        """Validates email.
+
+        Uses EmailValidator to check if value
+            is valid email.
+
+        Args:
+            key (str): Name used for error messege.
+            value (str): Value to be verified.
+        """
         return self._email_validator(key, value)
 
     @validates("phone")
     def validate_phone(self, key: str, value: str) -> str:
+        """Validates phone.
+
+        Uses PhoneValidator to check if value
+            is valid phone number (with or without prefix +xx).
+
+        Args:
+            key (str): Name used for error messege.
+            value (str): Value to be verified.
+        """
         return self._phone_validator(key, value)
 
     def __repr__(self) -> str:
+        """String representation of User.
+
+        Returns:
+            str
+        """
         return (
             f"User(id={self.id!r},admin={self.admin!r},"
             f" name={self.name!r}, surname={self.surname!r},"

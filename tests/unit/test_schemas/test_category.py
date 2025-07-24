@@ -1,5 +1,4 @@
 from copy import deepcopy  # noqa: D100
-from datetime import datetime
 
 import pytest
 from pydantic import ValidationError
@@ -9,6 +8,7 @@ from paytrack.schemas import (
     CategoryReadSchema,
     CategoryUpdateSchema,
 )
+from paytrack.services.date import utc_now
 
 from .conftest import skip_test
 
@@ -138,7 +138,7 @@ class TestCategoryUpdate:  # noqa: D101
         def test_update(self, value):  # noqa: D102
             result = CategoryUpdateSchema(**value)
 
-            assert (result.updated_at - datetime.now()).total_seconds() < 5
+            assert (result.updated_at - utc_now()).total_seconds() < 5
 
         @pytest.mark.regression
         @pytest.mark.parametrize(
@@ -153,7 +153,7 @@ class TestCategoryUpdate:  # noqa: D101
 
             result = CategoryUpdateSchema(**data)
 
-            assert (result.updated_at - datetime.now()).total_seconds() < 5
+            assert (result.updated_at - utc_now()).total_seconds() < 5
 
     class TestInvalid:  # noqa: D106
         @pytest.mark.parametrize(

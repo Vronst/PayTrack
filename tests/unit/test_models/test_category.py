@@ -1,8 +1,7 @@
-from datetime import datetime  # noqa: D100
-
-import pytest
+import pytest  # noqa: D100
 
 from paytrack.models.category import Category
+from paytrack.services.date import utc_now
 
 
 class TestPositiveCategory:  # noqa: D101
@@ -12,7 +11,7 @@ class TestPositiveCategory:  # noqa: D101
         session.add(category)
         session.commit()
 
-        now = datetime.now()
+        now = utc_now()
 
         # assert category.created_at.day == now.day
         # assert category.created_at.month == now.month

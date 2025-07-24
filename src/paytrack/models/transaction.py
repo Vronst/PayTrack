@@ -1,3 +1,5 @@
+"""SQLAlchemy's based model for storing Transactions."""
+
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -10,7 +12,7 @@ from .associations import association_transaction
 from .base import Base
 
 if TYPE_CHECKING:
-    from ..validators import Validator
+    from ..validators.base import Validator
     from .category import Category
     from .currency import Currency
     from .receiver import Receiver
@@ -18,6 +20,43 @@ if TYPE_CHECKING:
 
 
 class Transaction(Base):
+    """Transaction model.
+
+    Attributes:
+        id (int): Can be skipped, due to automatically assigned.
+
+        date (datetime): Date of transaction. Default datetime.now(UTC).
+
+        done (bool): Makrs if transaction has been already made.
+
+        owner_id (int): Owner's id.
+
+        category_id (int): Category's id.
+
+        receiver_id (int | None): Receiver's id. Default None.
+
+        type (str): String that must match one of
+            `paytrack.constants.transaction.TYPE_CHOICE`.
+
+        amount (float): Float that must be bigger than
+            `paytrack.constants.transaction.MIN_AMOUNT`.
+
+        currency_id (int): Related currency's id.
+
+        receiver_name (str | None): Receiver's name. Should be None if
+            receiver_id is provided. Default None.
+
+        owner (User): Owner.
+
+        included (list[User]): List of users that can see this transaction.
+
+        category (Category): Related Category.
+
+        currency (Currency): Related Currency.
+
+        receiver (Receiver): Related Receiver.
+    """
+
     __tablename__ = "transactions"
     _amount_validator: "Validator" = AmountValidator(min_amount=MIN_AMOUNT)
     _type_validator: "Validator" = ChoiceValidator(TYPE_CHOICE)
@@ -65,12 +104,38 @@ class Transaction(Base):
 
     @validates("type")
     def validate_type(self, key: str, value: str) -> str:
+        """Validates type.
+
+        Uses ChoiceValidator to check if value
+            is in specified list.
+
+        Args:
+            key (str): Name used for error messege.
+            value (str): Value to be verified.
+        """
         return self._type_validator(key, value)
 
     @validates("amount")
     def validate_amount(self, key: str, value: float) -> float:
+        """Validates amount.
+
+        Uses AmountValidator to check if value
+            is in acceptable range.
+
+        Args:
+            key (str): Name used for error messege.
+            value (str): Value to be verified.
+        """
         return self._amount_validator(key, value)
 
     @validates("date")
     def validate_date(self, key, value) -> datetime:
+        """Validates date.
+
+        Uses DateValidator to validate date and its format.
+
+        Args:
+            key (str): Name used for error messege.
+            value (str): Value to be verified.
+        """
         return self._date_validator(key, value)

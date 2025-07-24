@@ -1,10 +1,12 @@
 """SQLAlchemy Base for all models."""
 
-from datetime import UTC, datetime
+from datetime import datetime
 
 from sqlalchemy import DateTime
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
+from ..services.date import utc_now
 
 
 class Base(AsyncAttrs, DeclarativeBase):
@@ -18,10 +20,6 @@ class Base(AsyncAttrs, DeclarativeBase):
     """
 
     __abstract__ = True
-
-    def utc_now(self) -> datetime:
-        """Returns datetime.now(UTC)."""
-        return datetime.now(UTC)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=utc_now, nullable=False

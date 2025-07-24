@@ -4,6 +4,7 @@ import pytest
 from sqlalchemy.exc import IntegrityError
 
 from paytrack.models.subscription import Subscription
+from paytrack.services.date import utc_now
 
 
 class TestPositiveSubscription:  # noqa: D101
@@ -27,7 +28,7 @@ class TestPositiveSubscription:  # noqa: D101
         assert subscription.amount == amount
         assert subscription.currency_id == currency_id
         assert subscription.name == name
-        assert subscription.date.date() == datetime.now().date()
+        assert subscription.date.date() == utc_now().date()
         assert subscription.period == "monthly"
         assert subscription.active
         assert not subscription.shared

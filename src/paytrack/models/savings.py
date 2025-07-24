@@ -1,3 +1,5 @@
+"""SQLAlchemy's based model for storing Savings."""
+
 from typing import TYPE_CHECKING
 
 from sqlalchemy import Float, ForeignKey
@@ -9,12 +11,32 @@ from .associations import association_savings
 from .base import Base
 
 if TYPE_CHECKING:
-    from ..validators import Validator
+    from ..validators.base import Validator
     from .currency import Currency
     from .user import User
 
 
 class Savings(Base):
+    """Savings model.
+
+    Attributes:
+        id (int): Can be skipped, due to automatically assigned.
+
+        amount (float): Float representing current balance.
+
+        currency_id (int): Id of related currency.
+
+        budget (float | None): Float describing current budget set by user.
+            Default None.
+
+        owner_id (int): Id of owner.
+
+        included (list[User]): List of included users. These users can
+            see this entry data.
+
+        currency (Currency): Related Currency.
+    """
+
     __tablename__ = "savings"
     _budget_validator: "Validator" = AmountValidator(min_amount=MIN_BUDGET)
 
@@ -41,4 +63,13 @@ class Savings(Base):
 
     @validates("budget")
     def validate_budget(self, key, value):
+        """Validates budget.
+
+        Uses AmountValidator to check if number is
+            within range.
+
+        Args:
+            key (str): Name used for error messege.
+            value (str): Value to be verified.
+        """
         return self._budget_validator(key, value)

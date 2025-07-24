@@ -1,5 +1,4 @@
 from copy import deepcopy  # noqa: D100
-from datetime import datetime
 
 import pytest
 from pydantic import ValidationError
@@ -10,6 +9,7 @@ from paytrack.schemas import (
     SettingReadSchema,
     SettingUpdateSchema,
 )
+from paytrack.services.date import utc_now
 
 from .conftest import skip_test
 
@@ -102,14 +102,14 @@ class TestSettingUpdate:  # noqa: D101
     class TestValid:  # noqa: D106
         def test_update(self, value):  # noqa: D102
             result = SettingUpdateSchema(**value)
-            assert (result.updated_at - datetime.now()).total_seconds() < 5
+            assert (result.updated_at - utc_now()).total_seconds() < 5
 
         def test_partial_update(self, value):  # noqa: D102
             data = deepcopy(value)
             data.pop("language_id")
 
             result = SettingUpdateSchema(**data)
-            assert (result.updated_at - datetime.now()).total_seconds() < 5
+            assert (result.updated_at - utc_now()).total_seconds() < 5
 
     class TestInvalid:  # noqa: D106
         def test_update_invalid_mode(self, value):  # noqa: D102

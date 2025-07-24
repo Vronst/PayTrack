@@ -1,7 +1,8 @@
 """Validators used for valiating date."""
 
-from datetime import datetime
+from datetime import UTC, datetime
 
+from ..services.date import utc_now
 from .base import Validator
 
 
@@ -69,7 +70,11 @@ class DateValidator(Validator):
             Invalid datetime string format: {value}"
             )
 
-        now = datetime.now(tz=value.tzinfo) if value.tzinfo else datetime.now()
+        now = utc_now()
+
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=UTC)
+
         absolute = abs(value - now).days
 
         if self.future and value < now and absolute != 0:

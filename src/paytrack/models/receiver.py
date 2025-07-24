@@ -1,3 +1,5 @@
+"""SQLAlchemy's based model for storing Receivers."""
+
 from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey, String
@@ -14,6 +16,19 @@ if TYPE_CHECKING:
 
 
 class Receiver(Base):
+    """Receiver model.
+
+    Attributes:
+        id (int): Can be skipped, due to automatically assigned.
+
+        owner_id (int): Id of related user.
+
+        name (str): Name of receiver.
+
+        included (list[User] | None): List of users
+            that can see and use this receiver.
+    """
+
     __tablename__ = "receivers"
     _name_validator: "Validator" = LengthValidator(max_length=NAME_LENGTH)
 
@@ -32,4 +47,13 @@ class Receiver(Base):
 
     @validates("name")
     def validate_name(self, key, value):
+        """Validates name.
+
+        Uses LengthValidator to check if name
+            length is acceptable.
+
+        Args:
+            key (str): Name used for error messege.
+            value (str): Value to be verified.
+        """
         return self._name_validator(key, value)

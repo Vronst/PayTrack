@@ -100,7 +100,7 @@ class TransactionUpdateSchema(BaseUpdateSchema):
     only if receiver_id is None. Default None.
     """
 
-    date: Annotated[datetime | None, AfterValidator(date_validator)]
+    date: Annotated[datetime | None, AfterValidator(date_validator)] = None
     done: bool | None = None
     category_id: int | None = None
     receiver_id: int | None = None

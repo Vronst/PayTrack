@@ -10,6 +10,7 @@ from paytrack.schemas import (
     SubscriptionReadSchema,
     SubscriptionUpdateSchema,
 )
+from paytrack.services.date import utc_now
 
 from .conftest import skip_test
 
@@ -137,7 +138,7 @@ class TestSubscriptionUpdate:  # noqa: D101
     class TestValid:  # noqa: D106
         def test_update(self, value):  # noqa: D102
             result = SubscriptionUpdateSchema(**value)
-            assert (result.updated_at - datetime.now()).total_seconds() < 5
+            assert (result.updated_at - utc_now()).total_seconds() < 5
 
         def test_partial_update(self, value):  # noqa: D102
             data = deepcopy(value)
@@ -146,7 +147,7 @@ class TestSubscriptionUpdate:  # noqa: D101
             data.pop("name")
 
             result = SubscriptionUpdateSchema(**data)
-            assert (result.updated_at - datetime.now()).total_seconds() < 5
+            assert (result.updated_at - utc_now()).total_seconds() < 5
 
     class TestInvalid:  # noqa: D106
         def test_update_name_int(self, value):  # noqa: D102

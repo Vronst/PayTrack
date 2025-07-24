@@ -14,7 +14,24 @@ if TYPE_CHECKING:
 
 
 class Currency(Base):
-    """Currency model."""
+    """Currency model.
+
+    Attributes:
+        id (int): Can be skipped, due to automatically assigned.
+
+        code (str): String that length must be no longer than
+            `paytrack.constants.currency.CODE_LENGTH`.
+
+        name (str): String that length must be no longer than
+            `paytrack.constants.currency.NAME_LENGTH`.
+
+        value (float): Value of currency compared to EURO.
+
+    Methods:
+        validates_code: Used for validating code field length.
+
+        validate_name: Used for validating name field length.
+    """
 
     __tablename__ = "currencies"
     _code_validator: "Validator" = LengthValidator(max_length=CODE_LENGTH)

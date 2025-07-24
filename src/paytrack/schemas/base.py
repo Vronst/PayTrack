@@ -8,7 +8,9 @@ Contains base classes for:
 
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
+
+from ..services.date import utc_now
 
 CONFIG: ConfigDict = ConfigDict(
     from_attributes=True,
@@ -26,9 +28,6 @@ class BaseSchema(BaseModel):
     """
 
     model_config = CONFIG
-    # created_at: 'datetime' = datetime.now()
-    # updated_at: 'datetime | None' = None
-    # deleted_at: 'datetime | None' = None
 
 
 class BaseReadSchema(BaseSchema):
@@ -44,12 +43,12 @@ class BaseUpdateSchema(BaseModel):
         model_config (ConfigDict): shared config,
     set with module variable CONFIG.
         id (int | None): default None.
-        updated_at (datetime): default datetime.now().
+        updated_at (datetime): default datetime.now(UTC).
         deleted_at (datetime | None): default None.
     """
 
     model_config = CONFIG
 
     id: int | None = None
-    updated_at: "datetime" = datetime.now()
+    updated_at: "datetime" = Field(default_factory=utc_now)
     delete_at: "datetime | None" = None
