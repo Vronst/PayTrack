@@ -33,8 +33,8 @@ jobs:
     with:
       head: ${{ github.even.workflow_run.head_branch }}
       base: 'lap'
-      title: 'Tests and style formatting have passed'
-      body: 'Minimal requirements for pr to "lap" have been met'
+      title: '"Tests and style formatting have passed"'
+      body: '"Minimal requirements for pr to "lap" have been met"'
       flag: '--draft'
     secrets:
       TOKEN: ${{ secrets.PRO_TOKEN }}
