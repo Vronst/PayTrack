@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y git; apt-get install -y tree
 ENV UV_LINK_MODE=copy
 
 ENV PATH="/app/.venv/bin:$PATH"
+ENV CI=true
 
 WORKDIR	/app 
 

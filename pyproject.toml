@@ -1,6 +1,6 @@
 [project]
 name = "paytrack"
-version = "0.6.2"
+version = "0.7.0"
 description = "Simple app to track your taxes."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -22,8 +22,13 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
+    "black>=25.1.0",
+    "flake8>=7.3.0",
+    "flake8-pytest-style>=2.1.0",
+    "isort>=6.0.1",
     "pytest>=8.3.4",
     "python-dotenv>=1.1.0",
+    "ruff>=0.12.4",
 ]
 doc = [
     "sphinx>=8.2.3",
@@ -37,4 +42,37 @@ release = { git = "https://github.com/Vronst/release_script.git" }
 markers = [
 	"regression: Tests that ensure previous bugs stay fixed"
 	]
-pythonpath = "src"
+testpaths = "tests/"
+pythonpath = "src/"
+
+[tool.ruff]
+line-length = 79
+indent-width = 4
+exclude = [
+	"docs"
+	]
+
+[tool.ruff.lint]
+extend-select = [
+	"UP",  # pyupgrade
+	"D",  # pydocstyle
+	"F",  # flake8 
+	"E",  # pycodestyle
+	"B",  # flake8-bugbear
+	"SIM",  # flake8-simplify
+	"I",  # isort
+]
+ignore = []
+fixable = ["ALL"]
+unfixable = []
+dummy-variable-rgx = ""
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
