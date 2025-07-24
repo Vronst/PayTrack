@@ -29,12 +29,12 @@ jobs:
     needs: 
       - tests
       - lint_and_format
-    uses: Vronst/pull_request_workflow/.github/workflows/pull_request.yml@1.1.0
+    uses: Vronst/pull_request_workflow/.github/workflows/pull_request.yml@316832e21184ac2fb58a4bf3b510f67b1187aa59
     with:
       head: ${{ github.even.workflow_run.head_branch }}
       base: 'lap'
-      title: 'Tests_and_style_formatting_have_passed'
-      body: 'Minimal_requirements_for_pr_to_"lap"_have_been_met'
+      title: 'Tests and style formatting have passed'
+      body: 'Minimal requirements for pr to "lap" have been met'
       flag: '--draft'
     secrets:
       TOKEN: ${{ secrets.PRO_TOKEN }}
