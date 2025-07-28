@@ -9,6 +9,7 @@ Can be imported with:
 from sqlalchemy.orm import configure_mappers
 
 from .base import Base
+from .budget import Budget
 from .category import Category
 from .currency import Currency
 from .language import Language
@@ -39,4 +40,5 @@ __all__ = [
     "TransactionShare",
     "Translation",
     "Subscription",
+    "Budget",
 ]

@@ -16,19 +16,17 @@ class TestPositiveSavings:  # noqa: D101
         session.commit()
 
         assert savings.amount == 0.0
-        assert savings.budget is None
         assert savings.owner_id == owner_id
         assert savings.currency_id == currency_id
+        assert savings.budgets == []
 
     def test_full_creation(self, session):  # noqa: D102
         currency_id: int = 1
         owner_id: int = 1
         amount: float = 0.5
-        budget: float = 1.0
 
         savings: Savings = Savings(
             amount=amount,
-            budget=budget,
             currency_id=currency_id,
             owner_id=owner_id,
         )
@@ -39,7 +37,7 @@ class TestPositiveSavings:  # noqa: D101
         assert savings.amount == amount
         assert savings.owner_id == owner_id
         assert savings.currency_id == currency_id
-        assert savings.budget == budget
+        assert savings.budgets == []
 
 
 class TestNegativeSavings:  # noqa: D101
@@ -68,29 +66,5 @@ class TestNegativeSavings:  # noqa: D101
             session.add(savings)
             session.commit()
 
-    @pytest.mark.regression
-    def test_budget_equal_zero(self, session):  # noqa: D102
-        currency_id: int = 1
-        owner_id: int = 1
-        budget: float = 0.0
 
-        with pytest.raises(ValueError):
-            savings: Savings = Savings(
-                budget=budget, currency_id=currency_id, owner_id=owner_id
-            )
-
-            session.add(savings)
-            session.commit()
-
-    def test_budget_below_zero(self, session):  # noqa: D102
-        currency_id: int = 1
-        owner_id: int = 1
-        budget: float = -1.0
-
-        with pytest.raises(ValueError):
-            savings: Savings = Savings(
-                budget=budget, currency_id=currency_id, owner_id=owner_id
-            )
-
-            session.add(savings)
-            session.commit()
+# TODO: write new tests to cover budget

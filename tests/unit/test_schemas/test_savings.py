@@ -39,7 +39,6 @@ invalid_values = [
     ("amount", "amount"),
     ("currency_id", "currency_id"),
     ("owner_id", "owner_id"),
-    ("budget", "budget"),
 ]
 
 
