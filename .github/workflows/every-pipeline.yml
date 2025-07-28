@@ -29,7 +29,7 @@ jobs:
     needs: 
       - tests
       - lint_and_format
-    uses: Vronst/pull_request_workflow/.github/workflows/pull_request.yml@316832e21184ac2fb58a4bf3b510f67b1187aa59
+    uses: Vronst/pull_request_workflow/.github/workflows/pull_request.yml@acec6e40120f22cabecc0f790256d706d7d0111e
     with:
       head: ${{ github.even.workflow_run.head_branch }}
       base: 'lap'
