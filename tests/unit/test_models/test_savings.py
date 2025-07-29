@@ -65,6 +65,3 @@ class TestNegativeSavings:  # noqa: D101
 
             session.add(savings)
             session.commit()
-
-
-# TODO: write new tests to cover budget
