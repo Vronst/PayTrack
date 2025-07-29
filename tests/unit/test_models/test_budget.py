@@ -1,4 +1,4 @@
-from copy import deepcopy
+from copy import deepcopy  # noqa: D100
 from typing import Any
 
 import pytest
@@ -27,7 +27,7 @@ incorrect_params: list[tuple[str, Any]] = [
 
 @pytest.mark.parametrize("data", params)
 class TestPositiveBudget:  # noqa: D101
-    def test_creation(self, session, data):
+    def test_creation(self, session, data):  # noqa: D102
         budget: Budget = Budget(**data)
 
         session.add(budget)
@@ -44,7 +44,7 @@ class TestPositiveBudget:  # noqa: D101
 @pytest.mark.parametrize("data", params)
 class TestNegativeBudget:  # noqa: D101
     @pytest.mark.parametrize("field, invalid_data", incorrect_params)
-    def test_creation_incorrect_data(self, session, data, field, invalid_data):
+    def test_creation_incorrect_data(self, session, data, field, invalid_data):  # noqa: D102
         dt = deepcopy(data)
         dt[field] = invalid_data
 

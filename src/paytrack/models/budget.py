@@ -20,9 +20,21 @@ class Budget(Base):
 
     Attributes:
         id (int): Can be skipped, due to automatically assigned.
+
+        amount (float): Float describing how much money is in account.
+
         period (str): String that must match one of
             `paytrack.constants.budget.PERIOD_CHOICES`.
-    ...
+
+        owner_id (int): Id of owner.
+
+        currency_id (int): Id of used currency.
+
+        savings_id (int): Id of related savings.
+
+        currency (Currency): Related currency.
+
+        savings (Savings): Related savings.
     """
 
     __tablename__ = "budgets"
