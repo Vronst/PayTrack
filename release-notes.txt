@@ -1,10 +1,20 @@
 ## About
+PayTrack (formerly Rachunki) was fundamentaly changed.
+It used to be a simple text app with bugs and a little bit of sphagetti code.
+Now it is as professional, as I could have made it.
+I added a lot of tests, now properly. There are new models (planed in miro to avoid
+unnecesarry mistakes and complications).
+The code is better, well structured and checked with professional linters.
+More will come!
 
 ## Changes:
-	- Updated README.md
-	- Added Pydantic schemas and corelated tests (not mentioned in release before)
-	- Refactored code with flake8 and black to meet standards
-	- Prepared engine to work with FastAPI
-	- Added docstrings for modules, classes and function/methods
+	- Changed code layout to be more modular.
+	- Updated README.md.
+	- Added Pydantic schemas and corelated tests (not mentioned in release before).
+	- Refactored code with ruff to meet standards.
+	- Prepared engine to work with FastAPI.
+	- Added docstrings for modules, classes and function/methods.
 	- Added new model *Budget* and removed old **budget** from savings. Made relationship between user, budget and savings.
+	- Written more tests for models.
+	- Written new validators.
 
