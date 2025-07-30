@@ -12,9 +12,16 @@ permissions:
 
 jobs:
   tests:
-    uses: Vronst/testing_workflow/.github/workflows/testing_workflow.yml@2.0.0
+    uses: Vronst/testing_workflow/.github/workflows/testing_workflow.yml@2.1.0
     with:
-      pytest_flags: '-m regression'
+      pytest_flags: '-m regression --cov=src'
+      container_name: 'paytrack'
+
+  lint_and_format:
+    uses: Vronst/lint-check/.github/workflows/lint.yaml@1.0.0
+    # (optional)
+    with:
+      python-version: '3.13'
 
   release:
     needs: tests
@@ -28,7 +35,7 @@ jobs:
     needs: 
       - tests 
       - release 
-    uses: Vronst/documentation_workflow/.github/workflows/doc_workflow.yml@1.0.1
+    uses: Vronst/documentation_workflow/.github/workflows/doc_workflow.yml@1.0.2
     with: 
       python-version: '3.13'
 
