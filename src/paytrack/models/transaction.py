@@ -34,7 +34,7 @@ class Transaction(Base):
 
         date (datetime): Date of transaction. Default datetime.now(UTC).
 
-        done (bool): Makrs if transaction has been already made.
+        done (bool): Makrs if transaction has been already made. Default False.
 
         owner_id (int): Owner's id.
 
@@ -69,8 +69,10 @@ class Transaction(Base):
     _type_validator: "Validator" = ChoiceValidator(TYPE_CHOICE)
     _date_validator: "Validator" = DateValidator()
     _type_int_validator: "Validator" = TypeValidator([int])
+    _type_receiver_id_validator: "Validator" = TypeValidator([int, type(None)])
     _type_float_validator: "Validator" = TypeValidator([float])
     _type_bool_validator: "Validator" = TypeValidator([bool])
+    _type_name_validator: "Validator" = TypeValidator([str, type(None)])
     _name_validator: "Validator" = LengthValidator(max_length=NAME_LENGTH)
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -152,7 +154,7 @@ class Transaction(Base):
         """
         return self._date_validator(key, value)
 
-    @validates("owner_id", "category_id", "receiver_id", "currency_id")
+    @validates("owner_id", "category_id", "currency_id")
     def validate_id_type(self, key, value):
         """Validates types of certain fields.
 
@@ -164,6 +166,19 @@ class Transaction(Base):
             value (str): Value to be verified.
         """
         return self._type_int_validator(key, value)
+
+    @validates("receiver_id")
+    def validate_receiver_id_type(self, key, value):
+        """Validates types of certain fields.
+
+        Uses TypeValidator to check if value
+            is one of correct type.
+
+        Args:
+            key (str): Name used for error messege.
+            value (str): Value to be verified.
+        """
+        return self._type_receiver_id_validator(key, value)
 
     @validates("done")
     def validate_bool_type(self, key, value):
@@ -189,4 +204,7 @@ class Transaction(Base):
             key (str): Name used for error messege.
             value (str): Value to be verified.
         """
-        return self._name_validator(key, value)
+        self._type_name_validator(key, value)
+        if isinstance(value, type(str)):
+            return self._name_validator(key, value)
+        return value
