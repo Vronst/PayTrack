@@ -6,7 +6,7 @@ from sqlalchemy import Boolean, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from ..constants.category import NAME_LENGTH
-from ..validators import LengthValidator
+from ..validators import LengthValidator, TypeValidator
 from .base import Base
 
 if TYPE_CHECKING:
@@ -44,6 +44,7 @@ class Category(Base):
 
     __tablename__ = "categories"
     _name_validator: "Validator" = LengthValidator(max_length=NAME_LENGTH)
+    _type_validator: "Validator" = TypeValidator([int, type(None)])
 
     id: Mapped[int] = mapped_column(primary_key=True)
     root_category: Mapped[int | None] = mapped_column(
@@ -86,3 +87,16 @@ class Category(Base):
                 f"{key.capitalize()} cannot be set in non custom categories"
             )
         return self._name_validator(key, value)
+
+    @validates("root_category")
+    def validate_type(self, key, value):
+        """Validates types of certain fields.
+
+        Uses TypeValidator to check if value
+            is one of correct type.
+
+        Args:
+            key (str): Name used for error messege.
+            value (str): Value to be verified.
+        """
+        return self._type_validator(key, value)

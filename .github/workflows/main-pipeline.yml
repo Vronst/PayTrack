@@ -14,7 +14,7 @@ jobs:
   tests:
     uses: Vronst/testing_workflow/.github/workflows/testing_workflow.yml@2.1.0
     with:
-      pytest_flags: '-m regression'
+      pytest_flags: '-m regression --cov=src'
       container_name: 'paytrack'
 
   lint_and_format:

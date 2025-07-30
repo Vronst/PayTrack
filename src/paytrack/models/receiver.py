@@ -6,7 +6,7 @@ from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from ..constants.receiver import NAME_LENGTH
-from ..validators import LengthValidator
+from ..validators import LengthValidator, TypeValidator
 from .associations import association_receivers
 from .base import Base
 
@@ -31,6 +31,7 @@ class Receiver(Base):
 
     __tablename__ = "receivers"
     _name_validator: "Validator" = LengthValidator(max_length=NAME_LENGTH)
+    _type_validator: "Validator" = TypeValidator([int])
 
     id: Mapped[int] = mapped_column(primary_key=True)
     owner_id: Mapped[int] = mapped_column(
@@ -57,3 +58,16 @@ class Receiver(Base):
             value (str): Value to be verified.
         """
         return self._name_validator(key, value)
+
+    @validates("owner_id")
+    def validate_type(self, key, value):
+        """Validates types of certain fields.
+
+        Uses TypeValidator to check if value
+            is one of correct type.
+
+        Args:
+            key (str): Name used for error messege.
+            value (str): Value to be verified.
+        """
+        return self._type_validator(key, value)

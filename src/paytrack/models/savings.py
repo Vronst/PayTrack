@@ -5,13 +5,13 @@ from typing import TYPE_CHECKING
 from sqlalchemy import Float, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
-from ..constants.savings import MIN_BUDGET
-from ..validators import AmountValidator
+from ..validators import TypeValidator
 from .associations import association_savings
 from .base import Base
 
 if TYPE_CHECKING:
     from ..validators.base import Validator
+    from .budget import Budget
     from .currency import Currency
     from .user import User
 
@@ -26,9 +26,6 @@ class Savings(Base):
 
         currency_id (int): Id of related currency.
 
-        budget (float | None): Float describing current budget set by user.
-            Default None.
-
         owner_id (int): Id of owner.
 
         included (list[User]): List of included users. These users can
@@ -37,15 +34,17 @@ class Savings(Base):
         currency (Currency): Related Currency.
     """
 
+    # TODO: make relationship with budget
+
     __tablename__ = "savings"
-    _budget_validator: "Validator" = AmountValidator(min_amount=MIN_BUDGET)
+    _type_validator: "Validator" = TypeValidator([int])
+    _type_amount_validator: "Validator" = TypeValidator([float])
 
     id: Mapped[int] = mapped_column(primary_key=True)
     amount: Mapped[float] = mapped_column(Float, nullable=False, default=0)
     currency_id: Mapped[int] = mapped_column(
         ForeignKey("currencies.id"), nullable=False
     )
-    budget: Mapped[float | None] = mapped_column(Float, nullable=True)
     owner_id: Mapped[int] = mapped_column(
         ForeignKey("users.id"), nullable=False
     )
@@ -61,15 +60,30 @@ class Savings(Base):
 
     currency: Mapped["Currency"] = relationship()
 
-    @validates("budget")
-    def validate_budget(self, key, value):
-        """Validates budget.
+    budgets: Mapped[list["Budget"]] = relationship(back_populates="savings")
 
-        Uses AmountValidator to check if number is
-            within range.
+    @validates("owner_id", "currency_id")
+    def validate_type(self, key, value):
+        """Validates types of certain fields.
+
+        Uses TypeValidator to check if value
+            is one of correct type.
 
         Args:
             key (str): Name used for error messege.
             value (str): Value to be verified.
         """
-        return self._budget_validator(key, value)
+        return self._type_validator(key, value)
+
+    @validates("amount")
+    def validate_amount_type(self, key, value):
+        """Validates types of certain fields.
+
+        Uses TypeValidator to check if value
+            is one of correct type.
+
+        Args:
+            key (str): Name used for error messege.
+            value (str): Value to be verified.
+        """
+        return self._type_amount_validator(key, value)
