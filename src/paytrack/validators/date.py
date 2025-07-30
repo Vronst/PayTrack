@@ -1,6 +1,6 @@
 """Validators used for valiating date."""
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 
 from ..services.date import utc_now
 from .base import Validator
@@ -56,6 +56,7 @@ class DateValidator(Validator):
             "%Y-%m-%d",
         ]
         if isinstance(value, str):
+            value = value.strip()
             for format in formats:
                 try:
                     value = datetime.strptime(value, format)
@@ -64,10 +65,12 @@ class DateValidator(Validator):
                 else:
                     break
 
+        elif isinstance(value, date):
+            value = datetime.combine(value, datetime.min.time())
+
         if not isinstance(value, datetime):
             raise ValueError(
-                f"{key} -\
-            Invalid datetime string format: {value}"
+                rf"{key} - Invalid datetime string format: {value}"
             )
 
         now = utc_now()
@@ -79,7 +82,7 @@ class DateValidator(Validator):
 
         if self.future and value < now and absolute != 0:
             raise ValueError(f"Expected future date, got {value}")
-        elif self.past and value > now and absolute != 0:
+        elif self.past and value > now:
             raise ValueError(f"Expected past date, got {value}")
 
         return value

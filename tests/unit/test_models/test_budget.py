@@ -2,6 +2,7 @@ from copy import deepcopy  # noqa: D100
 from typing import Any
 
 import pytest
+from sqlalchemy.exc import IntegrityError
 
 from paytrack.constants.budget import MIN_BUDGET, PERIOD_CHOICES
 from paytrack.models.budget import Budget
@@ -22,6 +23,13 @@ incorrect_params: list[tuple[str, Any]] = [
     ("owner_id", "owner_id"),
     ("currency_id", "currency_id"),
     ("savings_id", "savings_id"),
+]
+
+missing: list[str] = [
+    "amount",
+    "owner_id",
+    "currency_id",
+    "savings_id",
 ]
 
 
@@ -49,6 +57,16 @@ class TestNegativeBudget:  # noqa: D101
         dt[field] = invalid_data
 
         with pytest.raises(ValueError):
+            budget: Budget = Budget(**dt)
+            session.add(budget)
+            session.commit()
+
+    @pytest.mark.parametrize("field", missing)
+    def test_creation_missing_data(self, session, data, field):  # noqa: D102
+        dt = deepcopy(data)
+        dt.pop(field)
+
+        with pytest.raises(IntegrityError):
             budget: Budget = Budget(**dt)
             session.add(budget)
             session.commit()

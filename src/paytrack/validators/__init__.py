@@ -7,6 +7,7 @@ from .email import EmailValidator
 from .length import LengthValidator
 from .phone import PhoneValidator
 from .pin import PinValidator
+from .type import TypeValidator
 
 __all__ = [
     "AmountValidator",
@@ -16,4 +17,5 @@ __all__ = [
     "LengthValidator",
     "PhoneValidator",
     "PinValidator",
+    "TypeValidator",
 ]

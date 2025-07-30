@@ -76,3 +76,10 @@ class TestNegativeCategory:  # noqa: D101
             category: Category = Category(name=name)
             session.add(category)
             session.commit()
+
+    def test_incorect_type(self, session):  # noqa: D102
+        root_category: str = "Incorect type"
+        category: Category = Category()
+
+        with pytest.raises(ValueError):
+            category.root_category = root_category

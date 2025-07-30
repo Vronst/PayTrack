@@ -6,7 +6,7 @@ from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from ..constants.setting import MODE_CHOICES, MODE_LENGTH
-from ..validators import ChoiceValidator
+from ..validators import ChoiceValidator, TypeValidator
 from .base import Base
 
 if TYPE_CHECKING:
@@ -32,6 +32,7 @@ class Setting(Base):
 
     __tablename__ = "settings"
     _mode_validator: "Validator" = ChoiceValidator(MODE_CHOICES)
+    _type_validator: "Validator" = TypeValidator([int])
 
     id: Mapped[int] = mapped_column(primary_key=True)
     mode: Mapped[str] = mapped_column(
@@ -58,3 +59,16 @@ class Setting(Base):
             value (str): Value to be verified.
         """
         return self._mode_validator(key, value)
+
+    @validates("language_id", "owner_id")
+    def validate_type(self, key, value):
+        """Validates types of certain fields.
+
+        Uses TypeValidator to check if value
+            is one of correct type.
+
+        Args:
+            key (str): Name used for error messege.
+            value (str): Value to be verified.
+        """
+        return self._type_validator(key, value)

@@ -3,12 +3,14 @@
 from typing import TYPE_CHECKING
 
 from sqlalchemy import Float, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
+from ..validators import TypeValidator
 from .associations import association_savings
 from .base import Base
 
 if TYPE_CHECKING:
+    from ..validators.base import Validator
     from .budget import Budget
     from .currency import Currency
     from .user import User
@@ -35,6 +37,8 @@ class Savings(Base):
     # TODO: make relationship with budget
 
     __tablename__ = "savings"
+    _type_validator: "Validator" = TypeValidator([int])
+    _type_amount_validator: "Validator" = TypeValidator([float])
 
     id: Mapped[int] = mapped_column(primary_key=True)
     amount: Mapped[float] = mapped_column(Float, nullable=False, default=0)
@@ -57,3 +61,29 @@ class Savings(Base):
     currency: Mapped["Currency"] = relationship()
 
     budgets: Mapped[list["Budget"]] = relationship(back_populates="savings")
+
+    @validates("owner_id", "currency_id")
+    def validate_type(self, key, value):
+        """Validates types of certain fields.
+
+        Uses TypeValidator to check if value
+            is one of correct type.
+
+        Args:
+            key (str): Name used for error messege.
+            value (str): Value to be verified.
+        """
+        return self._type_validator(key, value)
+
+    @validates("amount")
+    def validate_amount_type(self, key, value):
+        """Validates types of certain fields.
+
+        Uses TypeValidator to check if value
+            is one of correct type.
+
+        Args:
+            key (str): Name used for error messege.
+            value (str): Value to be verified.
+        """
+        return self._type_amount_validator(key, value)

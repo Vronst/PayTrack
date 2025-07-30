@@ -18,6 +18,7 @@ from ..validators import (
     ChoiceValidator,
     DateValidator,
     LengthValidator,
+    TypeValidator,
 )
 from .associations import association_subscription
 from .base import Base
@@ -68,6 +69,10 @@ class Subscription(Base):
     _amount_validator: "Validator" = AmountValidator(min_amount=MIN_AMOUNT)
     _period_validator: "Validator" = ChoiceValidator(PERIOD_CHOICES)
     _date_validator: "Validator" = DateValidator(future_date=True)
+    _type_validator: "Validator" = TypeValidator([int])
+    _type_bool_validator: "Validator" = TypeValidator([bool])
+    _type_float_validator: "Validator" = TypeValidator([float])
+    _type_str_validator: "Validator" = TypeValidator([str])
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(NAME_LENGTH), nullable=False)
@@ -110,6 +115,7 @@ class Subscription(Base):
             key (str): Name used for error messege.
             value (str): Value to be verified.
         """
+        self._type_str_validator(key, value)
         return self._name_validator(key, value)
 
     @validates("period")
@@ -136,6 +142,7 @@ class Subscription(Base):
             key (str): Name used for error messege.
             value (str): Value to be verified.
         """
+        self._type_float_validator(key, value)
         return self._amount_validator(key, value)
 
     @validates("date")
@@ -149,3 +156,29 @@ class Subscription(Base):
             value (str): Value to be verified.
         """
         return self._date_validator(key, value)
+
+    @validates("owner_id", "currency_id")
+    def validate_type(self, key, value):
+        """Validates types of certain fields.
+
+        Uses TypeValidator to check if value
+            is one of correct type.
+
+        Args:
+            key (str): Name used for error messege.
+            value (str): Value to be verified.
+        """
+        return self._type_validator(key, value)
+
+    @validates("active", "shared")
+    def validate_bool_type(self, key, value):
+        """Validates types of certain fields.
+
+        Uses TypeValidator to check if value
+            is one of correct type.
+
+        Args:
+            key (str): Name used for error messege.
+            value (str): Value to be verified.
+        """
+        return self._type_bool_validator(key, value)

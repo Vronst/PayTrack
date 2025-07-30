@@ -49,3 +49,9 @@ class TestNegativeReceiver:  # noqa: D101
 
             session.add(receiver)
             session.commit()
+
+    def test_creation_wrong_type(self):  # noqa: D102
+        name: str = "t"
+        user_id: str = "incorrect"
+        with pytest.raises(ValueError):
+            Receiver(name=name, owner_id=user_id)

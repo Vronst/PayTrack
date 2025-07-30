@@ -6,7 +6,7 @@ from sqlalchemy import Float, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from ..constants.budget import MIN_BUDGET, PERIOD_CHOICES
-from ..validators import AmountValidator, ChoiceValidator
+from ..validators import AmountValidator, ChoiceValidator, TypeValidator
 from .base import Base
 
 if TYPE_CHECKING:
@@ -24,7 +24,7 @@ class Budget(Base):
         amount (float): Float describing how much money is in account.
 
         period (str): String that must match one of
-            `paytrack.constants.budget.PERIOD_CHOICES`.
+            `paytrack.constants.budget.PERIOD_CHOICES`. Default 'monthly'
 
         owner_id (int): Id of owner.
 
@@ -40,9 +40,10 @@ class Budget(Base):
     __tablename__ = "budgets"
     _amount_validator: "Validator" = AmountValidator(min_amount=MIN_BUDGET)
     _period_validator: "Validator" = ChoiceValidator(PERIOD_CHOICES)
+    _type_validator: "Validator" = TypeValidator([int])
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    amount: Mapped[float] = mapped_column(Float, nullable=False, default=0)
+    amount: Mapped[float] = mapped_column(Float, nullable=False)
     period: Mapped[str] = mapped_column(
         String, nullable=False, default="monthly"
     )
@@ -85,3 +86,16 @@ class Budget(Base):
             value (str): Value to be verified.
         """
         return self._period_validator(key, value)
+
+    @validates("owner_id", "currency_id", "savings_id")
+    def validate_type(self, key, value):
+        """Validates types of certain fields.
+
+        Uses TypeValidator to check if value
+            is one of correct type.
+
+        Args:
+            key (str): Name used for error messege.
+            value (str): Value to be verified.
+        """
+        return self._type_validator(key, value)
