@@ -1,1 +1,3 @@
-MIN_AMOUNT: float = .0
+"""Constants for TransactionShare."""
+
+MIN_AMOUNT: float = 0.0

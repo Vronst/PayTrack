@@ -1,69 +1,73 @@
-# Rachunki
+# PayTrack
+![Version](https://img.shields.io/badge/Version-0.7.0-blue)
+![Tests](https://github.com/Vronst/PayTrack/actions/workflows/main-pipeline.yml/badge.svg)
+![Tests](https://github.com/Vronst/PayTrack/actions/workflows/stage-pipeline.yml/badge.svg)
+![Coverage](https://img.shields.io/badge/coverage-97%25-brightgreen)
 
-Rachunki is a Python application for managing user taxes and payments. It allows users to create accounts, check their tax statuses, make payments, and view or edit payment details.
+PayTrack is a Python application for managing user taxes, subscriptions, income and payments.
 
-## Features
+## Features (not yet implemented)
 
 - Create and manage user accounts
+- Track your subscriptions
 - Check tax payment statuses
 - Make tax payments
 - View and edit payment details
-- Log activities and errors
 
 ## Table of content
 1. [Installation](#Installation)
-2. [Logging](#Logging)
-3. [Documentation](#Documentation)
+2. [Documentation](#Documentation)
+3. [Contributing](#Contributing)
 
 ## Installation
 
-This project uses PostgreSQL, be sure you have it installed.
+This project is run with docker compose, but can be used without it too.
+For it to work without docker compose, be sure to have POSTGRESQL.
+
+#### Steps:
 
 1. Clone the repository:
     ```sh
     git clone https://github.com/Vronst/PayTrack.git
-    cd rachunki
+    cd PayTrack
     ```
-
-2. Create a virtual environment and activate it:
-    ```sh
-    python -m venv .venv
-    source .venv/bin/activate  # On Windows use `.venv\Scripts\activate`
+    **(For implementing frontend)**
+    Or install project with with uv or something similar:
+    ```sh 
+    uv add https://github.com/Vronst/PayTrack.git
     ```
+    and skip later steps.
 
-3. Install the dependencies:
+2. Create venv and install dependencies.
+    *I'm working with uv, so this step should be alternated if uv is not used.*
     ```sh
-    pip install -r requirements.txt
+    uv sync
     ```
 
 4. Set up the environment variables in the [.env]() file:
     ```env
-    POSTGRES_USER='your_postgres_user'
-    POSTGRES_PASSWORD='your_postgres_password'
-    POSTGRES_HOST='localhost'
-    POSTGRES_PORT='5432'
-    DataBase='your_database_name'
-    LOGS_PATH='/path/to/logs/'
+    DB_USER='your_postgres_user'
+    DB_PASSWORD='your_postgres_password'
+    HOST='localhost'
+    PORT='5432'
+    DATABASE ='your_database_name'
     ```
 
 ## Usage
 
-Run the application in text mode:
+For now there is no functionality yet, just models, schemas and tests. 
+To run tests in docker run:
     ```sh
-    python manage.py -t
+    docker compose up --build -d 
+    docker exec paytrack uv run pytest
     ```
-
-## Logging
-
-Logs are stored in the [logs](http://_vscodecontentref_/4) directory:
-- [db.log](): Logs related to database operations
-- [logs.txt](): General logs
-- [taxes.log](): Logs related to tax payments
-- [user.log](): Logs related to user activities
 
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request.
+I will only cover backend part of this project, frontend desing will be done by UI/UX designer,
+while frontend code will not be touched, only API will be created to allow for later development of it.
+Feel free to create your own frontend for this project to your portfolio!
 
 ## License
 
