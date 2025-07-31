@@ -12,7 +12,6 @@ create_params = [
     {
         "name": "name",
         "surname": "surname",
-        "admin": True,
         "email": "example@example.com",
         "phone": None,
         "premium": True,
@@ -21,7 +20,6 @@ create_params = [
     {
         "name": "company_name",
         "surname": None,
-        "admin": False,
         "email": "example2@example.com",
         "phone": "+48 999 999 999",
         "premium": False,
@@ -43,7 +41,6 @@ for param in update_params:
 missing_fields = [
     "id",
     "name",
-    "admin",
     "email",
     "premium",
 ]
@@ -52,7 +49,6 @@ invalid = [
     ("id", "id"),
     ("name", 1),
     ("name", "a" * NAME_LENGTH + "a"),
-    ("admin", "admin"),
     ("email", 1),
     ("email", "email"),
     ("email", "email@email"),
