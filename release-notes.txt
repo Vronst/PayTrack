@@ -18,3 +18,5 @@ More will come!
 	- Written more tests for models.
 	- Written new validators.
 
+## Known Issues:
+- some docstrings may be inacurrate in models validators.

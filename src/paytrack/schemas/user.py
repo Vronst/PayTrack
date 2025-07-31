@@ -25,8 +25,6 @@ class UserSchema(BaseSchema):
         only valid if company is set to False.
         Default None.
 
-        admin (bool): If True, user has admin privilages.
-
         email (str): String verified with `paytrack.validators.EmailValidator`.
         Should be a valid email.
 
@@ -43,7 +41,6 @@ class UserSchema(BaseSchema):
     surname: Annotated[
         str | None, StringConstraints(max_length=NAME_LENGTH)
     ] = None
-    admin: bool
     email: Annotated[
         str,
         AfterValidator(email_validator),
@@ -96,8 +93,6 @@ class UserUpdateSchema(BaseUpdateSchema):
         only valid if company is set to False.
         Default None.
 
-        admin (bool | None): If True, user has admin privilages. Default None.
-
         email (str | None): String verified with
         `paytrack.validators.EmailValidator`.
         Should be a valid email. Default None.
@@ -124,7 +119,6 @@ class UserUpdateSchema(BaseUpdateSchema):
     surname: Annotated[
         str | None, StringConstraints(max_length=NAME_LENGTH)
     ] = None
-    admin: bool | None = None
     email: Annotated[
         str | None,
         AfterValidator(email_validator),

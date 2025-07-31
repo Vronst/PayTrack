@@ -204,7 +204,6 @@ class TestPositiveUser:  # noqa: D101
         assert user.parent_id is None
         assert user.parent is None
         assert user.phone is None
-        assert not user.admin
         assert user.included == []
         assert user.subaccounts == []
         assert user.settings is None
@@ -240,7 +239,6 @@ class TestPositiveUser:  # noqa: D101
         assert user.parent_id is None
         assert user.parent is None
         assert user.phone is None
-        assert not user.admin
         assert user.included == []
         assert user.subaccounts == []
         assert user.settings is None
