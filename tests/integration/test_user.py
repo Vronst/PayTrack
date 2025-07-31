@@ -1,4 +1,4 @@
-
+# noqa: D100
 
 #
 # class TestPositiveUser:  # noqa: D101
@@ -122,7 +122,8 @@
 #
 #         assert user.phone == phone.replace(" ", "")
 #
-#     def test_phone_validation_with_spaces_and_prefix(self, session):  # noqa: D102
+#     def test_phone_validation_with_spaces_and_prefix(self, session):
+# noqa: D102
 #         name: str = "testuser"
 #         company: bool = True
 #         phone: str = "+48 999 999 999"
