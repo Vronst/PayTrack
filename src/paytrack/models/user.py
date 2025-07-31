@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, ForeignKey, String
+from sqlalchemy import Boolean, CheckConstraint, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from ..constants.user import (
@@ -16,6 +16,7 @@ from ..validators import (
     LengthValidator,
     PhoneValidator,
     PinValidator,
+    TypeValidator,
 )
 from .associations import (
     association_included,
@@ -43,14 +44,12 @@ class User(Base):
     Attributes:
         id (int): Can be skipped, due to automatically assigned.
 
-        company (bool): If True, surname is not needed.
+        company (bool): If True, surname is prohibitet. Default False.
 
         name (str): User's name. Cannot be longer than
             `paytrack.constants.user.NAME_LENGTH`.
 
         surname (str | None): User's surname. Omit if company is True.
-
-        admin (bool): If True, user has admin privilages.
 
         email (str): String that contains valid email.
 
@@ -61,9 +60,9 @@ class User(Base):
 
         pin (str): User pin, stored as hash.
 
-        premium (bool): If user bought premium.
+        premium (bool): If user bought premium. Default False.
 
-        parent_id (int | None): User's main account id.
+        parent_id (int | None): User's main account id. Default None.
 
         parent (User): Parent account.
 
@@ -76,7 +75,7 @@ class User(Base):
 
         settings (Setting): Related settings.
 
-        transaction (list[Transaction]): List of transaction created by
+        transactions (list[Transaction]): List of transaction created by
             this user.
 
         included_in_transactions (list[Transaction]): List of transaction of
@@ -107,6 +106,9 @@ class User(Base):
     _pin_validator: "Validator" = PinValidator(PIN_LENGTH)
     _email_validator: "Validator" = EmailValidator()
     _phone_validator: "Validator" = PhoneValidator()
+    _type_str_validator: "Validator" = TypeValidator([str])
+    _type_int_validator: "Validator" = TypeValidator([int])
+    _type_bool_validator: "Validator" = TypeValidator([int])
 
     # black and flake8 were fighting over line limit besides
     # having the same one, so here is helper to make it shorter
@@ -120,7 +122,6 @@ class User(Base):
     surname: Mapped[str | None] = mapped_column(
         String(NAME_LENGTH), nullable=True
     )
-    admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     email: Mapped[str] = mapped_column(
         String(EMAIL_LENGTH), unique=True, nullable=False
     )
@@ -128,7 +129,7 @@ class User(Base):
         String(PHONE_LENGTH), nullable=True
     )
     password: Mapped[str] = mapped_column(String, nullable=False)
-    pin: Mapped[str | None] = mapped_column(String, nullable=True)
+    pin: Mapped[str] = mapped_column(String, nullable=False)
     premium: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False
     )
@@ -208,8 +209,59 @@ class User(Base):
 
     transactions_shares: Mapped[list["TransactionShare"]] = relationship()
 
-    @validates("name", "surname")
-    def validate_name(self, key: str, value: str) -> str:
+    __table_args__ = (
+        CheckConstraint(
+            "parent_id != id", name="Account cannot be it's own parent"
+        ),
+        CheckConstraint(
+            "(company = FALSE) OR (surname IS NULL)",
+            name="Companies do not have surnames",
+        ),
+    )
+
+    @validates("premium", "company")
+    def validate_bool_type(self, key, value):
+        """Validates types of certain fields.
+
+        Uses TypeValidator to check if value
+            is one of correct type.
+
+        Args:
+            key (str): Name used for error messege.
+            value (Any): Value to be verified.
+        """
+        return self._type_bool_validator(key, value)
+
+    @validates("parent_id")
+    def validate_parent_type(self, key, value):
+        """Validates types of certain fields.
+
+        Uses TypeValidator to check if value
+            is one of correct type.
+
+        Args:
+            key (str): Name used for error messege.
+            value (str): Value to be verified.
+        """
+        if isinstance(value, type(None)):
+            return value
+        return self._type_int_validator(key, value)
+
+    @validates("savings_id")
+    def validate_id_type(self, key, value):
+        """Validates types of certain fields.
+
+        Uses TypeValidator to check if value
+            is one of correct type.
+
+        Args:
+            key (str): Name used for error messege.
+            value (str): Value to be verified.
+        """
+        return self._type_int_validator(key, value)
+
+    @validates("name")
+    def validate_name(self, key: str, value: str | None) -> str | None:
         """Validates name and surname.
 
         Uses LengthValidator to check if value
@@ -219,6 +271,23 @@ class User(Base):
             key (str): Name used for error messege.
             value (str): Value to be verified.
         """
+        self._type_str_validator(key, value)
+        return self._name_validator(key, value)
+
+    @validates("surname")
+    def validate_surname(self, key: str, value: str | None) -> str | None:
+        """Validates name and surname.
+
+        Uses LengthValidator to check if value
+            length is acceptable.
+
+        Args:
+            key (str): Name used for error messege.
+            value (str): Value to be verified.
+        """
+        if isinstance(value, type(None)):
+            return value
+        self._type_str_validator(key, value)
         return self._name_validator(key, value)
 
     @validates("pin")
@@ -232,7 +301,21 @@ class User(Base):
             key (str): Name used for error messege.
             value (str): Value to be verified.
         """
+        self._type_str_validator(key, value)
         return self._pin_validator(key, value)
+
+    @validates("password")
+    def validate_type(self, key, value):
+        """Validates types of certain fields.
+
+        Uses TypeValidator to check if value
+            is one of correct type.
+
+        Args:
+            key (str): Name used for error messege.
+            value (str): Value to be verified.
+        """
+        return self._type_str_validator(key, value)
 
     @validates("email")
     def validate_email(self, key: str, value: str) -> str:
@@ -245,10 +328,11 @@ class User(Base):
             key (str): Name used for error messege.
             value (str): Value to be verified.
         """
+        self._type_str_validator(key, value)
         return self._email_validator(key, value)
 
     @validates("phone")
-    def validate_phone(self, key: str, value: str) -> str:
+    def validate_phone(self, key: str, value: str | None) -> str | None:
         """Validates phone.
 
         Uses PhoneValidator to check if value
@@ -258,6 +342,9 @@ class User(Base):
             key (str): Name used for error messege.
             value (str): Value to be verified.
         """
+        if isinstance(value, type(None)):
+            return value
+        self._type_str_validator(key, value)
         return self._phone_validator(key, value)
 
     def __repr__(self) -> str:
@@ -267,7 +354,7 @@ class User(Base):
             str
         """
         return (
-            f"User(id={self.id!r},admin={self.admin!r},"
+            f"User(id={self.id!r},"
             f" name={self.name!r}, surname={self.surname!r},"
             f" email={self.email!r},"
             f"phone={self.phone!r}, password=****, company={self.company!r}, "
