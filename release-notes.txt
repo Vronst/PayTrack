@@ -1,9 +1,4 @@
 ## About
 
 ## Changes:
-	- Updated README.md
-	- Added Pydantic schemas and corelated tests (not mentioned in release before)
-	- Refactored code with flake8 and black to meet standards
-	- Prepared engine to work with FastAPI
-	- Added docstrings for modules, classes and function/methods
 
