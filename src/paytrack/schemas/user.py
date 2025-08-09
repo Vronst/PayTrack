@@ -59,8 +59,6 @@ class UserCreateSchema(UserSchema):
         pin (str): String.
     """
 
-    # TODO: maybe some checks if password is strong?
-
     password: str | None = None
     pin: Annotated[str | None, AfterValidator(pin_validator)] = None
 

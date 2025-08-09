@@ -22,7 +22,7 @@ create_param = [
         "period": PERIOD_CHOICES[0],
         "shared": False,
         "active": True,
-        "date": datetime.now().date(),
+        "date": datetime.now(),
         "owner_id": 1,
     }
 ]
@@ -43,7 +43,6 @@ missing_fields = [
     "period",
     "shared",
     "active",
-    "date",
     "owner_id",
 ]
 

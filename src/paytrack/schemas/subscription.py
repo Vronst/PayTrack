@@ -8,6 +8,7 @@ from pydantic import AfterValidator, Field, StringConstraints
 
 from ..constants.subscription import MIN_AMOUNT, NAME_LENGTH, PERIOD_CHOICES
 from ..models import SubscriptionShare, User
+from ..services.date import utc_now
 from ..validators import ChoiceValidator, DateValidator
 from .base import BaseReadSchema, BaseSchema, BaseUpdateSchema
 
@@ -40,15 +41,18 @@ class SubscriptionSchema(BaseSchema):
         owner_id (int): Id of related user.
     """
 
-    # FIXME: date can be 10,
-    # FIXME: which creates problems (Field(strict=True)) should help
+    # TODO: test if date can be 10
     name: Annotated[str, StringConstraints(max_length=NAME_LENGTH)]
     amount: float = Field(gt=MIN_AMOUNT)
     currency_id: int
     period: Annotated[str, AfterValidator(validator)]
     shared: bool
     active: bool
-    date: Annotated[datetime, AfterValidator(date_validator)]
+    date: Annotated[
+        datetime,
+        AfterValidator(date_validator),
+        Field(strict=True, default=utc_now),
+    ]
     owner_id: int
 
 
