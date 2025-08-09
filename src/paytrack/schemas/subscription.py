@@ -8,6 +8,7 @@ from pydantic import AfterValidator, Field, StringConstraints
 
 from ..constants.subscription import MIN_AMOUNT, NAME_LENGTH, PERIOD_CHOICES
 from ..models import SubscriptionShare, User
+from ..services.date import utc_now
 from ..validators import ChoiceValidator, DateValidator
 from .base import BaseReadSchema, BaseSchema, BaseUpdateSchema
 
@@ -47,9 +48,11 @@ class SubscriptionSchema(BaseSchema):
     period: Annotated[str, AfterValidator(validator)]
     shared: bool
     active: bool
-    date: Annotated[datetime, AfterValidator(date_validator)] = Field(
-        strict=True
-    )
+    date: Annotated[
+        datetime,
+        AfterValidator(date_validator),
+        Field(strict=True, default=utc_now),
+    ]
     owner_id: int
 
 
