@@ -43,7 +43,6 @@ missing_fields = [
     "period",
     "shared",
     "active",
-    "date",
     "owner_id",
 ]
 
